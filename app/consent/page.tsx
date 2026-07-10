@@ -50,10 +50,10 @@ const [today] = useState(
 
       if (!bookingSnap.exists()) return;
 
-      const bookingData = {
-        id: bookingSnap.id,
-        ...bookingSnap.data(),
-      };
+      const bookingData: any = {
+  id: bookingSnap.id,
+  ...bookingSnap.data(),
+};
 
       setBooking(bookingData);
 
