@@ -38,10 +38,7 @@ export default function BookingReceiptPage() {
 
     if (!bookingSnap.exists()) return;
 
-    const bookingData = {
-      id: bookingSnap.id,
-      ...(bookingSnap.data() as Booking),
-    };
+    const bookingData = bookingSnap.data() as Booking;
 
     setBooking(bookingData);
 
