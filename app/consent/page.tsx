@@ -3,7 +3,7 @@
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+
 import {
   doc,
   getDoc,
@@ -14,14 +14,13 @@ import {
 import { db } from "../lib/firebase";
 
 export default function ConsentPage() {
-  const searchParams = useSearchParams();
-  const bookingId = searchParams.get("bookingId");
+  
 
   const [booking, setBooking] = useState<any>(null);
   const [customer, setCustomer] = useState<any>(null);
   const [idType, setIdType] = useState("");
 const [idNumber, setIdNumber] = useState("");
-
+const [bookingId, setBookingId] = useState("");
 const [adults, setAdults] = useState(1);
 const [children, setChildren] = useState(0);
 const [vehicleNumber, setVehicleNumber] = useState("");
@@ -40,6 +39,12 @@ const [signature, setSignature] = useState("");
 const [today] = useState(
   new Date().toISOString().split("T")[0]
 );
+useEffect(() => {
+  if (typeof window === "undefined") return;
+
+  const params = new URLSearchParams(window.location.search);
+  setBookingId(params.get("bookingId") || "");
+}, []);
 
   useEffect(() => {
     async function loadBooking() {
