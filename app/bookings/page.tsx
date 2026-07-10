@@ -630,7 +630,7 @@ else {
 console.log("Booking:", booking.bookingNumber);
 
   const consentLink =
-  `https://deep-shrimps-mix.loca.lt/guest/consent/${booking.bookingNumber}`;
+  `${process.env.NEXT_PUBLIC_APP_URL}/guest/consent/${booking.bookingNumber}`;
 
   const message = `Hello ${booking.customerName},
 
