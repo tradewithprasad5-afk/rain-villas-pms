@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+
 
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
@@ -73,7 +73,7 @@ export default function BookingsPage() {
       Lists
   ========================================== */
   
-  const searchParams = useSearchParams();
+  
   const [bookings, setBookings] =
     useState<Booking[]>([]);
 
@@ -319,30 +319,23 @@ function searchCustomerByPhone(phoneNumber: string) {
     loadCustomers();
 
   }, []);
-  useEffect(() => {
+ useEffect(() => {
+  if (typeof window === "undefined") return;
 
-  const villa = searchParams.get("villa");
-  const checkIn = searchParams.get("checkIn");
-  const checkOut = searchParams.get("checkOut");
+  const params = new URLSearchParams(window.location.search);
+
+  const villa = params.get("villa");
+  const checkIn = params.get("checkIn");
+  const checkOut = params.get("checkOut");
+
   if (villa || checkIn) {
-
-  setShowForm(true);
-
-}
-
-  if (villa) {
-    setVilla(villa);
+    setShowForm(true);
   }
 
-  if (checkIn) {
-    setCheckIn(checkIn);
-  }
-
-  if (checkOut) {
-    setCheckOut(checkOut);
-  }
-
-}, [searchParams]);
+  if (villa) setVilla(villa);
+  if (checkIn) setCheckIn(checkIn);
+  if (checkOut) setCheckOut(checkOut);
+}, []);
     /* ==========================================
       Save Booking
   ========================================== */
