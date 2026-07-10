@@ -63,7 +63,6 @@ const bookingData = {
   id: snapshot.docs[0].id,
   ...snapshot.docs[0].data(),
 };
-
 setBooking(bookingData);
 
       const customerSnapshot = await getDocs(
@@ -78,7 +77,7 @@ setBooking(bookingData);
         .find(
           (c: any) =>
             c.name?.toLowerCase() ===
-            bookingData.customerName?.toLowerCase()
+            (bookingData as any).customerName?.toLowerCase()
         );
 
       if (customerData) {
