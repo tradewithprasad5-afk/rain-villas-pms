@@ -13,7 +13,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+
 
 interface Payment {
     
@@ -51,7 +51,7 @@ interface Customer {
   phone?: string;
 }
 export default function PaymentsPage() {
-    const searchParams = useSearchParams();
+    
     const [payments, setPayments] = useState<Payment[]>([]);
     const [bookings, setBookings] = useState<Booking[]>([]);
 const [loading, setLoading] = useState(true);
@@ -67,7 +67,7 @@ const [paymentMethod, setPaymentMethod] = useState("Cash");
 const [paymentType, setPaymentType] = useState("Advance");
 const [notes, setNotes] = useState("");
 const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
-
+const [bookingParam, setBookingParam] = useState("");
 const [totalAmount, setTotalAmount] = useState(0);
 const [advancePaid, setAdvancePaid] = useState(0);
 const [balanceAmount, setBalanceAmount] = useState(0);
@@ -93,13 +93,11 @@ async function loadPayments() {
     ...doc.data(),
   })) as Payment[];
 
-  const bookingParam = searchParams.get("booking");
-
   if (bookingParam) {
-    data = data.filter(
-      (payment) => payment.bookingNumber === bookingParam
-    );
-  }
+  data = data.filter(
+    (payment) => payment.bookingNumber === bookingParam
+  );
+}
 
   setPayments(data);
   setLoading(false);
@@ -131,9 +129,7 @@ async function loadBookings() {
 );
 
 setBookings(data);
-  const bookingParam = searchParams.get("booking");
-
-if (bookingParam) {
+  if (bookingParam) {
   const booking = data.find(
     (b) => b.bookingNumber === bookingParam
   );
@@ -252,9 +248,17 @@ await loadBookings();
 await loadPayments();
 }
 useEffect(() => {
+  if (typeof window === "undefined") return;
+
+  const params = new URLSearchParams(window.location.search);
+  setBookingParam(params.get("booking") || "");
+}, []);
+useEffect(() => {
+  if (!bookingParam) return;
+
   loadBookings();
   loadPayments();
-}, []);
+}, [bookingParam]);
 
 const filteredBookings = bookings
   .filter((booking) => {
