@@ -9,7 +9,7 @@ import {
   getDoc,
   collection,
   getDocs,
-  addDoc,
+   setDoc,
 } from "firebase/firestore";
 import { db } from "../lib/firebase";
 
@@ -100,16 +100,15 @@ useEffect(() => {
     alert("Please enter guest signature.");
     return;
   }
-  const bookingSnapshot = await getDocs(collection(db, "bookings"));
+  
 
-const bookingNumber = `RV-${String(
-  bookingSnapshot.size + 1
-).padStart(4, "0")}`;
-
-  await addDoc(collection(db, "consents"), {
-    bookingId: booking?.id,
-    customerName: booking?.customerName,
-    villa: booking?.villa,
+  await setDoc(
+  doc(db, "consents", booking.bookingNumber),
+  {
+    bookingNumber: booking.bookingNumber,
+    bookingId: booking.id,
+    customerName: booking.customerName,
+    villa: booking.villa,
 
     phone: customer?.phone,
     email: customer?.email,
@@ -125,16 +124,14 @@ const bookingNumber = `RV-${String(
     signature,
 
     houseRules,
-poolRules,
-damageRules,
-zeroTolerance,
-liabilityWaiver,
+    poolRules,
+    damageRules,
+    zeroTolerance,
+    liabilityWaiver,
 
     createdAt: new Date(),
-  });
-
-  alert("Consent saved successfully.");
-}
+  }
+);
 
   return (
     <div className="flex min-h-screen bg-slate-100">

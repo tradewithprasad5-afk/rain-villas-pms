@@ -254,8 +254,6 @@ useEffect(() => {
   setBookingParam(params.get("booking") || "");
 }, []);
 useEffect(() => {
-  if (!bookingParam) return;
-
   loadBookings();
   loadPayments();
 }, [bookingParam]);
