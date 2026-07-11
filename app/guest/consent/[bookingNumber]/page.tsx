@@ -5,12 +5,13 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import {
   collection,
- getDocs,
- addDoc,
- query,
- where,
+  getDocs,
+  getDoc,
+  query,
+  where,
   serverTimestamp,
-   doc,
+  doc,
+  setDoc,
   updateDoc,
 } from "firebase/firestore";
 import { db } from "../../../lib/firebase";
@@ -42,6 +43,7 @@ const [zeroTolerance, setZeroTolerance] = useState(false);
 
 const [liabilityWaiver, setLiabilityWaiver] = useState(false);
 const [signature, setSignature] = useState("");
+const [saving, setSaving] = useState(false);
 const [today] = useState(
   new Date().toISOString().split("T")[0]
 );
@@ -64,7 +66,16 @@ const bookingData = {
   ...snapshot.docs[0].data(),
 };
 setBooking(bookingData);
+const consentDoc = await getDoc(
+  doc(db, "consents", bookingNumber)
+);
 
+alert(`Booking: ${bookingNumber} | Exists: ${consentDoc.exists()}`);
+
+if (consentDoc.exists()) {
+  router.replace("/guest/consent-already-submitted");
+  return;
+}
       const customerSnapshot = await getDocs(
         collection(db, "customers")
       );
@@ -88,6 +99,10 @@ setBooking(bookingData);
     loadBooking();
  }, [bookingNumber]);
   async function saveConsent() {
+    if (saving) return;
+
+setSaving(true);
+try {
   if (
     !houseRules ||
     !poolRules ||
@@ -105,7 +120,9 @@ setBooking(bookingData);
   }
   
 
-  await addDoc(collection(db, "consents"), {
+  await setDoc(
+  doc(db, "consents", booking.bookingNumber),
+  {
     bookingNumber: booking?.bookingNumber,
     customerName: booking?.customerName,
     villa: booking?.villa,
@@ -124,13 +141,14 @@ setBooking(bookingData);
     signature,
 
     houseRules,
-poolRules,
-damageRules,
-zeroTolerance,
-liabilityWaiver,
+    poolRules,
+    damageRules,
+    zeroTolerance,
+    liabilityWaiver,
 
     createdAt: serverTimestamp(),
-  });
+  }
+);
   await updateDoc(
   doc(db, "bookings", booking.id),
   {
@@ -138,7 +156,10 @@ liabilityWaiver,
   }
 );
 
-  router.push("/guest/thank-you");
+router.push("/guest/thank-you");
+
+} finally {
+  setSaving(false);
 }
 
   return (
@@ -716,12 +737,13 @@ I agree to the Liability Waiver.
   </button>
 
   <button
-    type="button"
-    onClick={saveConsent}
-    className="px-6 py-3 rounded-lg bg-green-600 text-white hover:bg-green-700"
-  >
-    Save Consent
-  </button>
+  type="button"
+  onClick={saveConsent}
+  disabled={saving}
+  className="px-6 py-3 rounded-lg bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+>
+  {saving ? "Submitting..." : "Save Consent"}
+</button>
 
 </div>
 

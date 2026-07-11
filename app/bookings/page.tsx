@@ -634,17 +634,18 @@ console.log("Booking:", booking.bookingNumber);
 
   const message = `Hello ${booking.customerName},
 
-Welcome to The Rain Villa.
+Welcome to The Rain Villa 🌿
 
-Please complete your Guest Consent before arrival.
+Please complete your Guest Consent before your arrival.
 
 Booking No: ${booking.bookingNumber}
 
-Consent Form:
+Please click the link below to complete your consent form:
+
 ${consentLink}
 
 Thank you,
-The Rain Villa`;
+The Rain Villa Team`;
 
   window.open(
     `https://wa.me/91${customer.phone}?text=${encodeURIComponent(message)}`,
