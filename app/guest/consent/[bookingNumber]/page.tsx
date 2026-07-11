@@ -78,7 +78,7 @@ console.log(
 );
 
 if (consentDoc.exists()) {
-  router.replace("/guest/consent-already-submitted");
+  router.replace("/guest/consent/consent-already-submitted");
   return;
 }
       const customerSnapshot = await getDocs(
