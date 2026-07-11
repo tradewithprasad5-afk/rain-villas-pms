@@ -70,7 +70,12 @@ const consentDoc = await getDoc(
   doc(db, "consents", bookingNumber)
 );
 
-alert(`Booking: ${bookingNumber} | Exists: ${consentDoc.exists()}`);
+console.log(
+  "Booking:",
+  bookingNumber,
+  "Exists:",
+  consentDoc.exists()
+);
 
 if (consentDoc.exists()) {
   router.replace("/guest/consent-already-submitted");
