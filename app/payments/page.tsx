@@ -103,54 +103,62 @@ async function loadPayments() {
   setLoading(false);
 }
 async function loadBookings() {
-  const snapshot = await getDocs(collection(db, "bookings"));
+    console.log("loadBookings called");
+  try {
+    const snapshot = await getDocs(collection(db, "bookings"));
 
-  const data = await Promise.all(
-  snapshot.docs.map(async (bookingDoc) => {
-    const booking = {
-      id: bookingDoc.id,
-      ...bookingDoc.data(),
-    } as Booking;
+    const data = await Promise.all(
+      snapshot.docs.map(async (bookingDoc) => {
+        const booking = {
+          id: bookingDoc.id,
+          ...bookingDoc.data(),
+        } as Booking;
 
-    if (booking.customerId) {
-      const customerSnap = await getDoc(
-        doc(db, "customers", booking.customerId)
+        if (booking.customerId) {
+          const customerSnap = await getDoc(
+            doc(db, "customers", booking.customerId)
+          );
+
+          if (customerSnap.exists()) {
+            const customer = customerSnap.data() as Customer;
+            booking.phone = customer.phone;
+          }
+        }
+
+        return booking;
+      })
+    );
+
+    console.log("Bookings found:", data.length);
+
+    setBookings(data);
+
+    if (bookingParam) {
+      const booking = data.find(
+        (b) => b.bookingNumber === bookingParam
       );
 
-      if (customerSnap.exists()) {
-        const customer = customerSnap.data() as Customer;
+      if (booking) {
+        setSelectedBooking(booking);
 
-        booking.phone = customer.phone;
+        setBookingNumber(booking.bookingNumber);
+        setCustomerName(booking.customerName);
+
+        setTotalAmount(booking.totalAmount);
+        setAdvancePaid(booking.advancePaid);
+        setBalanceAmount(booking.balanceAmount);
+
+        setPaymentType("Balance");
+        setAmount(String(booking.balanceAmount));
+
+        setShowForm(true);
       }
     }
-
-    return booking;
-  })
-);
-
-setBookings(data);
-  if (bookingParam) {
-  const booking = data.find(
-    (b) => b.bookingNumber === bookingParam
-  );
-
-  if (booking) {
-    setSelectedBooking(booking);
-
-    setBookingNumber(booking.bookingNumber);
-    setCustomerName(booking.customerName);
-
-    setTotalAmount(booking.totalAmount);
-    setAdvancePaid(booking.advancePaid);
-    setBalanceAmount(booking.balanceAmount);
-
-    // Default to Balance payment
-    setPaymentType("Balance");
-    setAmount(String(booking.balanceAmount));
-
-    setShowForm(true);
+  } catch (err) {
+    console.error("Error loading bookings:", err);
+  } finally {
+    setLoading(false);
   }
-}
 }
 async function savePayment() {
   if (!bookingNumber) {
@@ -254,6 +262,7 @@ useEffect(() => {
   setBookingParam(params.get("booking") || "");
 }, []);
 useEffect(() => {
+    console.log("Payments useEffect", bookingParam);
   loadBookings();
   loadPayments();
 }, [bookingParam]);
