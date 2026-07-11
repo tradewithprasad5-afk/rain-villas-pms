@@ -162,6 +162,9 @@ router.push("/guest/thank-you");
   setSaving(false);
 }
 
+} // <-- ADD THIS MISSING BRACE
+
+return (
   return (
     <div className="min-h-screen bg-slate-100">
 
