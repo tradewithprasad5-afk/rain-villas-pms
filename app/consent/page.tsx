@@ -35,6 +35,8 @@ const [damageRules, setDamageRules] = useState(false);
 const [zeroTolerance, setZeroTolerance] = useState(false);
 
 const [liabilityWaiver, setLiabilityWaiver] = useState(false);
+
+const [guestDeclaration, setGuestDeclaration] = useState(false);
 const [signature, setSignature] = useState("");
 const [today] = useState(
   new Date().toISOString().split("T")[0]
@@ -90,51 +92,52 @@ useEffect(() => {
     !poolRules ||
     !damageRules ||
     !zeroTolerance ||
-    !liabilityWaiver
-) {
+    !liabilityWaiver ||
+    !guestDeclaration
+  ) {
     alert("Please accept all sections before submitting.");
     return;
-}
+  }
 
   if (!signature.trim()) {
     alert("Please enter guest signature.");
     return;
   }
-  
 
   await setDoc(
-  doc(db, "consents", booking.bookingNumber),
-  {
-    bookingNumber: booking.bookingNumber,
-    bookingId: booking.id,
-    customerName: booking.customerName,
-    villa: booking.villa,
+    doc(db, "consents", booking.bookingNumber),
+    {
+      bookingNumber: booking.bookingNumber,
+      bookingId: booking.id,
+      customerName: booking.customerName,
+      villa: booking.villa,
 
-    phone: customer?.phone,
-    email: customer?.email,
+      phone: customer?.phone,
+      email: customer?.email,
 
-    idType,
-    idNumber,
+      idType,
+      idNumber,
 
-    adults,
-    children,
-    vehicleNumber,
-    emergencyContact,
+      adults,
+      children,
+      vehicleNumber,
+      emergencyContact,
 
-    signature,
+      signature,
 
-    houseRules,
-    poolRules,
-    damageRules,
-    zeroTolerance,
-    liabilityWaiver,
+      houseRules,
+      poolRules,
+      damageRules,
+      zeroTolerance,
+      liabilityWaiver,
+      guestDeclaration,
 
-    createdAt: new Date(),
-  }
-);
+      createdAt: new Date(),
+    }
+  );
 
-}   // <-- ADD THIS MISSING BRACE
-
+  alert("Consent submitted successfully.");
+}
 return (
     <div className="flex min-h-screen bg-slate-100">
 
@@ -642,6 +645,47 @@ I agree to the Liability Waiver.
 </label>
 
 </section>
+  {/* Guest Declaration */}
+
+<section>
+
+  <h2 className="text-xl font-semibold border-b pb-2 mb-6">
+    Guest Declaration
+  </h2>
+
+  <p className="mb-5 text-gray-700">
+    I confirm that:
+  </p>
+
+  <ul className="list-disc pl-6 space-y-2 mb-6">
+
+    <li>All information provided by me is true and accurate.</li>
+
+    <li>I have read and understood all villa rules and policies.</li>
+
+    <li>I accept responsibility for myself and all accompanying guests.</li>
+
+    <li>I agree to follow all villa rules during my stay.</li>
+
+    <li>I understand that violations may result in penalties, eviction, or legal action where applicable.</li>
+
+  </ul>
+
+  <label className="flex gap-3">
+
+    <input
+      type="checkbox"
+      checked={guestDeclaration}
+      onChange={(e) => setGuestDeclaration(e.target.checked)}
+    />
+
+    <span>
+      I agree to the Guest Declaration.
+    </span>
+
+  </label>
+
+</section>
 {/* Signature */}
 
 <section>
@@ -649,6 +693,7 @@ I agree to the Liability Waiver.
   <h2 className="text-xl font-semibold border-b pb-2 mb-6">
     Guest Signature
   </h2>
+
 
   <div className="grid grid-cols-2 gap-5">
 
