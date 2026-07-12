@@ -115,18 +115,26 @@ export default function SettingsPage() {
           </div>
 
           <div>
-            <label className="block mb-2 font-medium">
-              Logo URL
-            </label>
+  <label className="block mb-2 font-medium">
+    Logo URL
+  </label>
 
-            <input
-              type="text"
-              name="logo"
-              value={settings.logo}
-              onChange={handleChange}
-              className="w-full border rounded-lg px-3 py-2"
-            />
-          </div>
+  <input
+    type="text"
+    name="logo"
+    value={settings.logo}
+    onChange={handleChange}
+    className="w-full border rounded-lg px-3 py-2"
+  />
+
+  {settings.logo && (
+    <img
+      src={settings.logo}
+      alt="Company Logo"
+      className="mt-3 h-20 w-auto rounded border"
+    />
+  )}
+</div>
 
           <div>
             <label className="block mb-2 font-medium">
