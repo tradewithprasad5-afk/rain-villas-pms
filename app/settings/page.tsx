@@ -1,96 +1,12 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { doc, getDoc, setDoc } from "firebase/firestore";
-import { db } from "../lib/firebase";
-
-interface SettingsData {
-  companyName: string;
-  logo: string;
-  address: string;
-  phone: string;
-  email: string;
-  bankName: string;
-  accountNumber: string;
-  ifsc: string;
-  upiId: string;
-  terms: string;
-}
-
 export default function SettingsPage() {
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-
-  const [settings, setSettings] = useState<SettingsData>({
-    companyName: "",
-    logo: "",
-    address: "",
-    phone: "",
-    email: "",
-    bankName: "",
-    accountNumber: "",
-    ifsc: "",
-    upiId: "",
-    terms: "",
-  });
-
-  useEffect(() => {
-    loadSettings();
-  }, []);
-
-  async function loadSettings() {
-    try {
-      const ref = doc(db, "settings", "company");
-      const snap = await getDoc(ref);
-
-      if (snap.exists()) {
-        setSettings(snap.data() as SettingsData);
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function saveSettings() {
-    setSaving(true);
-
-    try {
-      await setDoc(doc(db, "settings", "company"), settings);
-
-      alert("Settings saved successfully.");
-    } catch (error) {
-      console.error(error);
-      alert("Failed to save settings.");
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  function handleChange(
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) {
-    setSettings({
-      ...settings,
-      [e.target.name]: e.target.value,
-    });
-  }
-
-  if (loading) {
-    return (
-      <div className="p-8">
-        <h1 className="text-2xl font-bold">Loading...</h1>
-      </div>
-    );
-  }
-
   return (
     <div className="p-8">
 
       <h1 className="text-3xl font-bold mb-8">
-        Settings
+        Company Information
       </h1>
+
+      {/* Company Information */}
 
       <div className="bg-white rounded-xl shadow p-6 mb-8">
 
@@ -98,185 +14,175 @@ export default function SettingsPage() {
           Company Information
         </h2>
 
-        <div className="grid gap-5 md:grid-cols-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 
           <div>
-            <label className="block mb-2 font-medium">
-              Company Name
-            </label>
 
-            <input
-              type="text"
-              name="companyName"
-              value={settings.companyName}
-              onChange={handleChange}
-              className="w-full border rounded-lg px-3 py-2"
-            />
+            <p className="text-sm text-gray-500 mb-2">
+              Company Logo
+            </p>
+
+            <img
+  src="/logo/rain-villa-logo.jpeg"
+  alt="Rain Villa Logo"
+  className="h-28 w-auto rounded-lg border bg-white p-2"
+/>
           </div>
 
-          <div>
-  <label className="block mb-2 font-medium">
-    Logo URL
-  </label>
+          <div className="space-y-5">
 
-  <input
-    type="text"
-    name="logo"
-    value={settings.logo}
-    onChange={handleChange}
-    className="w-full border rounded-lg px-3 py-2"
-  />
+            <div>
 
-  {settings.logo && (
-    <img
-      src={settings.logo}
-      alt="Company Logo"
-      className="mt-3 h-20 w-auto rounded border"
-    />
-  )}
-</div>
+              <p className="text-sm text-gray-500">
+                Company Name
+              </p>
 
-          <div>
-            <label className="block mb-2 font-medium">
-              Phone
-            </label>
+              <p className="font-semibold text-lg">
+                Rain Villa
+              </p>
 
-            <input
-              type="text"
-              name="phone"
-              value={settings.phone}
-              onChange={handleChange}
-              className="w-full border rounded-lg px-3 py-2"
-            />
-          </div>
+            </div>
 
-          <div>
-            <label className="block mb-2 font-medium">
-              Email
-            </label>
+            <div>
 
-            <input
-              type="email"
-              name="email"
-              value={settings.email}
-              onChange={handleChange}
-              className="w-full border rounded-lg px-3 py-2"
-            />
+              <p className="text-sm text-gray-500">
+                Website
+              </p>
+
+              <p className="font-semibold">
+                www.rainvilla.in
+              </p>
+
+            </div>
+
+            <div>
+
+              <p className="text-sm text-gray-500">
+                Email
+              </p>
+
+              <p className="font-semibold">
+                rainvilla.igatpuri@gmail.com
+              </p>
+
+            </div>
+
+            <div>
+
+              <p className="text-sm text-gray-500">
+                Phone
+              </p>
+
+              <p className="font-semibold">
+                9923506006 / 9527249988
+              </p>
+
+            </div>
+
           </div>
 
         </div>
 
-        <div className="mt-5">
+        <div className="mt-8">
 
-          <label className="block mb-2 font-medium">
+          <p className="text-sm text-gray-500">
             Address
-          </label>
+          </p>
 
-          <textarea
-            rows={3}
-            name="address"
-            value={settings.address}
-            onChange={handleChange}
-            className="w-full border rounded-lg px-3 py-2"
-          />
+          <p className="font-semibold leading-7">
+            Ritiksha Homeland,
+            <br />
+            Plot No. 36,
+            <br />
+            Igatpuri - 422403,
+            Maharashtra, India
+          </p>
 
         </div>
 
       </div>
-            <div className="bg-white rounded-xl shadow p-6 mb-8">
+
+      {/* Bank Details */}
+
+      <div className="bg-white rounded-xl shadow p-6 mb-8">
 
         <h2 className="text-xl font-semibold mb-6">
           Bank Details
         </h2>
 
-        <div className="grid gap-5 md:grid-cols-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
           <div>
-            <label className="block mb-2 font-medium">
+
+            <p className="text-sm text-gray-500">
               Bank Name
-            </label>
+            </p>
 
-            <input
-              type="text"
-              name="bankName"
-              value={settings.bankName}
-              onChange={handleChange}
-              className="w-full border rounded-lg px-3 py-2"
-            />
+            <p className="font-semibold">
+              Bank of Maharashtra
+            </p>
+
           </div>
 
           <div>
-            <label className="block mb-2 font-medium">
+
+            <p className="text-sm text-gray-500">
               Account Number
-            </label>
+            </p>
 
-            <input
-              type="text"
-              name="accountNumber"
-              value={settings.accountNumber}
-              onChange={handleChange}
-              className="w-full border rounded-lg px-3 py-2"
-            />
+            <p className="font-semibold">
+              60582272804
+            </p>
+
           </div>
+                    <div>
 
-          <div>
-            <label className="block mb-2 font-medium">
+            <p className="text-sm text-gray-500">
               IFSC Code
-            </label>
+            </p>
 
-            <input
-              type="text"
-              name="ifsc"
-              value={settings.ifsc}
-              onChange={handleChange}
-              className="w-full border rounded-lg px-3 py-2"
-            />
+            <p className="font-semibold">
+              MAHB0000959
+            </p>
+
           </div>
 
           <div>
-            <label className="block mb-2 font-medium">
-              UPI ID
-            </label>
 
-            <input
-              type="text"
-              name="upiId"
-              value={settings.upiId}
-              onChange={handleChange}
-              className="w-full border rounded-lg px-3 py-2"
-            />
+            <p className="text-sm text-gray-500">
+              UPI ID
+            </p>
+
+            <p className="font-semibold">
+              To be created
+            </p>
+
           </div>
 
         </div>
 
       </div>
 
-      <div className="bg-white rounded-xl shadow p-6 mb-8">
+      
 
-        <h2 className="text-xl font-semibold mb-6">
-          Terms & Conditions
+      {/* Support */}
+
+      <div className="bg-white rounded-xl shadow p-6">
+
+        <h2 className="text-xl font-semibold mb-4">
+          Support
         </h2>
 
-        <textarea
-          rows={10}
-          name="terms"
-          value={settings.terms}
-          onChange={handleChange}
-          placeholder="Enter your booking terms and conditions..."
-          className="w-full border rounded-lg px-3 py-2"
-        />
+        <p className="text-gray-700 mb-3">
+  Rain Villa PMS has been developed exclusively for
+  <strong> Rain Villa, Igatpuri.</strong>
+</p>
 
-      </div>
-
-      <div className="flex justify-end">
-
-        <button
-          onClick={saveSettings}
-          disabled={saving}
-          className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg disabled:opacity-50"
-        >
-          {saving ? "Saving..." : "Save Settings"}
-        </button>
+<p className="text-gray-700">
+  For technical support, system maintenance, or future
+  enhancements, please contact the Rain Villa PMS
+  administrator.
+</p>
 
       </div>
 
