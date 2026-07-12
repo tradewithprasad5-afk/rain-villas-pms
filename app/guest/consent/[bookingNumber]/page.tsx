@@ -61,10 +61,10 @@ const [guestDeclaration, setGuestDeclaration] = useState(false);
 
       if (snapshot.empty) return;
 
-      const bookingData = {
-        id: snapshot.docs[0].id,
-        ...snapshot.docs[0].data(),
-      };
+      const bookingData: any = {
+  id: snapshot.docs[0].id,
+  ...snapshot.docs[0].data(),
+};
 
       setBooking(bookingData);
 
@@ -669,8 +669,8 @@ createdAt: serverTimestamp(),
 
               <input
   type="checkbox"
-  checked={guestDeclaration}
-  onChange={(e) => setGuestDeclaration(e.target.checked)}
+  checked={houseRules}
+onChange={(e) => setHouseRules(e.target.checked)}
   className="mt-1"
 />
 
@@ -1186,8 +1186,8 @@ createdAt: serverTimestamp(),
 
               <input
                 type="checkbox"
-                checked={houseRules}
-                onChange={(e) => setHouseRules(e.target.checked)}
+                checked={guestDeclaration}
+onChange={(e) => setGuestDeclaration(e.target.checked)}
                 className="mt-1"
               />
 
