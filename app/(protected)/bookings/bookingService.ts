@@ -7,7 +7,7 @@ import {
   doc,
 } from "firebase/firestore";
 
-import { db } from "../lib/firebase";
+import { db } from "../../lib/firebase";
 import { Booking } from "./bookingTypes";
 
 // Get all bookings

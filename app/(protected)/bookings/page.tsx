@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 
 
-import Sidebar from "../components/Sidebar";
-import Navbar from "../components/Navbar";
+import Sidebar from "../../components/Sidebar";
+import Navbar from "../../components/Navbar";
 
 import {
   collection,
@@ -15,7 +15,7 @@ import {
   doc,
 } from "firebase/firestore";
 
-import { db } from "../lib/firebase";
+import { db } from "../../lib/firebase";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,6 +37,10 @@ interface Customer {
   phone: string;
   email: string;
   address: string;
+
+  totalBookings?: number;
+  totalSpent?: number;
+  lastStay?: string;
 }
 
 interface Booking {
@@ -382,17 +386,22 @@ function searchCustomerByPhone(phoneNumber: string) {
         finalCustomerId = existingCustomer.id;
 
         await updateDoc(
+  doc(db, "customers", existingCustomer.id),
+  {
+    name: customerName,
+    phone,
+    email,
+    address,
+    totalBookings:
+      (existingCustomer.totalBookings || 0) + (editingId ? 0 : 1),
 
-          doc(db, "customers", existingCustomer.id),
+    totalSpent:
+      (existingCustomer.totalSpent || 0) +
+      (editingId ? 0 : Number(totalAmount)),
 
-          {
-            name: customerName,
-            phone,
-            email,
-            address,
-          }
-
-        );
+    lastStay: checkOut,
+  }
+);
 
       }
 
@@ -407,11 +416,17 @@ function searchCustomerByPhone(phoneNumber: string) {
           collection(db, "customers"),
 
           {
-            name: customerName,
-            phone,
-            email,
-            address,
-          }
+  name: customerName,
+  phone,
+  email,
+  address,
+
+  totalBookings: 1,
+
+  totalSpent: Number(totalAmount),
+
+  lastStay: checkOut,
+}
 
         );
 

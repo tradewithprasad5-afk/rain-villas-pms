@@ -1,14 +1,14 @@
 "use client";
 
-import Sidebar from "./components/Sidebar";
-import Navbar from "./components/Navbar";
+import Sidebar from "../components/Sidebar";
+import Navbar from "../components/Navbar";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
-import { db } from "./lib/firebase";
+import { db } from "../lib/firebase";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import { useRouter } from "next/navigation";
-import { useAuth } from "./components/AuthProvider";
+import { useAuth } from "../components/AuthProvider";
 import {
   Chart as ChartJS,
   CategoryScale,

@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-import Sidebar from "../components/Sidebar";
-import Navbar from "../components/Navbar";
+import Sidebar from "../../components/Sidebar";
+import Navbar from "../../components/Navbar";
 import { useSearchParams } from "next/navigation";
 
 import {
@@ -12,7 +12,7 @@ import {
   getDocs,
 } from "firebase/firestore";
 
-import { db } from "../lib/firebase";
+import { db } from "../../lib/firebase";
 
 /* =========================================================
    Booking Interface
