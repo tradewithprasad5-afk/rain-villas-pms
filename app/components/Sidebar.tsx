@@ -6,30 +6,26 @@ import {
   FaCalendarAlt,
   FaUsers,
   FaMoneyBill,
-  FaFileInvoice,
-  FaClipboardList,
   FaChartBar,
   FaCog,
 } from "react-icons/fa";
 
 export default function Sidebar() {
- const menu = [
-  { name: "Dashboard", icon: <FaHome />, link: "/" },
+  const menu = [
+    { name: "Dashboard", icon: <FaHome />, link: "/" },
 
-  { name: "Availability", icon: <FaCalendarAlt />, link: "/availability" },
+    { name: "Availability", icon: <FaCalendarAlt />, link: "/availability" },
 
-  { name: "Bookings", icon: <FaCalendarAlt />, link: "/bookings" },
+    { name: "Bookings", icon: <FaCalendarAlt />, link: "/bookings" },
 
-  { name: "Payments", icon: <FaMoneyBill />, link: "/payments" },
+    { name: "Customers", icon: <FaUsers />, link: "/customers" },
 
-  { name: "Invoices", icon: <FaFileInvoice />, link: "/invoices" },
+    { name: "Payments", icon: <FaMoneyBill />, link: "/payments" },
 
-  { name: "Housekeeping", icon: <FaClipboardList />, link: "/housekeeping" },
+    { name: "Reports", icon: <FaChartBar />, link: "/reports" },
 
-  { name: "Reports", icon: <FaChartBar />, link: "/reports" },
-
-  { name: "Settings", icon: <FaCog />, link: "/settings" },
-];
+    { name: "Settings", icon: <FaCog />, link: "/settings" },
+  ];
 
   return (
     <div className="w-64 bg-slate-900 text-white min-h-screen p-6">
