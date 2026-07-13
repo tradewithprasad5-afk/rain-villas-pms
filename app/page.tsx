@@ -7,6 +7,8 @@ import { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "./lib/firebase";
 import { FaEdit, FaTrash } from "react-icons/fa";
+import { useRouter } from "next/navigation";
+import { useAuth } from "./components/AuthProvider";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -28,6 +30,8 @@ ChartJS.register(
 );
 
 export default function DashboardPage() {
+  const router = useRouter();
+const { user, loading } = useAuth();
   const [totalBookings, setTotalBookings] = useState(0);
   const [totalRevenue, setTotalRevenue] = useState(0);
   const [advanceReceived, setAdvanceReceived] = useState(0);
@@ -71,9 +75,9 @@ const [monthlyRevenue, setMonthlyRevenue] = useState<number[]>(
   (booking: any) => booking.status === "Confirmed"
 ).length;
 
-setConfirmedBookings(confirmed);    
-   
-   setConfirmedBookings(confirmed);
+setConfirmedBookings(confirmed);
+
+
     
     setRecentBookings(bookings.slice(0, 5));
     const revenueByMonth = Array(12).fill(0);
@@ -90,8 +94,15 @@ setMonthlyRevenue(revenueByMonth);
   }
 
   useEffect(() => {
-    loadDashboard();
-  }, []);
+  if (loading) return;
+
+  if (!user) {
+    router.replace("/login");
+    return;
+  }
+
+  loadDashboard();
+}, [user, loading, router]);
   const chartData = {
   labels: [
     "Jan",
@@ -115,7 +126,17 @@ setMonthlyRevenue(revenueByMonth);
     },
   ],
 };
+if (loading) {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      Loading...
+    </div>
+  );
+}
 
+if (!user) {
+  return null;
+}
   return (
     <div className="flex min-h-screen bg-slate-100">
       <Sidebar />
