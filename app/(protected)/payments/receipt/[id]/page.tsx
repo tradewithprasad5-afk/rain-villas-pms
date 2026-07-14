@@ -5,7 +5,7 @@ import {
   doc,
   getDoc,
 } from "firebase/firestore";
-import { db } from "../../../lib/firebase";
+import { db } from "../../../../lib/firebase";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 
