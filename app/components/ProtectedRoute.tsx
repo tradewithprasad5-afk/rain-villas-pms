@@ -19,7 +19,7 @@ export default function ProtectedRoute({
 
     if (!user) {
       router.replace("/login");
-      return;
+      return; 
     }
 
     if (user.email !== ADMIN_EMAIL) {

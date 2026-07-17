@@ -26,9 +26,6 @@ export default function ConsentPage() {
   const [booking, setBooking] = useState<any>(null);
   const [customer, setCustomer] = useState<any>(null);
 
-  const [idType, setIdType] = useState("");
-  const [idNumber, setIdNumber] = useState("");
-
   const [adults, setAdults] = useState(1);
   const [children, setChildren] = useState(0);
 
@@ -131,13 +128,10 @@ const [guestDeclaration, setGuestDeclaration] = useState(false);
         villa: booking.villa,
 
         phone: customer?.phone ?? "",
-        email: customer?.email ?? "",
+email: customer?.email ?? "",
 
-        idType,
-        idNumber,
-
-        adults,
-        children,
+adults,
+children,
 
         vehicleNumber,
         emergencyContact,
@@ -381,20 +375,7 @@ createdAt: serverTimestamp(),
 
               </div>
 
-              <div>
-
-                <label className="block text-sm font-semibold mb-2">
-                  Emergency Contact
-                </label>
-
-                <input
-                  value={emergencyContact}
-                  onChange={(e) => setEmergencyContact(e.target.value)}
-                  placeholder="Emergency Contact Number"
-                  className="w-full rounded-lg border p-3"
-                />
-
-              </div>
+              
 
             </div>
 
@@ -402,95 +383,15 @@ createdAt: serverTimestamp(),
 
         </section>
 
-        {/* C. GOVERNMENT ID VERIFICATION */}
+        
+                {/* C. GUEST STAY DETAILS */}
 
         <section>
 
           <div className="bg-slate-800 text-white px-5 py-3 rounded-t-lg">
 
             <h2 className="text-xl font-bold">
-              C. GOVERNMENT ID VERIFICATION
-            </h2>
-
-          </div>
-
-          <div className="border border-t-0 rounded-b-lg p-6">
-
-            <p className="text-gray-700 mb-6">
-
-              Every adult guest must provide a valid Government-issued
-              Photo ID before check-in in accordance with applicable
-              regulations.
-
-            </p>
-
-            <div className="grid md:grid-cols-2 gap-6">
-
-              <div>
-
-                <label className="block text-sm font-semibold mb-2">
-                  ID Type
-                </label>
-
-                <select
-                  value={idType}
-                  onChange={(e) => setIdType(e.target.value)}
-                  className="w-full rounded-lg border p-3"
-                >
-
-                  <option value="">
-                    Select ID Type
-                  </option>
-
-                  <option>Aadhaar Card</option>
-                  <option>Passport</option>
-                  <option>Driving Licence</option>
-                  <option>Voter ID</option>
-                  <option>PAN Card</option>
-
-                </select>
-
-              </div>
-
-              <div>
-
-                <label className="block text-sm font-semibold mb-2">
-                  ID Number
-                </label>
-
-                <input
-                  value={idNumber}
-                  onChange={(e) => setIdNumber(e.target.value)}
-                  placeholder="Enter Government ID Number"
-                  className="w-full rounded-lg border p-3"
-                />
-
-              </div>
-
-            </div>
-
-            <div className="mt-6 rounded-lg border border-yellow-300 bg-yellow-50 p-4">
-
-              <p className="text-sm text-gray-700">
-
-                The information provided above will only be used for
-                guest verification and statutory compliance.
-
-              </p>
-
-            </div>
-
-          </div>
-
-        </section>
-                {/* D. GUEST STAY DETAILS */}
-
-        <section>
-
-          <div className="bg-slate-800 text-white px-5 py-3 rounded-t-lg">
-
-            <h2 className="text-xl font-bold">
-              D. GUEST STAY DETAILS
+              C. GUEST STAY DETAILS
             </h2>
 
           </div>
@@ -603,14 +504,14 @@ createdAt: serverTimestamp(),
 
         </section>
 
-        {/* E. ACKNOWLEDGMENT OF HOUSE RULES */}
+        {/* D. ACKNOWLEDGMENT OF HOUSE RULES */}
 
         <section>
 
           <div className="bg-slate-800 text-white px-5 py-3 rounded-t-lg">
 
             <h2 className="text-xl font-bold">
-              E. ACKNOWLEDGMENT OF HOUSE RULES
+              D. ACKNOWLEDGMENT OF HOUSE RULES
             </h2>
 
           </div>
@@ -683,14 +584,14 @@ onChange={(e) => setHouseRules(e.target.checked)}
           </div>
 
         </section>
-                {/* F. SWIMMING POOL – LIABILITY & RULES */}
+                {/* E. SWIMMING POOL – LIABILITY & RULES */}
 
         <section>
 
           <div className="bg-slate-800 text-white px-5 py-3 rounded-t-lg">
 
             <h2 className="text-xl font-bold">
-              F. SWIMMING POOL – LIABILITY & RULES
+              E. SWIMMING POOL – LIABILITY & RULES
             </h2>
 
           </div>
@@ -797,14 +698,14 @@ onChange={(e) => setHouseRules(e.target.checked)}
 
         </section>
 
-        {/* G. DAMAGE TO PROPERTY & FINANCIAL LIABILITY */}
+        {/* F. DAMAGE TO PROPERTY & FINANCIAL LIABILITY */}
 
         <section>
 
           <div className="bg-slate-800 text-white px-5 py-3 rounded-t-lg">
 
             <h2 className="text-xl font-bold">
-              G. DAMAGE TO PROPERTY & FINANCIAL LIABILITY
+              F. DAMAGE TO PROPERTY & FINANCIAL LIABILITY
             </h2>
 
           </div>
@@ -917,14 +818,14 @@ onChange={(e) => setHouseRules(e.target.checked)}
           </div>
 
         </section>
-                {/* H. STRICT PROHIBITIONS & ZERO TOLERANCE */}
+                {/* G. STRICT PROHIBITIONS & ZERO TOLERANCE */}
 
         <section>
 
           <div className="bg-red-800 text-white px-5 py-3 rounded-t-lg">
 
             <h2 className="text-xl font-bold">
-              H. STRICT PROHIBITIONS & ZERO TOLERANCE
+              G. STRICT PROHIBITIONS & ZERO TOLERANCE
             </h2>
 
           </div>
@@ -1010,14 +911,14 @@ onChange={(e) => setHouseRules(e.target.checked)}
           </div>
 
         </section>
-                {/* I. GENERAL LIABILITY WAIVER */}
+                {/* H. GENERAL LIABILITY WAIVER */}
 
         <section>
 
           <div className="bg-slate-800 text-white px-5 py-3 rounded-t-lg">
 
             <h2 className="text-xl font-bold">
-              I. GENERAL LIABILITY WAIVER
+              H. GENERAL LIABILITY WAIVER
             </h2>
 
           </div>
@@ -1122,14 +1023,14 @@ onChange={(e) => setHouseRules(e.target.checked)}
           </div>
 
         </section>
-                {/* J. GUEST DECLARATION */}
+                {/* I. GUEST DECLARATION */}
 
         <section>
 
           <div className="bg-green-700 text-white px-5 py-3 rounded-t-lg">
 
             <h2 className="text-xl font-bold">
-              J. GUEST DECLARATION
+              I. GUEST DECLARATION
             </h2>
 
           </div>
@@ -1202,14 +1103,14 @@ onChange={(e) => setGuestDeclaration(e.target.checked)}
           </div>
 
         </section>
-                {/* K. DIGITAL SIGNATURE */}
+                {/* J. DIGITAL SIGNATURE */}
 
         <section>
 
           <div className="bg-slate-800 text-white px-5 py-3 rounded-t-lg">
 
             <h2 className="text-xl font-bold">
-              K. DIGITAL SIGNATURE
+              J. DIGITAL SIGNATURE
             </h2>
 
           </div>
