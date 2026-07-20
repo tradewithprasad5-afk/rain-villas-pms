@@ -52,7 +52,7 @@ import { AvailabilityResult } from "./types";
     <div className="min-h-screen bg-slate-100 py-10">
       <div className="mx-auto max-w-3xl rounded-2xl bg-white p-8 shadow-xl">
         <h1 className="text-center text-3xl font-bold">
-          Rain Villas
+          Rain Villa
         </h1>
 
         <p className="mt-2 text-center text-slate-500">
