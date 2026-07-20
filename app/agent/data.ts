@@ -2,19 +2,15 @@ import { Villa } from "./types";
 
 export const villas: Villa[] = [
   {
-    id: "1",
+    id: "rain-paradise",
     name: "Rain Paradise",
+    floor: "Ground Floor",
     capacity: 6,
-    rate: 8500,
-    image:
-      "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1200",
   },
   {
-    id: "2",
+    id: "rain-heaven",
     name: "Rain Heaven",
+    floor: "First Floor",
     capacity: 8,
-    rate: 10500,
-    image:
-      "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=1200",
   },
 ];
