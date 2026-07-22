@@ -131,10 +131,11 @@ export default function RevenueChart({
             <YAxis />
 
             <Tooltip
-              formatter={(value: number) =>
-                `₹${value.toLocaleString("en-IN")}`
-              }
-            />
+  formatter={(value) => [
+    `₹${Number(value).toLocaleString("en-IN")}`,
+    "Revenue",
+  ]}
+/>
 
             <Line
               type="monotone"
