@@ -15,6 +15,7 @@ import * as XLSX from "xlsx";
 export default function CustomersPage() {
   const [customers, setCustomers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [collapsed, setCollapsed] = useState(false);
 
   async function loadCustomers() {
     try {
@@ -90,10 +91,14 @@ export default function CustomersPage() {
 
   return (
     <div className="flex min-h-screen bg-slate-100">
-      <Sidebar />
+      <Sidebar collapsed={collapsed} />
 
       <div className="flex-1">
-        <Navbar />
+        <Navbar
+  collapsed={collapsed}
+  toggleSidebar={() => setCollapsed((prev) => !prev)}
+  onMenuClick={() => {}}
+/>
 
         <main className="p-8">
 
