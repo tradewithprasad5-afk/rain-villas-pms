@@ -42,6 +42,7 @@ const { user, loading } = useAuth();
 const [monthlyRevenue, setMonthlyRevenue] = useState<number[]>(
   Array(12).fill(0)
 );
+const [collapsed, setCollapsed] = useState(false);
 
   async function loadDashboard() {
     
@@ -139,10 +140,14 @@ if (!user) {
 }
   return (
     <div className="flex min-h-screen bg-slate-100">
-      <Sidebar />
+      <Sidebar collapsed={collapsed} />
 
       <div className="flex-1">
-        <Navbar />
+        <Navbar
+  collapsed={collapsed}
+  toggleSidebar={() => setCollapsed((prev) => !prev)}
+  onMenuClick={() => {}}
+/>
 
         <main className="p-8">
           <h1 className="text-3xl font-bold mb-6">
