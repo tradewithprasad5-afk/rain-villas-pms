@@ -3,7 +3,12 @@
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 import { useEffect, useState } from "react";
-import { collection, getDocs } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  deleteDoc,
+  doc,
+} from "firebase/firestore";
 import { db } from "../lib/firebase";
 import * as XLSX from "xlsx";
 
@@ -33,6 +38,27 @@ export default function CustomersPage() {
   useEffect(() => {
     loadCustomers();
   }, []);
+
+  async function deleteCustomer(id: string) {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this customer?"
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+      await deleteDoc(doc(db, "customers", id));
+
+      setCustomers((prev) =>
+        prev.filter((customer) => customer.id !== id)
+      );
+
+      alert("Customer deleted successfully.");
+    } catch (error) {
+      console.error(error);
+      alert("Unable to delete customer.");
+    }
+  }
 
   function exportCustomers() {
     const exportData = customers.map((customer) => ({
@@ -71,57 +97,61 @@ export default function CustomersPage() {
 
         <main className="p-8">
 
-          <div className="flex justify-between items-center mb-8">
+          <div className="mb-8 flex items-center justify-between">
 
             <div>
               <h1 className="text-3xl font-bold">
                 Customers
               </h1>
 
-              <p className="text-gray-500 mt-1">
+              <p className="mt-1 text-gray-500">
                 Customer Directory
               </p>
             </div>
 
             <button
               onClick={exportCustomers}
-              className="bg-green-600 hover:bg-green-700 text-white px-5 py-3 rounded-lg"
+              className="rounded-lg bg-green-600 px-5 py-3 text-white hover:bg-green-700"
             >
               Export Excel
             </button>
 
           </div>
 
-          <div className="bg-white rounded-xl shadow overflow-hidden">
+          <div className="overflow-x-auto rounded-xl bg-white shadow">
 
-            <table className="w-full">
+            <table className="min-w-[1000px] w-full">
 
               <thead className="bg-gray-100">
 
                 <tr>
 
-                  <th className="text-left p-4">
+                  <th className="p-4 text-left">
                     Customer
                   </th>
 
-                  <th className="text-left p-4">
+                  <th className="p-4 text-left">
                     Phone
                   </th>
 
-                  <th className="text-left p-4">
+                  <th className="p-4 text-left">
                     Email
                   </th>
 
-                  <th className="text-center p-4">
+                  <th className="p-4 text-center">
                     Bookings
                   </th>
 
-                  <th className="text-center p-4">
+                  <th className="p-4 text-center">
                     Last Stay
                   </th>
 
-                  <th className="text-right p-4">
+                  <th className="p-4 text-right">
                     Total Spent
+                  </th>
+
+                  <th className="p-4 text-center">
+                    Actions
                   </th>
 
                 </tr>
@@ -135,8 +165,8 @@ export default function CustomersPage() {
                   <tr>
 
                     <td
-                      colSpan={6}
-                      className="text-center py-12 text-gray-500"
+                      colSpan={7}
+                      className="py-12 text-center text-gray-500"
                     >
                       Loading customers...
                     </td>
@@ -148,8 +178,8 @@ export default function CustomersPage() {
                   <tr>
 
                     <td
-                      colSpan={6}
-                      className="text-center py-12 text-gray-500"
+                      colSpan={7}
+                      className="py-12 text-center text-gray-500"
                     >
                       No customers found.
                     </td>
@@ -177,16 +207,29 @@ export default function CustomersPage() {
                         {customer.email || "-"}
                       </td>
 
-                      <td className="text-center p-4">
+                      <td className="p-4 text-center">
                         {customer.totalBookings || 0}
                       </td>
 
-                      <td className="text-center p-4">
+                      <td className="p-4 text-center">
                         {customer.lastStay || "-"}
                       </td>
 
-                      <td className="text-right p-4 font-semibold text-green-700">
+                      <td className="p-4 text-right font-semibold text-green-700">
                         ₹{(customer.totalSpent || 0).toLocaleString()}
+                      </td>
+
+                      <td className="p-4 text-center">
+
+                        <button
+                          onClick={() =>
+                            deleteCustomer(customer.id)
+                          }
+                          className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700"
+                        >
+                          Delete
+                        </button>
+
                       </td>
 
                     </tr>

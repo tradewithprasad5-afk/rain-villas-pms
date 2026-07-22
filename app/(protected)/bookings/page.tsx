@@ -580,34 +580,70 @@ else {
   /* ==========================================
       Delete Booking
   ========================================== */
+  
+  async function markConsentCompleted(id: string) {
+  try {
+    await updateDoc(doc(db, "bookings", id), {
+      consentStatus: "Completed",
+    });
 
-  async function deleteBooking(id: string) {
-
-    const confirmDelete = window.confirm(
-      "Delete this booking?"
+    setBookings((prev) =>
+      prev.map((booking) =>
+        booking.id === id
+          ? {
+              ...booking,
+              consentStatus: "Completed",
+            }
+          : booking
+      )
     );
+  } catch (error) {
+    console.error(error);
+    alert("Unable to update consent status.");
+  }
+}
+  async function deleteBooking(booking: Booking) {
 
-    if (!confirmDelete) return;
+  const confirmDelete = window.confirm("Delete this booking?");
 
-    try {
+  if (!confirmDelete) return;
 
-      await deleteDoc(
-        doc(db, "bookings", id)
+  try {
+
+    // Delete booking
+    await deleteDoc(doc(db, "bookings", booking.id));
+
+    // Load remaining bookings
+    const snapshot = await getDocs(collection(db, "bookings"));
+
+    const remainingBookings = snapshot.docs
+      .map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }))
+      .filter(
+        (b: any) =>
+          b.customerId === booking.customerId
       );
 
-      await loadBookings();
-
+    // If customer has no bookings left, delete customer
+    if (remainingBookings.length === 0) {
+      await deleteDoc(
+        doc(db, "customers", booking.customerId)
+      );
     }
 
-    catch (error) {
+    await loadBookings();
+    await loadCustomers();
 
-      console.error(error);
+  } catch (error) {
 
-      alert("Unable to delete booking.");
-
-    }
+    console.error(error);
+    alert("Unable to delete booking.");
 
   }
+
+}
 
   /* ==========================================
       Filter Bookings
@@ -731,9 +767,9 @@ The Rain Villa Team`;
 
           {/* Booking Table */}
 
-          <div className="bg-white rounded-xl shadow overflow-hidden">
+          <div className="overflow-x-auto rounded-xl bg-white shadow">
 
-            <table className="w-full">
+            <table className="min-w-[1100px] w-full">
 
               <thead className="bg-gray-100">
 
@@ -894,17 +930,30 @@ The Rain Villa Team`;
 
                         {/* Consent */}
 
-                        <td className="p-4 text-center">
+                        <td className="p-4">
 
-  <span
-    className={`px-3 py-1 rounded-full text-sm font-medium ${
-      booking.consentStatus === "Completed"
-        ? "bg-green-100 text-green-700"
-        : "bg-yellow-100 text-yellow-700"
-    }`}
-  >
-    {booking.consentStatus || "Pending"}
-  </span>
+  <div className="flex flex-col items-center gap-2 sm:flex-row sm:justify-center">
+
+    <span
+      className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
+        booking.consentStatus === "Completed"
+          ? "bg-green-100 text-green-700"
+          : "bg-yellow-100 text-yellow-700"
+      }`}
+    >
+      {booking.consentStatus || "Pending"}
+    </span>
+
+    {booking.consentStatus !== "Completed" && (
+      <button
+        onClick={() => markConsentCompleted(booking.id)}
+        className="rounded-lg bg-green-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-green-700"
+      >
+        ✓ Complete
+      </button>
+    )}
+
+  </div>
 
 </td>
 
@@ -946,7 +995,7 @@ The Rain Villa Team`;
 )}
        
       <DropdownMenuItem
-        onClick={() => deleteBooking(booking.id)}
+        onClick={() => deleteBooking(booking)}
         className="text-red-600"
       >
         🗑 Delete Booking

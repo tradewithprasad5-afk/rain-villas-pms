@@ -1,241 +1,214 @@
 "use client";
 
-import Sidebar from "../components/Sidebar";
-import Navbar from "../components/Navbar";
 import { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
-import { db } from "../lib/firebase";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-} from "chart.js";
 
-import { Bar } from "react-chartjs-2";
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-);
+import { db } from "../lib/firebase";
+
+import Sidebar from "../components/Sidebar";
+import MobileSidebar from "../components/MobileSidebar";
+import Navbar from "../components/Navbar";
+
+import DashboardHeader from "./components/DashboardHeader";
+import StatsCards from "./components/StatsCards";
+import RevenueChart from "./components/RevenueChart";
+import ActivityCard from "./components/ActivityCard";
+import PaymentSummary from "./components/PaymentSummary";
+
+import { Booking } from "@/app/types/booking";
+
+interface Activity {
+  type: "checkin" | "checkout";
+  guest: string;
+  villa: string;
+  date: string;
+}
 
 export default function DashboardPage() {
+  const [collapsed, setCollapsed] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const [bookings, setBookings] = useState<Booking[]>([]);
+
   const [totalBookings, setTotalBookings] = useState(0);
   const [totalRevenue, setTotalRevenue] = useState(0);
   const [advanceReceived, setAdvanceReceived] = useState(0);
   const [pendingBalance, setPendingBalance] = useState(0);
-  const [confirmedBookings, setConfirmedBookings] = useState(0);
-  const totalVillas = 2;
-  const [recentBookings, setRecentBookings] = useState<any[]>([]);
-  
-const [monthlyRevenue, setMonthlyRevenue] = useState<number[]>(
-  Array(12).fill(0)
-);
+
+  const [paradiseOccupied, setParadiseOccupied] = useState(false);
+  const [heavenOccupied, setHeavenOccupied] = useState(false);
+
+  const [paradiseGuest, setParadiseGuest] = useState("");
+  const [heavenGuest, setHeavenGuest] = useState("");
+
+  const [paradiseCheckout, setParadiseCheckout] = useState("");
+  const [heavenCheckout, setHeavenCheckout] = useState("");
+
+  const [activities, setActivities] = useState<Activity[]>([]);
+
+  const [monthlyRevenue, setMonthlyRevenue] = useState<number[]>(
+    new Array(12).fill(0)
+  );
 
   async function loadDashboard() {
-    
     const snapshot = await getDocs(collection(db, "bookings"));
 
-    const bookings = snapshot.docs.map((doc) => ({
+    const data = snapshot.docs.map((doc) => ({
       id: doc.id,
-      ...doc.data(),
+      ...(doc.data() as Omit<Booking, "id">),
     }));
-    
-    setTotalBookings(bookings.length);
 
-    const revenue = bookings.reduce(
-      (sum: number, booking: any) => sum + (booking.totalAmount || 0),
-      0
+    setBookings(data);
+
+    setTotalBookings(data.length);
+
+    setTotalRevenue(
+      data.reduce((sum, booking) => sum + (booking.totalAmount || 0), 0)
     );
-    setTotalRevenue(revenue);
 
-    const advance = bookings.reduce(
-      (sum: number, booking: any) => sum + (booking.advancePaid || 0),
-      0
+    setAdvanceReceived(
+      data.reduce((sum, booking) => sum + (booking.advancePaid || 0), 0)
     );
-    setAdvanceReceived(advance);
 
-    const balance = bookings.reduce(
-      (sum: number, booking: any) => sum + (booking.balanceAmount || 0),
-      0
+    setPendingBalance(
+      data.reduce((sum, booking) => sum + (booking.balanceAmount || 0), 0)
     );
-    setPendingBalance(balance);
 
-    
+    const revenue = new Array(12).fill(0);
 
-// Confirmed Bookings
+    data.forEach((booking) => {
+      if (!booking.checkIn) return;
 
-const confirmed = bookings.filter(
-  (booking: any) => booking.status === "Confirmed"
-).length;
+      const date = new Date(booking.checkIn);
 
-setConfirmedBookings(confirmed);
+      if (isNaN(date.getTime())) return;
 
-// Total Villas
+      revenue[date.getMonth()] += booking.totalAmount || 0;
+    });
 
-const totalVillas = 2;
+    setMonthlyRevenue(revenue);
 
-// Available Villas (based on confirmed bookings)
+    const today = new Date().toISOString().split("T")[0];
 
+    setParadiseOccupied(false);
+    setHeavenOccupied(false);
 
-    setRecentBookings(bookings.slice(0, 5));
-    const revenueByMonth = Array(12).fill(0);
+    setParadiseGuest("");
+    setHeavenGuest("");
 
-bookings.forEach((booking: any) => {
-  if (!booking.checkIn) return;
+    setParadiseCheckout("");
+    setHeavenCheckout("");
 
-  const month = new Date(booking.checkIn).getMonth();
+    const activityList: Activity[] = [];
 
-  revenueByMonth[month] += booking.totalAmount || 0;
-});
+    data.forEach((booking) => {
+      if (booking.status !== "Confirmed") return;
 
-setMonthlyRevenue(revenueByMonth);
+      if (
+        booking.villa === "Rain Paradise" &&
+        booking.checkIn <= today &&
+        booking.checkOut >= today
+      ) {
+        setParadiseOccupied(true);
+        setParadiseGuest(booking.customerName);
+        setParadiseCheckout(booking.checkOut);
+      }
+
+      if (
+        booking.villa === "Rain Heaven" &&
+        booking.checkIn <= today &&
+        booking.checkOut >= today
+      ) {
+        setHeavenOccupied(true);
+        setHeavenGuest(booking.customerName);
+        setHeavenCheckout(booking.checkOut);
+      }
+
+      if (booking.checkIn === today) {
+        activityList.push({
+          type: "checkin",
+          guest: booking.customerName,
+          villa: booking.villa,
+          date: booking.checkIn,
+        });
+      }
+
+      if (booking.checkOut === today) {
+        activityList.push({
+          type: "checkout",
+          guest: booking.customerName,
+          villa: booking.villa,
+          date: booking.checkOut,
+        });
+      }
+    });
+
+    setActivities(activityList);
   }
 
   useEffect(() => {
     loadDashboard();
   }, []);
-  const chartData = {
-  labels: [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ],
-  datasets: [
-    {
-      label: "Monthly Revenue",
-      data: monthlyRevenue,
-      backgroundColor: "#16a34a",
-    },
-  ],
-};
 
   return (
-    <div className="flex min-h-screen bg-slate-100">
-      <Sidebar />
+    <div className="flex min-h-screen bg-slate-50">
 
-      <div className="flex-1">
-        <Navbar />
+      {/* Desktop Sidebar */}
+      <Sidebar collapsed={collapsed} />
 
-        <main className="p-8">
-          <h1 className="text-3xl font-bold mb-6 text-red-600">
-  THIS IS MY NEW DASHBOARD
-</h1>
+      {/* Mobile Sidebar */}
+      <MobileSidebar
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            
-            <div className="bg-white rounded-xl shadow p-6">
-              <h3 className="text-gray-500">Total Bookings</h3>
-              <p className="text-3xl font-bold">{totalBookings}</p>
+      {/* Main Content */}
+      <div className="flex flex-1 flex-col">
+
+        <Navbar
+          collapsed={collapsed}
+          toggleSidebar={() => setCollapsed(!collapsed)}
+          onMenuClick={() => setSidebarOpen(true)}
+        />
+
+        <main className="space-y-6 p-4 md:p-6 xl:p-8">
+
+          <DashboardHeader />
+
+          <StatsCards
+            totalBookings={totalBookings}
+            totalRevenue={totalRevenue}
+            advanceReceived={advanceReceived}
+            pendingBalance={pendingBalance}
+            paradiseOccupied={paradiseOccupied}
+            heavenOccupied={heavenOccupied}
+          />
+
+          <RevenueChart
+            revenueData={monthlyRevenue}
+            totalRevenue={totalRevenue}
+          />
+
+          <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
+
+            <div className="xl:col-span-8">
+              <ActivityCard activities={activities} />
             </div>
 
-            <div className="bg-white rounded-xl shadow p-6">
-              <h3 className="text-gray-500">Total Revenue</h3>
-              <p className="text-3xl font-bold">
-                ₹{totalRevenue.toLocaleString()}
-              </p>
+            <div className="xl:col-span-4">
+              <PaymentSummary
+                totalRevenue={totalRevenue}
+                advanceReceived={advanceReceived}
+                pendingBalance={pendingBalance}
+              />
             </div>
 
-            <div className="bg-white rounded-xl shadow p-6">
-              <h3 className="text-gray-500">Advance Received</h3>
-              <p className="text-3xl font-bold">
-                ₹{advanceReceived.toLocaleString()}
-              </p>
-            </div>
-
-            <div className="bg-white rounded-xl shadow p-6">
-              <h3 className="text-gray-500">Pending Balance</h3>
-              <p className="text-3xl font-bold">
-                ₹{pendingBalance.toLocaleString()}
-              </p>
-            </div>
-
-            <div className="bg-white rounded-xl shadow p-6">
-
-  <h3 className="text-gray-500">
-
-    Confirmed Bookings
-
-  </h3>
-
-  <p className="text-3xl font-bold">
-
-    {confirmedBookings}
-
-  </p>
-
-</div>
-
-            <div className="bg-white rounded-xl shadow p-6">
-  <h3 className="text-gray-500">Total Villas</h3>
-  <p className="text-3xl font-bold">{totalVillas}</p>
-</div>
           </div>
-          <div className="bg-white rounded-xl shadow p-6 mt-8">
-  <h2 className="text-xl font-bold mb-4">
-    Monthly Revenue
-  </h2>
 
-  <Bar data={chartData} />
-</div>
-<div className="bg-white rounded-xl shadow mt-8 overflow-hidden">
-  <div className="p-6 border-b">
-    <h2 className="text-xl font-bold">Recent Bookings</h2>
-  </div>
-
-  <table className="w-full">
-    <thead className="bg-gray-100">
-      <tr>
-        <th className="text-left p-4">Customer</th>
-        <th className="text-left p-4">Villa</th>
-        <th className="text-left p-4">Check In</th>
-        <th className="text-left p-4">Status</th>
-      </tr>
-    </thead>
-
-    <tbody>
-      {recentBookings.map((booking) => (
-        <tr key={booking.id} className="border-b">
-          <td className="p-4">{booking.customerName}</td>
-          <td className="p-4">{booking.villa}</td>
-          <td className="p-4">{booking.checkIn}</td>
-
-          <td className="p-4">
-            <span
-              className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                booking.status === "Confirmed"
-                  ? "bg-green-100 text-green-700"
-                  : booking.status === "Pending"
-                  ? "bg-yellow-100 text-yellow-700"
-                  : "bg-red-100 text-red-700"
-              }`}
-            >
-              {booking.status}
-            </span>
-          </td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
-</div>
         </main>
+
       </div>
+
     </div>
-    
   );
 }

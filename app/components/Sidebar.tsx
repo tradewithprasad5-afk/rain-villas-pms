@@ -1,48 +1,113 @@
 "use client";
 
-import Link from "next/link";
-import {
-  FaHome,
-  FaCalendarAlt,
-  FaUsers,
-  FaMoneyBill,
-  FaChartBar,
-  FaCog,
-} from "react-icons/fa";
+import { Hotel, LogOut } from "lucide-react";
+import SidebarItem from "./SidebarItem";
+import { menuItems } from "./menu";
 
-export default function Sidebar() {
-  const menu = [
-    { name: "Dashboard", icon: <FaHome />, link: "/" },
+interface SidebarProps {
+  collapsed: boolean;
+}
 
-    { name: "Availability", icon: <FaCalendarAlt />, link: "/availability" },
-
-    { name: "Bookings", icon: <FaCalendarAlt />, link: "/bookings" },
-
-    { name: "Customers", icon: <FaUsers />, link: "/customers" },
-
-    { name: "Payments", icon: <FaMoneyBill />, link: "/payments" },
-
-    { name: "Reports", icon: <FaChartBar />, link: "/reports" },
-
-    { name: "Settings", icon: <FaCog />, link: "/settings" },
-  ];
-
+export default function Sidebar({
+  collapsed,
+}: SidebarProps) {
   return (
-    <div className="w-64 bg-slate-900 text-white min-h-screen p-6">
-      <h1 className="text-2xl font-bold text-green-400 mb-10">
-        The 5ive Ventures
-      </h1>
+    <aside
+  className={`
+    hidden md:flex
+    min-h-screen
+    flex-col
+    border-r
+    border-slate-800
+    bg-slate-950
+    transition-all
+    duration-300
+    ${collapsed ? "w-20" : "w-72"}
+  `}
+>
 
-      {menu.map((item) => (
-        <Link
-          key={item.name}
-          href={item.link}
-          className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-700 mb-2"
-        >
-          {item.icon}
-          {item.name}
-        </Link>
-      ))}
+      {/* Logo */}
+      <div className="border-b border-slate-800 px-5 py-6">
+  <div className="flex items-center gap-3">
+
+    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-cyan-500">
+      <Hotel className="text-white" size={24} />
     </div>
+
+    {!collapsed && (
+      <div>
+        <h1 className="text-lg font-bold text-white">
+          Rain Villa PMS
+        </h1>
+
+        <p className="text-xs text-slate-400">
+          Property Management
+        </p>
+      </div>
+    )}
+
+  </div>
+</div>
+
+      {/* Navigation */}
+      <nav className="flex-1 space-y-2 px-4 py-6">
+        {menuItems.map((item) => (
+          <SidebarItem
+    key={item.title}
+    collapsed={collapsed}
+    {...item}
+/>
+        ))}
+      </nav>
+
+      {/* User Card */}
+     <div className="border-t border-slate-800 p-4">
+  <div className="rounded-2xl bg-slate-900 p-4">
+
+    <div className="flex justify-center">
+      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 text-sm font-bold text-white">
+        A
+      </div>
+    </div>
+
+    {!collapsed && (
+      <>
+        <div className="mt-3 text-center">
+          <p className="font-semibold text-white">
+            Admin
+          </p>
+
+          <p className="text-xs text-slate-400">
+            Property Manager
+          </p>
+        </div>
+
+        <button
+          className="
+            mt-4
+            flex
+            w-full
+            items-center
+            justify-center
+            gap-2
+            rounded-xl
+            bg-slate-800
+            py-2
+            text-sm
+            text-slate-200
+            transition
+            hover:bg-red-500
+            hover:text-white
+          "
+        >
+          <LogOut size={18} />
+          Logout
+        </button>
+      </>
+    )}
+
+  </div>
+</div>
+    </aside>
   );
 }
