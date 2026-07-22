@@ -41,6 +41,7 @@ const [signature, setSignature] = useState("");
 const [today] = useState(
   new Date().toISOString().split("T")[0]
 );
+const [collapsed, setCollapsed] = useState(false);
 useEffect(() => {
   if (typeof window === "undefined") return;
 
@@ -141,11 +142,15 @@ useEffect(() => {
 return (
     <div className="flex min-h-screen bg-slate-100">
 
-      <Sidebar />
+      <Sidebar collapsed={collapsed} />
 
       <div className="flex-1">
 
-        <Navbar />
+        <Navbar
+  collapsed={collapsed}
+  toggleSidebar={() => setCollapsed((prev) => !prev)}
+  onMenuClick={() => {}}
+/>
 
         <main className="p-8">
 
