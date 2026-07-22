@@ -69,6 +69,7 @@ export default function AvailabilityPage() {
 
   const [selectedDate, setSelectedDate] =
     useState<Date | null>(today);
+    const [collapsed, setCollapsed] = useState(false);
       async function loadBookings() {
 
     setLoading(true);
@@ -239,11 +240,14 @@ export default function AvailabilityPage() {
 
     <div className="flex min-h-screen bg-slate-100">
 
-      <Sidebar />
+      <Sidebar collapsed={collapsed} />
 
       <div className="flex flex-1 flex-col">
 
-        <Navbar />
+        <Navbar
+  collapsed={collapsed}
+  setCollapsed={setCollapsed}
+/>
 
         <main className="flex-1 p-6 lg:p-8 space-y-6">
 
