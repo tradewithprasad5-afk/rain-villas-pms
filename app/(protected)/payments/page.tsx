@@ -71,6 +71,7 @@ const [bookingParam, setBookingParam] = useState("");
 const [totalAmount, setTotalAmount] = useState(0);
 const [advancePaid, setAdvancePaid] = useState(0);
 const [balanceAmount, setBalanceAmount] = useState(0);
+const [collapsed, setCollapsed] = useState(false);
 const totalRevenue = bookings.reduce(
   (sum, booking) => sum + booking.totalAmount,
   0
@@ -295,10 +296,14 @@ const filteredBookings = bookings
   });
   return (
     <div className="flex min-h-screen bg-slate-100">
-      <Sidebar />
+      <Sidebar collapsed={collapsed} />
 
       <div className="flex-1">
-        <Navbar />
+        <Navbar
+  collapsed={collapsed}
+  toggleSidebar={() => setCollapsed((prev) => !prev)}
+  onMenuClick={() => {}}
+/>
 
         <main className="p-8">
           <div className="mb-8">
