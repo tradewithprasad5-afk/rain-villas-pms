@@ -90,11 +90,7 @@ export default function MobileSidebar({
                   {item.title}
                 </span>
 
-                {item.badge && (
-                  <span className="ml-auto rounded-full bg-red-500 px-2 py-0.5 text-xs font-semibold text-white">
-                    {item.badge}
-                  </span>
-                )}
+                
               </Link>
             );
           })}
