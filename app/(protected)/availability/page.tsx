@@ -246,7 +246,8 @@ export default function AvailabilityPage() {
 
         <Navbar
   collapsed={collapsed}
-  setCollapsed={setCollapsed}
+  toggleSidebar={() => setCollapsed(!collapsed)}
+  onMenuClick={() => {}}
 />
 
         <main className="flex-1 p-6 lg:p-8 space-y-6">
