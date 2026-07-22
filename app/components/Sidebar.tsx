@@ -1,6 +1,9 @@
 "use client";
 
 import { Hotel, LogOut } from "lucide-react";
+import { signOut } from "firebase/auth";
+import { auth } from "../lib/firebase";
+import { useRouter } from "next/navigation";
 import SidebarItem from "./SidebarItem";
 import { menuItems } from "./menu";
 
@@ -11,6 +14,16 @@ interface SidebarProps {
 export default function Sidebar({
   collapsed,
 }: SidebarProps) {
+  const router = useRouter();
+
+  async function handleLogout() {
+    try {
+      await signOut(auth);
+      router.push("/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  }
   return (
     <aside
   className={`
@@ -83,7 +96,8 @@ export default function Sidebar({
         </div>
 
         <button
-          className="
+  onClick={handleLogout}
+  className="
             mt-4
             flex
             w-full

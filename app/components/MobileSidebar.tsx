@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { signOut } from "firebase/auth";
+import { auth } from "../lib/firebase";
 import { X, Hotel, LogOut } from "lucide-react";
 import { menuItems } from "./menu";
 
@@ -15,7 +17,17 @@ export default function MobileSidebar({
   onClose,
 }: MobileSidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
 
+async function handleLogout() {
+  try {
+    await signOut(auth);
+    onClose(); // Close the mobile drawer
+    router.push("/login");
+  } catch (error) {
+    console.error("Logout failed:", error);
+  }
+}
   return (
     <>
       {/* Backdrop */}
@@ -107,7 +119,10 @@ export default function MobileSidebar({
               Property Manager
             </p>
 
-            <button className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-slate-800 py-2 text-sm font-medium text-slate-200 transition hover:bg-red-500 hover:text-white">
+            <button
+  onClick={handleLogout}
+  className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-slate-800 py-2 text-sm font-medium text-slate-200 transition hover:bg-red-500 hover:text-white"
+>
               <LogOut size={18} />
               Logout
             </button>
