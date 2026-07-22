@@ -99,6 +99,7 @@ export default function BookingsPage() {
 
   const [search, setSearch] =
     useState("");
+    const [collapsed, setCollapsed] = useState(false);
 
   /* ==========================================
       Customer Information
@@ -718,11 +719,15 @@ The Rain Villa Team`;
 
     <div className="flex min-h-screen bg-slate-100">
 
-      <Sidebar />
+      <Sidebar collapsed={collapsed} />
 
       <div className="flex-1">
 
-        <Navbar />
+        <Navbar
+  collapsed={collapsed}
+  toggleSidebar={() => setCollapsed((prev) => !prev)}
+  onMenuClick={() => {}}
+/>
 
         <main className="p-8">
 
