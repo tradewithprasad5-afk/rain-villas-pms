@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useSwipeable } from "react-swipeable";
+import { usePathname, useRouter } from "next/navigation";
+import { App } from "@capacitor/app";
+import { Capacitor } from "@capacitor/core";
 
 import ProtectedRoute from "../components/ProtectedRoute";
 import Sidebar from "../components/Sidebar";
@@ -16,6 +19,9 @@ export default function ProtectedLayout({
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  const router = useRouter();
+  const pathname = usePathname();
+
   // Prevent body scrolling while mobile sidebar is open
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
@@ -25,10 +31,43 @@ export default function ProtectedLayout({
     };
   }, [mobileOpen]);
 
+  // Android Back Button Handling
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+
+    let lastBackPress = 0;
+
+    let listener: { remove: () => void } | undefined;
+
+    App.addListener("backButton", () => {
+      // Exit app only on Dashboard
+      if (pathname === "/dashboard") {
+        const now = Date.now();
+
+        if (now - lastBackPress < 2000) {
+          App.exitApp();
+        } else {
+          lastBackPress = now;
+          alert("Press back again to exit");
+        }
+
+        return;
+      }
+
+      // Navigate back on all other pages
+      router.back();
+    }).then((l) => {
+      listener = l;
+    });
+
+    return () => {
+      listener?.remove();
+    };
+  }, [pathname, router]);
+
   // Swipe gestures
   const handlers = useSwipeable({
     onSwipedRight: ({ initial }) => {
-      // Only open when swipe starts near the left edge
       if (initial[0] < 30) {
         setMobileOpen(true);
       }
@@ -67,19 +106,15 @@ export default function ProtectedLayout({
 
         {/* Main Content */}
         <div className="flex flex-1 flex-col">
-
           <Navbar
             collapsed={collapsed}
-            toggleSidebar={() =>
-              setCollapsed((prev) => !prev)
-            }
+            toggleSidebar={() => setCollapsed((prev) => !prev)}
             onMenuClick={() => setMobileOpen(true)}
           />
 
           <main className="flex-1 p-4 md:p-6 lg:p-8">
             {children}
           </main>
-
         </div>
       </div>
     </ProtectedRoute>

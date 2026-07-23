@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Rain Villa-PMS</string>
+    <string name="title_activity_main">Rain Villa-PMS</string>
+    <string name="package_name">com.rainvilla.pms</string>
+    <string name="custom_url_scheme">com.rainvilla.pms</string>
+</resources>
