@@ -39,7 +39,7 @@ export default function ProtectedLayout({
 
     let listener: { remove: () => void } | undefined;
 
-    App.addListener("backButton", () => {
+   App.addListener("backButton", ({ canGoBack }) => {
       // Exit app only on Dashboard
       if (pathname === "/dashboard") {
         const now = Date.now();

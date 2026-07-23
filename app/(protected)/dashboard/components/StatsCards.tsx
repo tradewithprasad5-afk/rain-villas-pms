@@ -60,7 +60,7 @@ export default function StatsCards({
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-5">
+    <div className="grid grid-cols-1 min-[380px]:grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-5">
 
       {cards.map((card) => {
         const Icon = card.icon;
@@ -70,15 +70,15 @@ export default function StatsCards({
             key={card.title}
             className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
           >
-            <div className="flex items-start justify-between">
+            <div className="flex items-start justify-between gap-3">
 
-              <div className="min-w-0">
+              <div className="flex-1 min-w-0">
 
                 <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                   {card.title}
                 </p>
 
-                <h2 className="mt-3 break-words text-2xl font-bold text-slate-900 lg:text-3xl">
+                <h2 className="mt-3 text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900 whitespace-nowrap overflow-hidden text-ellipsis">
                   {card.value}
                 </h2>
 
@@ -89,7 +89,7 @@ export default function StatsCards({
               </div>
 
               <div
-                className={`flex h-12 w-12 items-center justify-center rounded-xl ${card.iconBg}`}
+                className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${card.iconBg}`}
               >
                 <Icon className={`h-6 w-6 ${card.iconColor}`} />
               </div>
@@ -103,7 +103,7 @@ export default function StatsCards({
 
       <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
 
-        <div className="flex items-start justify-between">
+        <div className="flex items-start justify-between gap-3">
 
           <div className="flex-1">
 
@@ -113,42 +113,38 @@ export default function StatsCards({
 
             <div className="mt-5 space-y-4">
 
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-2">
 
                 <span className="text-sm font-medium text-slate-700">
                   Rain Paradise
                 </span>
 
                 <span
-                  className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                  className={`rounded-full px-3 py-1 text-xs font-semibold whitespace-nowrap ${
                     paradiseOccupied
                       ? "bg-green-100 text-green-700"
                       : "bg-slate-100 text-slate-600"
                   }`}
                 >
-                  {paradiseOccupied
-                    ? "🟢 Occupied"
-                    : "⚪ Available"}
+                  {paradiseOccupied ? "🟢 Occupied" : "⚪ Available"}
                 </span>
 
               </div>
 
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-2">
 
                 <span className="text-sm font-medium text-slate-700">
                   Rain Heaven
                 </span>
 
                 <span
-                  className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                  className={`rounded-full px-3 py-1 text-xs font-semibold whitespace-nowrap ${
                     heavenOccupied
                       ? "bg-green-100 text-green-700"
                       : "bg-slate-100 text-slate-600"
                   }`}
                 >
-                  {heavenOccupied
-                    ? "🟢 Occupied"
-                    : "⚪ Available"}
+                  {heavenOccupied ? "🟢 Occupied" : "⚪ Available"}
                 </span>
 
               </div>
@@ -157,10 +153,8 @@ export default function StatsCards({
 
           </div>
 
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-100">
-
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-100">
             <Hotel className="h-6 w-6 text-indigo-600" />
-
           </div>
 
         </div>
