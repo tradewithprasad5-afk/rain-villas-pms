@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../lib/firebase";
@@ -8,6 +9,7 @@ import DashboardCards from "./components/DashboardCards";
 import CalendarGrid from "./components/CalendarGrid";
 import BookingDrawer from "./components/BookingDrawer";
 import Legend from "./components/Legend";
+
 
 interface Booking {
   id: string;
@@ -62,6 +64,23 @@ export default function AvailabilityPage() {
 
   const [selectedDate, setSelectedDate] =
   useState<Date | null>(today);
+  function handlePreviousMonth() {
+  if (selectedMonth === 0) {
+    setSelectedMonth(11);
+    setSelectedYear((prev) => prev - 1);
+  } else {
+    setSelectedMonth((prev) => prev - 1);
+  }
+}
+
+function handleNextMonth() {
+  if (selectedMonth === 11) {
+    setSelectedMonth(0);
+    setSelectedYear((prev) => prev + 1);
+  } else {
+    setSelectedMonth((prev) => prev + 1);
+  }
+}
 
 async function loadBookings() {
 
@@ -248,37 +267,31 @@ return (
 
   </div>
 
-  <div className="flex gap-3">
+  <div className="flex w-full items-center justify-center gap-4 lg:w-auto">
 
-    <select
-      value={selectedMonth}
-      onChange={(e) =>
-        setSelectedMonth(Number(e.target.value))
-      }
-      className="rounded-xl border border-slate-300 px-4 py-3"
-    >
-      {months.map((month, index) => (
-        <option key={index} value={index}>
-          {month}
-        </option>
-      ))}
-    </select>
+  <button
+    onClick={handlePreviousMonth}
+    className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-300 bg-white text-slate-700 shadow-sm transition hover:border-green-600 hover:bg-green-50 hover:text-green-600"
+    aria-label="Previous Month"
+  >
+    <ChevronLeft size={20} />
+  </button>
 
-    <select
-      value={selectedYear}
-      onChange={(e) =>
-        setSelectedYear(Number(e.target.value))
-      }
-      className="rounded-xl border border-slate-300 px-4 py-3"
-    >
-      {[2025, 2026, 2027, 2028].map((year) => (
-        <option key={year} value={year}>
-          {year}
-        </option>
-      ))}
-    </select>
+  <div className="flex min-w-[220px] items-center justify-center">
+  <h2 className="text-2xl font-bold tracking-tight text-slate-800">
+    {months[selectedMonth]} {selectedYear}
+  </h2>
+</div>
 
-  </div>
+  <button
+    onClick={handleNextMonth}
+    className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-300 bg-white text-slate-700 shadow-sm transition hover:border-green-600 hover:bg-green-50 hover:text-green-600"
+    aria-label="Next Month"
+  >
+    <ChevronRight size={20} />
+  </button>
+
+</div>
 
 </div>
           
