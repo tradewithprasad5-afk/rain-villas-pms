@@ -1,6 +1,6 @@
 "use client";
 
-import { Booking, Customer } from "./bookingTypes";
+import { Booking } from "./bookingTypes";
 import {
   DropdownMenu,
   DropdownMenuContent,
