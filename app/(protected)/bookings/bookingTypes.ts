@@ -1,6 +1,6 @@
 export interface Booking {
   id: string;
-  customerId?: string;
+  customerId: string;
   customerName: string;
   bookingNumber?: string;
 
@@ -15,11 +15,5 @@ export interface Booking {
   balanceAmount: number;
 
   status: string;
-  consentStatus?: string;
-}
-
-export interface Customer {
-  id: string;
-  name: string;
-  phone?: string;
+  consentStatus?: "Pending" | "Completed";
 }
