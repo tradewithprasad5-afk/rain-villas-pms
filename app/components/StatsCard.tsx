@@ -12,16 +12,35 @@ export default function StatsCard({
   bgColor,
 }: StatsCardProps) {
   return (
-    <div className={`${bgColor} rounded-2xl shadow-lg p-6`}>
-      <div className="text-4xl">{icon}</div>
+    <div
+      className={`
+        ${bgColor}
+        rounded-2xl
+        shadow-md
+        hover:shadow-xl
+        transition-all
+        duration-300
+        p-5
+        sm:p-6
+        min-h-[160px]
+        flex
+        flex-col
+        justify-between
+      `}
+    >
+      <div className="text-3xl sm:text-4xl">
+        {icon}
+      </div>
 
-      <h3 className="mt-4 text-gray-700 text-sm font-semibold">
-        {title}
-      </h3>
+      <div>
+        <h3 className="mt-4 text-sm font-medium text-gray-600">
+          {title}
+        </h3>
 
-      <h2 className="text-3xl font-bold mt-2">
-        {value}
-      </h2>
+        <h2 className="mt-2 text-2xl sm:text-3xl font-bold break-words">
+          {value}
+        </h2>
+      </div>
     </div>
   );
 }

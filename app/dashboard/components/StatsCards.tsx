@@ -68,7 +68,7 @@ export default function StatsCards({
         return (
           <div
             key={card.title}
-            className={`${card.bg} rounded-2xl border border-slate-200 p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1`}
+            className={`${card.bg} rounded-2xl border border-slate-200 p-5 sm:p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1`}
           >
             <div className="flex items-center justify-between">
 
@@ -78,7 +78,7 @@ export default function StatsCards({
                   {card.title}
                 </p>
 
-                <h2 className="mt-3 text-3xl font-bold text-slate-800 break-words">
+                <h2 className="mt-3 text-2xl sm:text-3xl font-bold text-slate-800 break-words">
                   {card.value}
                 </h2>
 
@@ -88,9 +88,8 @@ export default function StatsCards({
                 className={`rounded-2xl p-4 ${card.iconBg}`}
               >
                 <Icon
-                  size={28}
-                  className={card.iconColor}
-                />
+  className={`${card.iconColor} h-6 w-6 sm:h-7 sm:w-7`}
+/>
               </div>
 
             </div>
@@ -98,7 +97,7 @@ export default function StatsCards({
         );
       })}
 
-      <div className="rounded-2xl border border-slate-200 bg-indigo-50 p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+      <div className="rounded-2xl border border-slate-200 bg-indigo-50 p-5 sm:p-6 transition-transform transition-shadow duration-300 hover:-translate-y-1 hover:shadow-lg">
 
         <div className="flex items-center justify-between">
 
@@ -157,9 +156,8 @@ export default function StatsCards({
           <div className="rounded-2xl bg-indigo-100 p-4">
 
             <Hotel
-              size={28}
-              className="text-indigo-600"
-            />
+  className="h-6 w-6 sm:h-7 sm:w-7 text-indigo-600"
+/>
 
           </div>
 

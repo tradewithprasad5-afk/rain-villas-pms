@@ -5,9 +5,7 @@ import { collection, getDocs } from "firebase/firestore";
 
 import { db } from "../lib/firebase";
 
-import Sidebar from "../components/Sidebar";
-import MobileSidebar from "../components/MobileSidebar";
-import Navbar from "../components/Navbar";
+
 
 import DashboardHeader from "./components/DashboardHeader";
 import StatsCards from "./components/StatsCards";
@@ -25,8 +23,7 @@ interface Activity {
 }
 
 export default function DashboardPage() {
-  const [collapsed, setCollapsed] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  
 
   const [bookings, setBookings] = useState<Booking[]>([]);
 
@@ -151,27 +148,9 @@ export default function DashboardPage() {
   }, []);
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
+  <div className="space-y-6">
 
-      {/* Desktop Sidebar */}
-      <Sidebar collapsed={collapsed} />
-
-      {/* Mobile Sidebar */}
-      <MobileSidebar
-        open={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-      />
-
-      {/* Main Content */}
-      <div className="flex flex-1 flex-col">
-
-        <Navbar
-          collapsed={collapsed}
-          toggleSidebar={() => setCollapsed(!collapsed)}
-          onMenuClick={() => setSidebarOpen(true)}
-        />
-
-        <main className="space-y-6 p-4 md:p-6 xl:p-8">
+      
 
           <DashboardHeader />
 
@@ -205,10 +184,6 @@ export default function DashboardPage() {
 
           </div>
 
-        </main>
-
-      </div>
-
-    </div>
+        </div>
   );
 }

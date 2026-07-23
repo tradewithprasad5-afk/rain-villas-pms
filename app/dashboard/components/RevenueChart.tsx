@@ -70,9 +70,9 @@ export default function RevenueChart({
   }, [filter, revenueData]);
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 lg:p-6 shadow-sm">
 
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 
         <div>
 
@@ -95,7 +95,7 @@ export default function RevenueChart({
           onChange={(e) =>
             setFilter(e.target.value as Filter)
           }
-          className="rounded-xl border px-4 py-2 text-sm outline-none"
+          className="w-full md:w-auto rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm outline-none focus:border-blue-500"
         >
           <option value="month">
             This Month
@@ -113,7 +113,7 @@ export default function RevenueChart({
 
       </div>
 
-      <div className="mt-6 h-[260px] sm:h-[280px] lg:h-[300px]">
+      <div className="mt-6 h-[240px] sm:h-[280px] lg:h-[340px]">
 
         <ResponsiveContainer
           width="100%"
@@ -126,15 +126,26 @@ export default function RevenueChart({
               strokeDasharray="3 3"
             />
 
-            <XAxis dataKey="month" />
+            <XAxis
+  dataKey="month"
+  tick={{ fontSize: 12 }}
+  interval="preserveStartEnd"
+/>
 
-            <YAxis />
+            <YAxis
+  tick={{ fontSize: 12 }}
+  width={60}
+/>
 
             <Tooltip
   formatter={(value) => [
     `₹${Number(value).toLocaleString("en-IN")}`,
     "Revenue",
   ]}
+  contentStyle={{
+    borderRadius: "12px",
+    border: "1px solid #e2e8f0",
+  }}
 />
 
             <Line

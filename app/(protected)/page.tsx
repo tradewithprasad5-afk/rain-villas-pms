@@ -1,7 +1,6 @@
 "use client";
 
-import Sidebar from "../components/Sidebar";
-import Navbar from "../components/Navbar";
+
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
@@ -42,7 +41,7 @@ const { user, loading } = useAuth();
 const [monthlyRevenue, setMonthlyRevenue] = useState<number[]>(
   Array(12).fill(0)
 );
-const [collapsed, setCollapsed] = useState(false);
+
 
   async function loadDashboard() {
     
@@ -139,17 +138,7 @@ if (!user) {
   return null;
 }
   return (
-    <div className="flex min-h-screen bg-slate-100">
-      <Sidebar collapsed={collapsed} />
-
-      <div className="flex-1">
-        <Navbar
-  collapsed={collapsed}
-  toggleSidebar={() => setCollapsed((prev) => !prev)}
-  onMenuClick={() => {}}
-/>
-
-        <main className="p-8">
+  <div className="space-y-6">
           <h1 className="text-3xl font-bold mb-6">
   Dashboard
 </h1>
@@ -273,9 +262,7 @@ if (!user) {
     </tbody>
   </table>
 </div>
-        </main>
-      </div>
-    </div>
-    
-  );
+        </div>
+
+);
 }

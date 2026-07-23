@@ -3,12 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { collection, getDocs } from "firebase/firestore";
-
-import Sidebar from "../../components/Sidebar";
-import Navbar from "../../components/Navbar";
 import { db } from "../../lib/firebase";
-
-
 import DashboardCards from "./components/DashboardCards";
 import CalendarGrid from "./components/CalendarGrid";
 import BookingDrawer from "./components/BookingDrawer";
@@ -52,9 +47,7 @@ const months = [
 export default function AvailabilityPage() {
 
   const router = useRouter();
-
   const today = new Date();
-
   const [selectedMonth, setSelectedMonth] =
     useState(today.getMonth());
 
@@ -68,9 +61,9 @@ export default function AvailabilityPage() {
     useState(true);
 
   const [selectedDate, setSelectedDate] =
-    useState<Date | null>(today);
-    const [collapsed, setCollapsed] = useState(false);
-      async function loadBookings() {
+  useState<Date | null>(today);
+
+async function loadBookings() {
 
     setLoading(true);
 
@@ -236,24 +229,9 @@ export default function AvailabilityPage() {
     );
 
   }
-    return (
 
-    <div className="flex min-h-screen bg-slate-100">
-
-      <Sidebar collapsed={collapsed} />
-
-      <div className="flex flex-1 flex-col">
-
-        <Navbar
-  collapsed={collapsed}
-  toggleSidebar={() => setCollapsed(!collapsed)}
-  onMenuClick={() => {}}
-/>
-
-        <main className="flex-1 p-6 lg:p-8 space-y-6">
-
-          
-
+return (
+  <div className="space-y-6">
           {/* Page Header */}
 
 <div className="flex flex-col gap-5 rounded-2xl bg-white p-6 shadow-sm lg:flex-row lg:items-center lg:justify-between">
@@ -403,13 +381,7 @@ export default function AvailabilityPage() {
 
 </div>
 
-          </div>
-
-          
-        </main>
-
-      </div>
-
-    </div>
-      );
+              </div>
+  </div>
+);
 }

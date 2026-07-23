@@ -1,6 +1,10 @@
 "use client";
 
-import { IndianRupee, Wallet, CircleDollarSign } from "lucide-react";
+import {
+  IndianRupee,
+  Wallet,
+  CircleDollarSign,
+} from "lucide-react";
 
 interface Props {
   totalRevenue: number;
@@ -19,33 +23,33 @@ export default function PaymentSummary({
       : 0;
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-6 h-full">
+    <div className="h-full rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
 
+      {/* Header */}
       <div className="mb-6">
 
-        <h2 className="text-xl font-bold text-slate-800">
+        <h2 className="text-lg font-bold text-slate-800 sm:text-xl">
           Payment Summary
         </h2>
 
-        <p className="text-sm text-slate-500 mt-1">
+        <p className="mt-1 text-sm text-slate-500">
           Collection Overview
         </p>
 
       </div>
 
+      {/* Summary Cards */}
       <div className="space-y-5">
 
         {/* Total Revenue */}
-
-        <div className="flex items-center justify-between rounded-xl bg-green-50 p-4">
+        <div className="rounded-xl bg-green-50 p-4">
 
           <div className="flex items-center gap-3">
 
             <div className="rounded-xl bg-green-100 p-3">
-              <IndianRupee
-                className="text-green-600"
-                size={22}
-              />
+
+              <IndianRupee className="h-5 w-5 text-green-600" />
+
             </div>
 
             <div>
@@ -54,7 +58,7 @@ export default function PaymentSummary({
                 Total Revenue
               </p>
 
-              <h3 className="font-bold text-slate-800">
+              <h3 className="text-lg font-bold text-slate-800">
                 ₹{totalRevenue.toLocaleString("en-IN")}
               </h3>
 
@@ -64,17 +68,15 @@ export default function PaymentSummary({
 
         </div>
 
-        {/* Advance */}
-
-        <div className="flex items-center justify-between rounded-xl bg-blue-50 p-4">
+        {/* Advance Received */}
+        <div className="rounded-xl bg-blue-50 p-4">
 
           <div className="flex items-center gap-3">
 
             <div className="rounded-xl bg-blue-100 p-3">
-              <Wallet
-                className="text-blue-600"
-                size={22}
-              />
+
+              <Wallet className="h-5 w-5 text-blue-600" />
+
             </div>
 
             <div>
@@ -83,7 +85,7 @@ export default function PaymentSummary({
                 Advance Received
               </p>
 
-              <h3 className="font-bold text-slate-800">
+              <h3 className="text-lg font-bold text-slate-800">
                 ₹{advanceReceived.toLocaleString("en-IN")}
               </h3>
 
@@ -93,17 +95,15 @@ export default function PaymentSummary({
 
         </div>
 
-        {/* Pending */}
-
-        <div className="flex items-center justify-between rounded-xl bg-orange-50 p-4">
+        {/* Pending Balance */}
+        <div className="rounded-xl bg-orange-50 p-4">
 
           <div className="flex items-center gap-3">
 
             <div className="rounded-xl bg-orange-100 p-3">
-              <CircleDollarSign
-                className="text-orange-600"
-                size={22}
-              />
+
+              <CircleDollarSign className="h-5 w-5 text-orange-600" />
+
             </div>
 
             <div>
@@ -112,7 +112,7 @@ export default function PaymentSummary({
                 Pending Balance
               </p>
 
-              <h3 className="font-bold text-slate-800">
+              <h3 className="text-lg font-bold text-slate-800">
                 ₹{pendingBalance.toLocaleString("en-IN")}
               </h3>
 
@@ -125,10 +125,9 @@ export default function PaymentSummary({
       </div>
 
       {/* Collection Progress */}
-
       <div className="mt-8">
 
-        <div className="flex items-center justify-between mb-2">
+        <div className="mb-2 flex items-center justify-between">
 
           <span className="text-sm font-medium text-slate-600">
             Collection Progress
@@ -140,10 +139,10 @@ export default function PaymentSummary({
 
         </div>
 
-        <div className="h-3 w-full rounded-full bg-slate-200 overflow-hidden">
+        <div className="h-3 w-full overflow-hidden rounded-full bg-slate-200">
 
           <div
-            className="h-full rounded-full bg-green-500 transition-all duration-700"
+            className="h-full rounded-full bg-green-500 transition-all duration-700 ease-out"
             style={{
               width: `${collectionPercentage}%`,
             }}
