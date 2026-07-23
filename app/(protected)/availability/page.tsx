@@ -281,26 +281,7 @@ return (
   </div>
 
 </div>
-          {/* Dashboard */}
-
-          <div className="mt-6">
-
-            <DashboardCards
-              totalBookings={bookings.length}
-              occupiedToday={occupiedToday}
-              availableToday={availableToday}
-              occupancyRate={occupancyRate}
-            />
-
-          </div>
-
-          {/* Legend */}
-
-          <div className="mt-6">
-
-            <Legend />
-
-          </div>
+          
 
           {/* Calendar Layout */}
 
@@ -382,6 +363,22 @@ return (
 </div>
 
               </div>
+              {/* Dashboard */}
+
+<div className="mt-6">
+  <DashboardCards
+    totalBookings={bookings.length}
+    occupiedToday={occupiedToday}
+    availableToday={availableToday}
+    occupancyRate={occupancyRate}
+  />
+</div>
+
+{/* Legend */}
+
+<div className="mt-6">
+  <Legend />
+</div>
   </div>
 );
 }

@@ -18,8 +18,6 @@ interface CalendarGridProps {
   onSelectDay?: (date: Date) => void;
 }
 
-const villas = ["Rain Paradise", "Rain Heaven"];
-
 const weekDays = [
   "Sun",
   "Mon",
@@ -36,6 +34,7 @@ export default function CalendarGrid({
   bookings,
   onSelectDay,
 }: CalendarGridProps) {
+
   const firstDay = new Date(year, month, 1).getDay();
 
   const daysInMonth = new Date(
@@ -59,35 +58,44 @@ export default function CalendarGrid({
   }
 
   function getBooking(
-  villa: string,
-  day: number
-) {
-  const current = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    villa: string,
+    day: number
+  ) {
 
-  return bookings.find((booking) => {
-    return (
+    const current = `${year}-${String(
+      month + 1
+    ).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+
+    return bookings.find((booking) =>
+
       booking.villa === villa &&
       booking.status !== "Cancelled" &&
       current >= booking.checkIn &&
       current < booking.checkOut
-    );
-  });
-}
 
-  return (
-    <div className="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+    );
+
+  }
+
+  
+  
+    return (
+  <div className="overflow-x-auto">
+    <div className="min-w-[900px] overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
 
       {/* Week Header */}
 
       <div className="grid grid-cols-7 bg-slate-100">
 
         {weekDays.map((day) => (
+
           <div
             key={day}
             className="border-b p-4 text-center font-semibold text-slate-600"
           >
             {day}
           </div>
+
         ))}
 
       </div>
@@ -100,7 +108,7 @@ export default function CalendarGrid({
 
           <div
             key={index}
-            className="min-h-[150px] border"
+            className="min-h-[150px] min-w-[128px] border"
           >
 
             {day && (
@@ -134,7 +142,10 @@ export default function CalendarGrid({
 
       </div>
 
-      {/* Bottom Legend */}
+      
+      
+
+            {/* Bottom Legend */}
 
       <div className="border-t bg-slate-50 p-5">
 
@@ -142,7 +153,7 @@ export default function CalendarGrid({
 
           <div className="flex items-center gap-3">
 
-            <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center font-semibold text-green-700">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 font-semibold text-green-700">
               RP
             </div>
 
@@ -160,7 +171,7 @@ export default function CalendarGrid({
 
           <div className="flex items-center gap-3">
 
-            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center font-semibold text-blue-700">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 font-semibold text-blue-700">
               RH
             </div>
 
@@ -181,5 +192,6 @@ export default function CalendarGrid({
       </div>
 
     </div>
-  );
+  </div>
+);
 }
