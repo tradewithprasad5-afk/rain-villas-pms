@@ -2,7 +2,6 @@ import {
   LayoutDashboard,
   CalendarDays,
   BookOpenCheck,
-  Users,
   CreditCard,
   BarChart3,
   Settings,
@@ -23,11 +22,6 @@ export const menuItems = [
     title: "Bookings",
     href: "/bookings",
     icon: BookOpenCheck,
-  },
-  {
-    title: "Customers",
-    href: "/customers",
-    icon: Users,
   },
   {
     title: "Payments",
