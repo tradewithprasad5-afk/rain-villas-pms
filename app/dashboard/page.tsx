@@ -168,21 +168,21 @@ export default function DashboardPage() {
             totalRevenue={totalRevenue}
           />
 
-          <div className="grid gap-6 lg:grid-cols-3">v className="grid grid-cols-1 gap-6 xl:grid-cols-12">
+          <div className="grid gap-6 lg:grid-cols-3">
 
-            <div className="lg:col-span-2">
-              <ActivityCard activities={activities} />
-            </div>
+  <div className="lg:col-span-2">
+    <ActivityCard activities={activities} />
+  </div>
 
-            <div>
-              <PaymentSummary
-                totalRevenue={totalRevenue}
-                advanceReceived={advanceReceived}
-                pendingBalance={pendingBalance}
-              />
-            </div>
+  <div>
+    <PaymentSummary
+      totalRevenue={totalRevenue}
+      advanceReceived={advanceReceived}
+      pendingBalance={pendingBalance}
+    />
+  </div>
 
-          </div>
+</div>
 
         </div>
   );
