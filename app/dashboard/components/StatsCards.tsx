@@ -28,39 +28,39 @@ export default function StatsCards({
     {
       title: "Bookings",
       value: totalBookings.toString(),
+      subtitle: "Total reservations",
       icon: CalendarDays,
-      bg: "bg-blue-50",
       iconBg: "bg-blue-100",
       iconColor: "text-blue-600",
     },
     {
       title: "Revenue",
       value: `₹${totalRevenue.toLocaleString("en-IN")}`,
+      subtitle: "Total earnings",
       icon: IndianRupee,
-      bg: "bg-green-50",
       iconBg: "bg-green-100",
       iconColor: "text-green-600",
     },
     {
       title: "Advance",
       value: `₹${advanceReceived.toLocaleString("en-IN")}`,
+      subtitle: "Received payments",
       icon: Wallet,
-      bg: "bg-emerald-50",
       iconBg: "bg-emerald-100",
       iconColor: "text-emerald-600",
     },
     {
       title: "Pending",
       value: `₹${pendingBalance.toLocaleString("en-IN")}`,
+      subtitle: "Balance due",
       icon: Wallet,
-      bg: "bg-orange-50",
       iconBg: "bg-orange-100",
       iconColor: "text-orange-600",
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+    <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-5">
 
       {cards.map((card) => {
         const Icon = card.icon;
@@ -68,28 +68,30 @@ export default function StatsCards({
         return (
           <div
             key={card.title}
-            className={`${card.bg} rounded-2xl border border-slate-200 p-5 sm:p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1`}
+            className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
           >
-            <div className="flex items-center justify-between">
+            <div className="flex items-start justify-between">
 
-              <div>
+              <div className="min-w-0">
 
-                <p className="text-sm text-slate-500">
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                   {card.title}
                 </p>
 
-                <h2 className="mt-3 text-2xl sm:text-3xl font-bold text-slate-800 break-words">
+                <h2 className="mt-3 break-words text-2xl font-bold text-slate-900 lg:text-3xl">
                   {card.value}
                 </h2>
+
+                <p className="mt-2 text-xs text-slate-400">
+                  {card.subtitle}
+                </p>
 
               </div>
 
               <div
-                className={`rounded-2xl p-4 ${card.iconBg}`}
+                className={`flex h-12 w-12 items-center justify-center rounded-xl ${card.iconBg}`}
               >
-                <Icon
-  className={`${card.iconColor} h-6 w-6 sm:h-7 sm:w-7`}
-/>
+                <Icon className={`h-6 w-6 ${card.iconColor}`} />
               </div>
 
             </div>
@@ -97,21 +99,23 @@ export default function StatsCards({
         );
       })}
 
-      <div className="rounded-2xl border border-slate-200 bg-indigo-50 p-5 sm:p-6 transition-transform transition-shadow duration-300 hover:-translate-y-1 hover:shadow-lg">
+      {/* Occupancy Card */}
 
-        <div className="flex items-center justify-between">
+      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
 
-          <div>
+        <div className="flex items-start justify-between">
 
-            <p className="text-sm text-slate-500">
+          <div className="flex-1">
+
+            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
               Today's Occupancy
             </p>
 
-            <div className="mt-4 space-y-3">
+            <div className="mt-5 space-y-4">
 
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center justify-between">
 
-                <span className="text-sm font-medium">
+                <span className="text-sm font-medium text-slate-700">
                   Rain Paradise
                 </span>
 
@@ -119,19 +123,19 @@ export default function StatsCards({
                   className={`rounded-full px-3 py-1 text-xs font-semibold ${
                     paradiseOccupied
                       ? "bg-green-100 text-green-700"
-                      : "bg-slate-200 text-slate-600"
+                      : "bg-slate-100 text-slate-600"
                   }`}
                 >
                   {paradiseOccupied
-                    ? "Occupied"
-                    : "Available"}
+                    ? "🟢 Occupied"
+                    : "⚪ Available"}
                 </span>
 
               </div>
 
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center justify-between">
 
-                <span className="text-sm font-medium">
+                <span className="text-sm font-medium text-slate-700">
                   Rain Heaven
                 </span>
 
@@ -139,12 +143,12 @@ export default function StatsCards({
                   className={`rounded-full px-3 py-1 text-xs font-semibold ${
                     heavenOccupied
                       ? "bg-green-100 text-green-700"
-                      : "bg-slate-200 text-slate-600"
+                      : "bg-slate-100 text-slate-600"
                   }`}
                 >
                   {heavenOccupied
-                    ? "Occupied"
-                    : "Available"}
+                    ? "🟢 Occupied"
+                    : "⚪ Available"}
                 </span>
 
               </div>
@@ -153,11 +157,9 @@ export default function StatsCards({
 
           </div>
 
-          <div className="rounded-2xl bg-indigo-100 p-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-100">
 
-            <Hotel
-  className="h-6 w-6 sm:h-7 sm:w-7 text-indigo-600"
-/>
+            <Hotel className="h-6 w-6 text-indigo-600" />
 
           </div>
 

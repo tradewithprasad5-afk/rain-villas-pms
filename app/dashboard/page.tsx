@@ -148,7 +148,7 @@ export default function DashboardPage() {
   }, []);
 
   return (
-  <div className="space-y-6">
+  <div className="mx-auto max-w-7xl space-y-8 px-4 py-4 sm:px-6">
 
       
 
@@ -168,13 +168,13 @@ export default function DashboardPage() {
             totalRevenue={totalRevenue}
           />
 
-          <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
+          <div className="grid gap-6 lg:grid-cols-3">v className="grid grid-cols-1 gap-6 xl:grid-cols-12">
 
-            <div className="xl:col-span-8">
+            <div className="lg:col-span-2">
               <ActivityCard activities={activities} />
             </div>
 
-            <div className="xl:col-span-4">
+            <div>
               <PaymentSummary
                 totalRevenue={totalRevenue}
                 advanceReceived={advanceReceived}
