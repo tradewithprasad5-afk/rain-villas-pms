@@ -113,25 +113,27 @@ export default function CalendarGrid({
             {day && (
 
               <DayCell
-                day={day}
-                paradise={getBooking(
-                  "Rain Paradise",
-                  day
-                )}
-                heaven={getBooking(
-                  "Rain Heaven",
-                  day
-                )}
-                onClick={() =>
-                  onSelectDay?.(
-                    new Date(
-                      year,
-                      month,
-                      day
-                    )
-                  )
-                }
-              />
+  day={day}
+  month={month}
+  year={year}
+  paradise={getBooking(
+    "Rain Paradise",
+    day
+  )}
+  heaven={getBooking(
+    "Rain Heaven",
+    day
+  )}
+  onClick={() =>
+    onSelectDay?.(
+      new Date(
+        year,
+        month,
+        day
+      )
+    )
+  }
+/>
 
             )}
 

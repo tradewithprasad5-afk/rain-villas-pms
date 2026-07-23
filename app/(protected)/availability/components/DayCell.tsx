@@ -2,6 +2,8 @@
 
 interface Props {
   day: number;
+  month: number;
+  year: number;
   paradise: any;
   heaven: any;
   onClick?: () => void;
@@ -9,10 +11,19 @@ interface Props {
 
 export default function DayCell({
   day,
+  month,
+  year,
   paradise,
   heaven,
   onClick,
 }: Props) {
+  const today = new Date();
+
+  const isToday =
+    day === today.getDate() &&
+    month === today.getMonth() &&
+    year === today.getFullYear();
+
   return (
     <button
       onClick={onClick}
@@ -20,7 +31,13 @@ export default function DayCell({
     >
       {/* Day */}
 
-      <div className="mb-2 text-sm font-bold text-slate-800 sm:text-lg">
+      <div
+        className={`mb-2 flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold sm:h-9 sm:w-9 sm:text-lg ${
+          isToday
+            ? "bg-slate-900 text-white shadow-md"
+            : "text-slate-800"
+        }`}
+      >
         {day}
       </div>
 
