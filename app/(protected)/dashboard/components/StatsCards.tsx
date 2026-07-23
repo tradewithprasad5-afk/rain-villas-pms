@@ -73,7 +73,7 @@ export default function StatsCards({
     >
       <div className="flex items-start justify-between gap-4">
 
-        <div className="min-w-0 flex-1">
+        <div className="flex-1 pr-2">
 
   <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
     {card.title}
@@ -90,11 +90,11 @@ export default function StatsCards({
 </div>
 
         <div
-          className={`flex h-10 w-10 sm:h-12 sm:w-12 lg:h-14 lg:w-14 shrink-0 items-center justify-center rounded-xl ${card.iconBg}`}
-        >
+  className={`flex h-9 w-9 sm:h-10 sm:w-10 lg:h-12 lg:w-12 shrink-0 items-center justify-center rounded-xl ${card.iconBg}`}
+>
           <Icon
-            className={`h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 ${card.iconColor}`}
-          />
+  className={`h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 ${card.iconColor}`}
+/>
         </div>
 
       </div>
@@ -105,7 +105,7 @@ export default function StatsCards({
 
 <div className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
 
-  <div className="flex items-start justify-between gap-4">
+  <div className="flex items-start justify-between gap-3">
 
     <div className="flex-1 min-w-0">
 
