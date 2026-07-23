@@ -12,24 +12,26 @@ export default function PaymentSearch({
   onStatusChange,
 }: PaymentSearchProps) {
   return (
-    <div className="bg-white rounded-xl shadow p-4 mb-6 flex gap-4">
-      <input
-        type="text"
-        placeholder="🔍 Search by Booking Number or Guest Name..."
-        value={search}
-        onChange={(e) => onSearchChange(e.target.value)}
-        className="flex-1 border rounded-lg px-4 py-3"
-      />
+    <div className="mb-6 rounded-xl bg-white p-4 shadow">
+      <div className="flex flex-col gap-3 md:flex-row">
+        <input
+          type="text"
+          placeholder="🔍 Search by Booking Number or Guest Name..."
+          value={search}
+          onChange={(e) => onSearchChange(e.target.value)}
+          className="w-full rounded-lg border px-4 py-3 outline-none transition focus:border-blue-500"
+        />
 
-      <select
-        value={statusFilter}
-        onChange={(e) => onStatusChange(e.target.value)}
-        className="border rounded-lg px-4 py-3"
-      >
-        <option value="All">All</option>
-        <option value="Paid">Paid</option>
-        <option value="Partial">Partial</option>
-      </select>
+        <select
+          value={statusFilter}
+          onChange={(e) => onStatusChange(e.target.value)}
+          className="w-full rounded-lg border px-4 py-3 outline-none transition focus:border-blue-500 md:w-48"
+        >
+          <option value="All">All</option>
+          <option value="Paid">Paid</option>
+          <option value="Partial">Partial</option>
+        </select>
+      </div>
     </div>
   );
 }
