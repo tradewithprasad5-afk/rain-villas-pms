@@ -6,6 +6,7 @@ import { signOut } from "firebase/auth";
 import { auth } from "../lib/firebase";
 import { X, Hotel, LogOut } from "lucide-react";
 import { menuItems } from "./menu";
+import { useSwipeable } from "react-swipeable";
 
 interface MobileSidebarProps {
   open: boolean;
@@ -18,8 +19,16 @@ export default function MobileSidebar({
 }: MobileSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const swipeHandlers = useSwipeable({
+  onSwipedLeft: () => {
+    onClose();
+  },
+  trackTouch: true,
+  preventScrollOnSwipe: false,
+});
 
 async function handleLogout() {
+  
   try {
     await signOut(auth);
     onClose(); // Close the mobile drawer
@@ -42,10 +51,11 @@ async function handleLogout() {
 
       {/* Drawer */}
       <aside
-        className={`fixed left-0 top-0 z-50 flex h-full w-72 flex-col bg-slate-950 shadow-2xl transition-transform duration-300 md:hidden ${
-          open ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
+  {...swipeHandlers}
+  className={`fixed left-0 top-0 z-50 flex h-full w-72 flex-col bg-slate-950 shadow-2xl transition-transform duration-300 ease-out md:hidden ${
+    open ? "translate-x-0" : "-translate-x-full"
+  }`}
+>
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-800 p-6">
           <div className="flex items-center gap-3">
