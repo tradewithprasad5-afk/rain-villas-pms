@@ -85,7 +85,15 @@ export default function DashboardPage() {
 
     setMonthlyRevenue(revenue);
 
-    const today = new Date().toISOString().split("T")[0];
+    const now = new Date();
+
+const today = `${now.getFullYear()}-${String(
+  now.getMonth() + 1
+).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+
+const currentHour = now.getHours();
+
+const CHECK_OUT_HOUR = 11;
 
     setParadiseOccupied(false);
     setHeavenOccupied(false);
@@ -101,21 +109,29 @@ export default function DashboardPage() {
     data.forEach((booking) => {
       if (booking.status !== "Confirmed") return;
 
-      if (
-        booking.villa === "Rain Paradise" &&
-        booking.checkIn <= today &&
-        booking.checkOut >= today
-      ) {
+      const paradiseOccupied =
+  booking.villa === "Rain Paradise" &&
+  booking.checkIn <= today &&
+  (
+    booking.checkOut > today ||
+    (booking.checkOut === today && currentHour < CHECK_OUT_HOUR)
+  );
+
+if (paradiseOccupied) {
         setParadiseOccupied(true);
         setParadiseGuest(booking.customerName);
         setParadiseCheckout(booking.checkOut);
       }
 
-      if (
-        booking.villa === "Rain Heaven" &&
-        booking.checkIn <= today &&
-        booking.checkOut >= today
-      ) {
+      const heavenOccupied =
+  booking.villa === "Rain Heaven" &&
+  booking.checkIn <= today &&
+  (
+    booking.checkOut > today ||
+    (booking.checkOut === today && currentHour < CHECK_OUT_HOUR)
+  );
+
+if (heavenOccupied) {
         setHeavenOccupied(true);
         setHeavenGuest(booking.customerName);
         setHeavenCheckout(booking.checkOut);
