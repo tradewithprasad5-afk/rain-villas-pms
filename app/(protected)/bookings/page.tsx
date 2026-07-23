@@ -694,12 +694,83 @@ The Rain Villa Team`;
   );
 }
   function openNewBooking() {
+    
 
     resetForm();
 
     setShowForm(true);
 
   }
+  function exportBookingsCSV() {
+  const headers = [
+    "Booking No",
+    "Customer",
+    "Phone",
+    "Email",
+    "Address",
+    "Villa",
+    "Check In",
+    "Check Out",
+    "Guests",
+    "Total Amount",
+    "Advance Paid",
+    "Balance Amount",
+    "Status",
+    "Consent Status",
+  ];
+
+  const rows = bookings.map((booking) => {
+    const customer = customers.find(
+      (c) => c.id === booking.customerId
+    );
+
+    return [
+      booking.bookingNumber || "",
+      booking.customerName || "",
+      customer?.phone || "",
+      customer?.email || "",
+      customer?.address || "",
+      booking.villa || "",
+      booking.checkIn || "",
+      booking.checkOut || "",
+      booking.guests,
+      booking.totalAmount,
+      booking.advancePaid,
+      booking.balanceAmount,
+      booking.status,
+      booking.consentStatus || "",
+    ];
+  });
+
+  const csv = [
+    headers.join(","),
+    ...rows.map((row) =>
+      row
+        .map((value) =>
+          `"${String(value ?? "").replace(/"/g, '""')}"`
+        )
+        .join(",")
+    ),
+  ].join("\n");
+
+  const blob = new Blob([csv], {
+    type: "text/csv;charset=utf-8;",
+  });
+
+  const url = window.URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `Bookings_${new Date()
+    .toISOString()
+    .slice(0, 10)}.csv`;
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  window.URL.revokeObjectURL(url);
+}
     /* ==========================================
       Page UI
   ========================================== */
@@ -712,7 +783,10 @@ The Rain Villa Team`;
 
           {/* Header */}
 
-          <BookingHeader onNewBooking={openNewBooking} />
+          <BookingHeader
+  onNewBooking={openNewBooking}
+  onExport={exportBookingsCSV}
+/>
 
           {/* Search */}
 
