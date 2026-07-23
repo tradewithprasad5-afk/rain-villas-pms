@@ -80,8 +80,7 @@ export default function CalendarGrid({
   
   
     return (
-  <div className="overflow-x-auto">
-    <div className="min-w-[900px] overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+  <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
 
       {/* Week Header */}
 
@@ -91,7 +90,7 @@ export default function CalendarGrid({
 
           <div
             key={day}
-            className="border-b p-4 text-center font-semibold text-slate-600"
+            className="border-b py-2 text-center text-xs font-semibold text-slate-600 sm:p-4 sm:text-base"
           >
             {day}
           </div>
@@ -108,7 +107,7 @@ export default function CalendarGrid({
 
           <div
             key={index}
-            className="min-h-[150px] min-w-[128px] border"
+            className="min-h-[70px] border sm:min-h-[140px]"
           >
 
             {day && (
@@ -192,6 +191,6 @@ export default function CalendarGrid({
       </div>
 
     </div>
-  </div>
+  
 );
 }

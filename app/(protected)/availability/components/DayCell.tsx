@@ -16,38 +16,44 @@ export default function DayCell({
   return (
     <button
       onClick={onClick}
-      className="h-full w-full p-2 text-left transition hover:bg-slate-50 sm:p-3"
+      className="h-full w-full p-2 text-left transition hover:bg-slate-50"
     >
-      {/* Day Number */}
-      <div className="mb-2 text-base font-bold sm:mb-3 sm:text-lg">
+      {/* Day */}
+
+      <div className="mb-2 text-sm font-bold text-slate-800 sm:text-lg">
         {day}
       </div>
 
-      {/* Villa Status */}
-      <div className="space-y-2">
-        {/* Rain Paradise */}
-        <div
-          className={`flex items-center gap-2 rounded-lg px-2 py-2 text-xs font-medium sm:px-3 ${
-            paradise
-              ? "bg-red-100 text-red-700"
-              : "bg-green-100 text-green-700"
-          }`}
-        >
-          <span>{paradise ? "🔴" : "🟢"}</span>
-          <span className="truncate">Paradise</span>
-        </div>
+      {/* Mobile */}
 
-        {/* Rain Heaven */}
-        <div
-          className={`flex items-center gap-2 rounded-lg px-2 py-2 text-xs font-medium sm:px-3 ${
-            heaven
-              ? "bg-red-100 text-red-700"
-              : "bg-green-100 text-green-700"
-          }`}
-        >
-          <span>{heaven ? "🔴" : "🟢"}</span>
-          <span className="truncate">Heaven</span>
-        </div>
+      <div className="space-y-1 sm:hidden">
+        {paradise && (
+          <div className="rounded bg-green-600 px-2 py-1 text-center text-[10px] font-semibold text-white">
+            RP
+          </div>
+        )}
+
+        {heaven && (
+          <div className="rounded bg-blue-600 px-2 py-1 text-center text-[10px] font-semibold text-white">
+            RH
+          </div>
+        )}
+      </div>
+
+      {/* Desktop */}
+
+      <div className="hidden space-y-1 sm:block">
+        {paradise && (
+          <div className="rounded bg-green-600 px-2 py-1 text-xs font-medium text-white">
+            Rain Paradise
+          </div>
+        )}
+
+        {heaven && (
+          <div className="rounded bg-blue-600 px-2 py-1 text-xs font-medium text-white">
+            Rain Heaven
+          </div>
+        )}
       </div>
     </button>
   );
