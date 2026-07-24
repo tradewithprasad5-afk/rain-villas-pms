@@ -76,7 +76,7 @@ export default function BookingReceiptPage() {
   return (
     <div className="min-h-screen bg-slate-100 py-10 px-4">
 
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto w-full max-w-6xl">
 
         <div className="flex justify-end mb-5 print:hidden">
 
@@ -91,30 +91,30 @@ export default function BookingReceiptPage() {
 
         <div className="overflow-hidden rounded-3xl bg-white shadow-2xl print:shadow-none">
 
-          <div className="bg-gradient-to-r from-blue-700 to-blue-500 px-10 py-8">
+          <div className="bg-gradient-to-r from-blue-700 to-blue-500 px-4 sm:px-6 lg:px-10 py-6 sm:py-8">
 
-            <div className="flex items-center gap-8">
+<div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 text-center sm:text-left">
 
               <div className="rounded-2xl bg-white p-3 shadow-lg">
 
                 <Image
-                  src="/logo/rain-villa-logo.jpeg"
-                  alt="Rain Villas"
-                  width={150}
-                  height={150}
-                  priority
-                  className="object-contain"
-                />
+  src="/logo/rain-villa-logo.jpeg"
+  alt="Rain Villas"
+  width={150}
+  height={150}
+  priority
+  className="h-20 w-20 sm:h-28 sm:w-28 lg:h-[150px] lg:w-[150px] object-contain"
+/>
 
               </div>
 
               <div className="text-white">
 
-                <h1 className="text-5xl font-bold tracking-wide">
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-wide">
                   Rain Villa
                 </h1>
 
-                <p className="mt-2 text-xl font-medium">
+                <p className="mt-2 text-base sm:text-lg lg:text-xl font-medium">
                   BOOKING RECEIPT
                 </p>
 
@@ -148,11 +148,11 @@ export default function BookingReceiptPage() {
 
           ) : (
 
-            <div className="p-10">
+            <div className="p-4 sm:p-6 lg:p-10">
 
-              <div className="mb-10 rounded-2xl border border-slate-200 bg-slate-50 p-8">
+              <div className="mb-8 rounded-2xl border border-slate-200 bg-slate-50 p-5 sm:p-8">
 
-                <div className="mb-6 flex items-center justify-between">
+                <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 
                   <h2 className="text-2xl font-bold text-slate-800">
                     Booking Details
@@ -174,15 +174,14 @@ export default function BookingReceiptPage() {
 
                 </div>
 
-                <div className="grid grid-cols-2 gap-x-16 gap-y-8">
-
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-x-16 sm:gap-y-8">
                   <div>
 
                     <p className="text-sm text-slate-500">
                       Booking Number
                     </p>
 
-                    <p className="mt-1 text-lg font-semibold">
+                    <p className="mt-1 break-words text-lg font-semibold">
                       {booking.bookingNumber}
                     </p>
 
@@ -194,7 +193,7 @@ export default function BookingReceiptPage() {
                       Guest Name
                     </p>
 
-                    <p className="mt-1 text-lg font-semibold">
+                    <p className="mt-1 break-words text-lg font-semibold">
                       {booking.customerName}
                     </p>
 
@@ -206,7 +205,7 @@ export default function BookingReceiptPage() {
                       Mobile Number
                     </p>
 
-                    <p className="mt-1 text-lg font-semibold">
+                    <p className="mt-1 break-words text-lg font-semibold">
                       {phone || "-"}
                     </p>
 
@@ -218,7 +217,7 @@ export default function BookingReceiptPage() {
                       Villa
                     </p>
 
-                    <p className="mt-1 text-lg font-semibold">
+                    <p className="mt-1 break-words text-lg font-semibold">
                       {booking.villa}
                     </p>
 
@@ -230,7 +229,7 @@ export default function BookingReceiptPage() {
                       Check-in
                     </p>
 
-                    <p className="mt-1 text-lg font-semibold">
+                    <p className="mt-1 break-words text-lg font-semibold">
                       {formatDate(booking.checkIn)}
                     </p>
 
@@ -242,7 +241,7 @@ export default function BookingReceiptPage() {
                       Check-out
                     </p>
 
-                    <p className="mt-1 text-lg font-semibold">
+                    <p className="mt-1 break-words text-lg font-semibold">
                       {formatDate(booking.checkOut)}
                     </p>
 
@@ -253,21 +252,21 @@ export default function BookingReceiptPage() {
               </div>
 
               {/* Finance Cards Start */}
-                            <div className="grid grid-cols-3 gap-8">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
 
                 {/* Booking Amount */}
 
-                <div className="rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 p-8 shadow-md">
+                <div className="rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 p-5 sm:p-8 shadow-md">
 
-                  <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-3xl text-white">
+                  <div className="mb-4 flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-blue-600 text-2xl sm:text-3xl text-white">
                     🏡
                   </div>
 
-                  <p className="text-sm uppercase tracking-wide text-slate-500">
+                  <p className="text-xs sm:text-sm uppercase tracking-wide text-slate-500">
                     Total Booking Amount
                   </p>
 
-                  <h3 className="mt-3 text-4xl font-bold text-blue-700">
+                  <h3 className="mt-3 break-words text-2xl sm:text-3xl lg:text-4xl font-bold text-blue-700">
                     ₹{booking.totalAmount.toLocaleString("en-IN")}
                   </h3>
 
@@ -275,17 +274,17 @@ export default function BookingReceiptPage() {
 
                 {/* Amount Paid */}
 
-                <div className="rounded-2xl bg-gradient-to-br from-green-50 to-green-100 p-8 shadow-md">
+                <div className="rounded-2xl bg-gradient-to-br from-green-50 to-green-100 p-5 sm:p-8 shadow-md">
 
-                  <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-green-600 text-3xl text-white">
+                  <div className="mb-4 flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-green-600 text-2xl sm:text-3xl text-white">
                     💳
                   </div>
 
-                  <p className="text-sm uppercase tracking-wide text-slate-500">
+                  <p className="text-xs sm:text-sm uppercase tracking-wide text-slate-500">
                     Amount Paid
                   </p>
 
-                  <h3 className="mt-3 text-4xl font-bold text-green-700">
+                  <h3 className="mt-3 text-2xl sm:text-3xl lg:text-4xl font-bold text-green-700">
                     ₹{booking.advancePaid.toLocaleString("en-IN")}
                   </h3>
 
@@ -293,17 +292,17 @@ export default function BookingReceiptPage() {
 
                 {/* Balance */}
 
-                <div className="rounded-2xl bg-gradient-to-br from-red-50 to-red-100 p-8 shadow-md">
+                <div className="rounded-2xl bg-gradient-to-br from-red-50 to-red-100 p-5 sm:p-8 shadow-md">
 
-                  <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-600 text-3xl text-white">
+                  <div className="mb-4 flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-red-600 text-2xl sm:text-3xl text-white">
                     ₹
                   </div>
 
-                  <p className="text-sm uppercase tracking-wide text-slate-500">
+                  <p className="text-xs sm:text-sm uppercase tracking-wide text-slate-500">
                     Outstanding Balance
                   </p>
 
-                  <h3 className="mt-3 text-4xl font-bold text-red-700">
+                  <h3 className="mt-3 text-2xl sm:text-3xl lg:text-4xl font-bold text-red-700">
                     ₹{booking.balanceAmount.toLocaleString("en-IN")}
                   </h3>
 
@@ -317,7 +316,7 @@ export default function BookingReceiptPage() {
 
                 <div className="h-px flex-1 bg-slate-300"></div>
 
-                <div className="mx-6 rounded-full bg-blue-600 px-4 py-1 text-sm font-semibold text-white">
+                <div className="mx-2 sm:mx-6 rounded-full bg-blue-600 px-4 py-1 text-sm font-semibold text-white">
                   THANK YOU
                 </div>
 
@@ -327,19 +326,19 @@ export default function BookingReceiptPage() {
 
               {/* Thank You */}
 
-              <div className="rounded-3xl bg-gradient-to-r from-green-50 via-white to-green-50 p-10">
+              <div className="rounded-3xl bg-gradient-to-r from-green-50 via-white to-green-50 p-5 sm:p-8 lg:p-10">
 
                 <div className="text-center">
 
-                  <div className="mb-4 text-6xl">
+                  <div className="mb-4 text-4xl sm:text-5xl lg:text-6xl">
                     🌿
                   </div>
 
-                  <h2 className="text-4xl font-bold text-slate-800">
+                  <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-800">
                     Thank You for Choosing Rain Villa
                   </h2>
 
-                  <p className="mx-auto mt-6 max-w-3xl text-lg leading-9 text-slate-600">
+                  <p className="mx-auto mt-6 max-w-3xl text-base sm:text-lg leading-7 sm:leading-9 text-slate-600">
 
                     We sincerely appreciate your reservation and
                     thank you for choosing Rain Villa for your stay.
@@ -364,13 +363,13 @@ export default function BookingReceiptPage() {
                   Rain Villa
                 </h3>
 
-                <div className="grid grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
                   {/* Phone */}
 
-                  <div className="rounded-2xl bg-slate-50 p-6 text-center shadow-sm">
+                  <div className="rounded-2xl bg-slate-50 p-5 sm:p-6 text-center shadow-sm">
 
-                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-600 text-3xl text-white">
+                    <div className="mx-auto mb-4 flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-blue-600 text-3xl text-white">
                       📞
                     </div>
 
@@ -378,11 +377,11 @@ export default function BookingReceiptPage() {
                       Contact
                     </p>
 
-                    <p className="text-lg font-semibold text-slate-800">
+                    <p className="text-base sm:text-lg font-semibold text-slate-800">
                       9527249988
                     </p>
 
-                    <p className="text-lg font-semibold text-slate-800">
+                    <p className="text-base sm:text-lg font-semibold text-slate-800">
                       9923506006
                     </p>
 
@@ -390,9 +389,9 @@ export default function BookingReceiptPage() {
 
                   {/* Email */}
 
-                  <div className="rounded-2xl bg-slate-50 p-6 text-center shadow-sm">
+                  <div className="rounded-2xl bg-slate-50 p-5 sm:p-6 text-center shadow-sm">
 
-                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-600 text-3xl text-white">
+                    <div className="mx-auto mb-4 flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-green-600 text-3xl text-white">
                       ✉️
                     </div>
 
@@ -400,7 +399,7 @@ export default function BookingReceiptPage() {
                       Email
                     </p>
 
-                    <p className="break-words text-lg font-medium text-slate-800">
+                    <p className="break-words text-base sm:text-lg font-medium text-slate-800">
                       rainvilla.igatpuri@gmail.com
                     </p>
 
@@ -408,9 +407,9 @@ export default function BookingReceiptPage() {
 
                   {/* Website */}
 
-                  <div className="rounded-2xl bg-slate-50 p-6 text-center shadow-sm">
+                  <div className="rounded-2xl bg-slate-50 p-5 sm:p-6 text-center shadow-sm">
 
-                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-purple-600 text-3xl text-white">
+                    <div className="mx-auto mb-4 flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-purple-600 text-3xl text-white">
                       🌐
                     </div>
 
@@ -422,7 +421,7 @@ export default function BookingReceiptPage() {
                       href="https://rainvilla.in"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-lg font-semibold text-blue-600 hover:underline"
+                      className="text-base sm:text-lg font-semibold text-blue-600 hover:underline"
                     >
                       www.rainvilla.in
                     </a>
@@ -431,9 +430,9 @@ export default function BookingReceiptPage() {
 
                 </div>
 
-                <div className="mt-12 rounded-2xl bg-blue-50 p-6">
+                <div className="mt-12 rounded-2xl bg-blue-50 p-5 sm:p-6">
 
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-5 text-center sm:text-left">
 
                     <div>
 
@@ -447,7 +446,7 @@ export default function BookingReceiptPage() {
 
                     </div>
 
-                    <div className="text-6xl">
+                    <div className="text-5xl sm:text-6xl">
                       🏡
                     </div>
 
