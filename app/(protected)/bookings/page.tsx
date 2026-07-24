@@ -88,6 +88,9 @@ export default function BookingsPage() {
 
   const [search, setSearch] =
     useState("");
+    const [filter, setFilter] = useState<
+  "all" | "consent" | "balance" | "both"
+>("all");
     
 
   /* ==========================================
@@ -643,15 +646,27 @@ else {
   .filter((booking) => {
     const keyword = search.toLowerCase();
 
-    return (
+    const matchesSearch =
       booking.customerName.toLowerCase().includes(keyword) ||
       booking.villa.toLowerCase().includes(keyword) ||
-      booking.status.toLowerCase().includes(keyword)
-    );
+      booking.status.toLowerCase().includes(keyword);
+
+    const matchesFilter =
+      filter === "all"
+        ? true
+        : filter === "consent"
+        ? booking.consentStatus !== "Completed"
+        : filter === "balance"
+        ? booking.balanceAmount > 0
+        : booking.consentStatus !== "Completed" &&
+          booking.balanceAmount > 0;
+
+    return matchesSearch && matchesFilter;
   })
   .sort(
     (a, b) =>
-      new Date(a.checkIn).getTime() - new Date(b.checkIn).getTime()
+      new Date(a.checkIn).getTime() -
+      new Date(b.checkIn).getTime()
   );
 
   /* ==========================================
@@ -793,6 +808,8 @@ The Rain Villa Team`;
           <BookingSearch
   value={search}
   onChange={setSearch}
+  filter={filter}
+  onFilterChange={setFilter}
 />
 
           
