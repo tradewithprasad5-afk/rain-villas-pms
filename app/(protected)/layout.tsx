@@ -55,7 +55,10 @@ export default function ProtectedLayout({
       }
 
       // Navigate back on all other pages
-      router.back();
+      if (pathname !== "/dashboard") {
+  router.push("/dashboard");
+  return;
+}
     }).then((l) => {
       listener = l;
     });

@@ -18,6 +18,7 @@ interface PaymentTableProps {
 }
 
 export default function PaymentTable({
+ 
   loading,
   filteredBookings,
   setSelectedBooking,
@@ -30,6 +31,37 @@ export default function PaymentTable({
   setAmount,
   setShowForm,
 }: PaymentTableProps) {
+   const sendReceiptWhatsApp = (booking: Booking) => {
+  if (!booking.phone) {
+    alert("Guest phone number is not available.");
+    return;
+  }
+
+  // Remove spaces, dashes, etc.
+  const phone = booking.phone.replace(/\D/g, "");
+
+  const receiptUrl = `${window.location.origin}/payments/booking-receipt/${booking.id}`;
+
+  const message = `🏡 Rain Villa
+
+Hello ${booking.customerName},
+
+Thank you for your payment.
+
+Your booking receipt is ready.
+
+Booking Number: ${booking.bookingNumber}
+
+Receipt:
+${receiptUrl}
+
+Thank you for choosing Rain Villa!`;
+
+  window.open(
+    `https://wa.me/91${phone}?text=${encodeURIComponent(message)}`,
+    "_blank"
+  );
+};
   return (
     <>
       {/* ================= MOBILE VIEW ================= */}
@@ -151,6 +183,12 @@ export default function PaymentTable({
                 >
                   📄 Receipt
                 </button>
+                <button
+  onClick={() => sendReceiptWhatsApp(booking)}
+  className="flex-1 rounded-lg bg-green-600 py-2 text-sm font-medium text-white hover:bg-green-700"
+>
+  📲 WhatsApp
+</button>
 
                 {booking.balanceAmount > 0 && (
                   <button
@@ -317,6 +355,12 @@ export default function PaymentTable({
                     >
                       📄 Receipt
                     </button>
+                    <button
+  onClick={() => sendReceiptWhatsApp(booking)}
+  className="rounded-lg bg-green-600 px-3 py-2 text-sm text-white hover:bg-green-700"
+>
+  📲 WhatsApp
+</button>
 
                     {booking.balanceAmount > 0 && (
                       <button
