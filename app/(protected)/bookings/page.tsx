@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import BookingHeader from "./BookingHeader";
 import BookingSearch from "./BookingSearch";
 import BookingTable from "./BookingTable";
+import DeletePinDialog from "./DeletePinDialog";
 import {
   collection,
   addDoc,
@@ -79,6 +80,9 @@ export default function BookingsPage() {
 
   const [loading, setLoading] =
     useState(true);
+
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+const [bookingToDelete, setBookingToDelete] = useState<Booking | null>(null);
 
   const [showForm, setShowForm] =
     useState(false);
@@ -596,46 +600,44 @@ else {
   }
 }
   async function deleteBooking(booking: Booking) {
-
-  const confirmDelete = window.confirm("Delete this booking?");
-
-  if (!confirmDelete) return;
+  setBookingToDelete(booking);
+  setShowDeleteDialog(true);
+}
+async function confirmDeleteBooking() {
+  if (!bookingToDelete) return;
 
   try {
-
     // Delete booking
-    await deleteDoc(doc(db, "bookings", booking.id));
+    await deleteDoc(doc(db, "bookings", bookingToDelete.id));
 
     // Load remaining bookings
     const snapshot = await getDocs(collection(db, "bookings"));
 
     const remainingBookings = snapshot.docs
-      .map(doc => ({
+      .map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }))
       .filter(
-        (b: any) =>
-          b.customerId === booking.customerId
+        (b: any) => b.customerId === bookingToDelete.customerId
       );
 
     // If customer has no bookings left, delete customer
     if (remainingBookings.length === 0) {
       await deleteDoc(
-        doc(db, "customers", booking.customerId)
+        doc(db, "customers", bookingToDelete.customerId)
       );
     }
 
     await loadBookings();
     await loadCustomers();
 
+    setBookingToDelete(null);
+    setShowDeleteDialog(false);
   } catch (error) {
-
     console.error(error);
     alert("Unable to delete booking.");
-
   }
-
 }
 
   /* ==========================================
@@ -872,6 +874,15 @@ The Rain Villa Team`;
         onSendConsent={sendConsent}
         onCompleteConsent={markConsentCompleted}
       />
+
+      <DeletePinDialog
+  open={showDeleteDialog}
+  onClose={() => {
+    setShowDeleteDialog(false);
+    setBookingToDelete(null);
+  }}
+  onVerified={confirmDeleteBooking}
+/>
 
     </div>
   );
