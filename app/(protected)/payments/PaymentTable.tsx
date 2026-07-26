@@ -110,55 +110,31 @@ Thank you for choosing Rain Villa!`;
 
     <OverflowMenu
   items={[
-    {
-      label: "Receipt",
-      icon: "📄",
-      onClick: () =>
-        window.open(
-          `/payments/booking-receipt/${booking.id}`,
-          "_blank"
-        ),
-    },
-    {
-      label: "WhatsApp",
-      icon: "📲",
-      onClick: () =>
-        sendReceiptWhatsApp(booking),
-    },
-    ...(booking.balanceAmount > 0
-      ? [
-          {
-            label: "Receive Payment",
-            icon: "💰",
-            onClick: () => {
-              setSelectedBooking(booking);
-              setBookingNumber(
-                booking.bookingNumber
-              );
-              setCustomerName(
-                booking.customerName
-              );
-              setTotalAmount(
-                booking.totalAmount
-              );
-              setAdvancePaid(
-                booking.advancePaid
-              );
-              setBalanceAmount(
-                booking.balanceAmount
-              );
-              setPaymentType("Balance");
-              setAmount(
-                String(
-                  booking.balanceAmount
-                )
-              );
-              setShowForm(true);
-            },
+  {
+    label: "Send Receipt",
+    icon: "📤",
+    onClick: () => sendReceiptWhatsApp(booking),
+  },
+  ...(booking.balanceAmount > 0
+    ? [
+        {
+          label: "Receive Payment",
+          icon: "💰",
+          onClick: () => {
+            setSelectedBooking(booking);
+            setBookingNumber(booking.bookingNumber);
+            setCustomerName(booking.customerName);
+            setTotalAmount(booking.totalAmount);
+            setAdvancePaid(booking.advancePaid);
+            setBalanceAmount(booking.balanceAmount);
+            setPaymentType("Balance");
+            setAmount(String(booking.balanceAmount));
+            setShowForm(true);
           },
-        ]
-      : []),
-  ]}
+        },
+      ]
+    : []),
+]}
 />
 
   </div>
