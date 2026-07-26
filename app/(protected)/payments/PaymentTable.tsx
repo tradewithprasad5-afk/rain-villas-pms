@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { Booking } from "./paymentTypes";
+import OverflowMenu from "./OverflowMenu";
 
 interface PaymentTableProps {
   loading: boolean;
@@ -32,27 +33,7 @@ export default function PaymentTable({
   setAmount,
   setShowForm,
 }: PaymentTableProps) {
-  const [openMenu, setOpenMenu] = useState<string | null>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-  function handleClickOutside(event: MouseEvent) {
-    if (
-      menuRef.current &&
-      !menuRef.current.contains(event.target as Node)
-    ) {
-      setOpenMenu(null);
-    }
-  }
-
-  document.addEventListener("mousedown", handleClickOutside);
-
-  return () => {
-    document.removeEventListener(
-      "mousedown",
-      handleClickOutside
-    );
-  };
-}, []);
+  
    const sendReceiptWhatsApp = (booking: Booking) => {
   if (!booking.phone) {
     alert("Guest phone number is not available.");
@@ -127,70 +108,58 @@ Thank you for choosing Rain Villa!`;
       </span>
     )}
 
-    <div
-  className="relative"
-  ref={menuRef}
->
-  <button
-    onClick={() =>
-      setOpenMenu(
-        openMenu === booking.id ? null : booking.id
-      )
-    }
-    className="rounded p-1 hover:bg-gray-100"
-  >
-    ⋮
-  </button>
-
-  {openMenu === booking.id && (
-    <div className="absolute right-0 mt-2 w-44 rounded-lg border bg-white shadow-lg z-20">
-
-      <button
-        onClick={() => {
-          window.open(
-            `/payments/booking-receipt/${booking.id}`,
-            "_blank"
-          );
-          setOpenMenu(null);
-        }}
-        className="block w-full px-4 py-2 text-left hover:bg-gray-100"
-      >
-        📄 Receipt
-      </button>
-
-      <button
-        onClick={() => {
-          sendReceiptWhatsApp(booking);
-          setOpenMenu(null);
-        }}
-        className="block w-full px-4 py-2 text-left hover:bg-gray-100"
-      >
-        📲 WhatsApp
-      </button>
-
-      {booking.balanceAmount > 0 && (
-        <button
-          onClick={() => {
-            setSelectedBooking(booking);
-            setBookingNumber(booking.bookingNumber);
-            setCustomerName(booking.customerName);
-            setTotalAmount(booking.totalAmount);
-            setAdvancePaid(booking.advancePaid);
-            setBalanceAmount(booking.balanceAmount);
-            setPaymentType("Balance");
-            setAmount(String(booking.balanceAmount));
-            setShowForm(true);
-            setOpenMenu(null);
-          }}
-          className="block w-full px-4 py-2 text-left hover:bg-gray-100"
-        >
-          💰 Receive Payment
-        </button>
-      )}
-
-    </div>
-  )}
-</div>
+    <OverflowMenu
+  items={[
+    {
+      label: "Receipt",
+      icon: "📄",
+      onClick: () =>
+        window.open(
+          `/payments/booking-receipt/${booking.id}`,
+          "_blank"
+        ),
+    },
+    {
+      label: "WhatsApp",
+      icon: "📲",
+      onClick: () =>
+        sendReceiptWhatsApp(booking),
+    },
+    ...(booking.balanceAmount > 0
+      ? [
+          {
+            label: "Receive Payment",
+            icon: "💰",
+            onClick: () => {
+              setSelectedBooking(booking);
+              setBookingNumber(
+                booking.bookingNumber
+              );
+              setCustomerName(
+                booking.customerName
+              );
+              setTotalAmount(
+                booking.totalAmount
+              );
+              setAdvancePaid(
+                booking.advancePaid
+              );
+              setBalanceAmount(
+                booking.balanceAmount
+              );
+              setPaymentType("Balance");
+              setAmount(
+                String(
+                  booking.balanceAmount
+                )
+              );
+              setShowForm(true);
+            },
+          },
+        ]
+      : []),
+  ]}
+/>
 
   </div>
 </div>
