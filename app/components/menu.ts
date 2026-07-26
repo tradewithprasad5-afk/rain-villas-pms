@@ -4,6 +4,7 @@ import {
   BookOpenCheck,
   CreditCard,
   BarChart3,
+  Globe,
   Settings,
 } from "lucide-react";
 
@@ -32,6 +33,11 @@ export const menuItems = [
     title: "Reports",
     href: "/reports",
     icon: BarChart3,
+  },
+  {
+  title: "Agent Portal",
+  href: "/agent-portal",
+  icon: Globe,
   },
   {
     title: "Settings",
