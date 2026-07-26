@@ -2,7 +2,6 @@
 
 import {
   Menu,
-  Bell,
   Search,
   PanelLeftClose,
   PanelLeftOpen,
@@ -102,14 +101,7 @@ export default function Navbar({
       {/* Right */}
       <div className="flex items-center gap-5">
 
-        {/* Notifications */}
-        <button className="relative rounded-xl p-3 transition hover:bg-slate-100">
-
-          <Bell size={22} />
-
-          <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-red-500" />
-
-        </button>
+        
 
         {/* User */}
         <div className="flex items-center gap-3">
