@@ -13,20 +13,32 @@ export default function BookingDrawer({
   heavenBooking,
 }: Props) {
   const router = useRouter();
+  const formatDate = (date: string) =>
+  new Date(date).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+
   return (
     <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-6">
 
-      <h2 className="text-xl font-bold mb-6">
+      <h2 className="text-lg font-bold mb-4">
         {selectedDate
-          ? selectedDate.toDateString()
-          : "Select a Date"}
+  ? selectedDate.toLocaleDateString("en-GB", {
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    })
+  : "Select a Date"}
       </h2>
 
-      <div className="space-y-6">
+      <div className="space-y-4">
 
         {/* Paradise */}
 
-        <div className="rounded-xl border p-4">
+        <div className="rounded-xl border p-3">
 
           <h3 className="font-semibold mb-3">
             Rain Paradise
@@ -38,15 +50,16 @@ export default function BookingDrawer({
     🔴 Booked
   </p>
 
-  <p className="mt-3 text-sm">
+  <p className="mt-2 text-sm">
     <strong>Guest:</strong> {paradiseBooking.customerName}
   </p>
 
-  <p className="text-sm">
-    📅 {paradiseBooking.checkIn} → {paradiseBooking.checkOut}
-  </p>
+  <p className="text-sm text-slate-600">
+  📅 {formatDate(paradiseBooking.checkIn)} →{" "}
+  {formatDate(paradiseBooking.checkOut)}
+</p>
 
-  <div className="mt-4 space-y-1 text-sm">
+  <div className="mt-2 space-y-1 text-sm">
     <p>
       💰 <strong>Total:</strong> ₹{paradiseBooking.totalAmount}
     </p>
@@ -68,14 +81,14 @@ export default function BookingDrawer({
     </p>
   </div>
 
-  <div className="mt-5 flex gap-2">
+  <div className="mt-3 flex gap-2">
   <button
     onClick={() =>
       router.push(
         `/payments?booking=${paradiseBooking.bookingNumber}`
       )
     }
-    className="flex-1 rounded-lg bg-green-600 py-2 text-sm font-medium text-white hover:bg-green-700"
+    className="flex-1 rounded-lg bg-green-600 py-1.5 text-sm font-medium text-white hover:bg-green-700"
   >
     💰 Payments
   </button>
@@ -86,7 +99,7 @@ export default function BookingDrawer({
         `/payments?whatsapp=${paradiseBooking.bookingNumber}`
       )
     }
-    className="flex-1 rounded-lg bg-blue-600 py-2 text-sm font-medium text-white hover:bg-blue-700"
+    className="flex-1 rounded-lg bg-blue-600 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
   >
     📲 WhatsApp
   </button>
@@ -102,7 +115,7 @@ export default function BookingDrawer({
 
         {/* Heaven */}
 
-        <div className="rounded-xl border p-4">
+        <div className="rounded-xl border p-3">
 
           <h3 className="font-semibold mb-3">
             Rain Heaven
@@ -114,15 +127,16 @@ export default function BookingDrawer({
     🔴 Booked
   </p>
 
-  <p className="mt-3 text-sm">
+  <p className="mt-2 text-sm">
     <strong>Guest:</strong> {heavenBooking.customerName}
   </p>
 
-  <p className="text-sm">
-    📅 {heavenBooking.checkIn} → {heavenBooking.checkOut}
-  </p>
+  <p className="text-sm text-slate-600">
+  📅 {formatDate(heavenBooking.checkIn)} →{" "}
+  {formatDate(heavenBooking.checkOut)}
+</p>
 
-  <div className="mt-4 space-y-1 text-sm">
+  <div className="mt-2 space-y-1 text-sm">
     <p>
       💰 <strong>Total:</strong> ₹{heavenBooking.totalAmount}
     </p>
@@ -144,14 +158,14 @@ export default function BookingDrawer({
     </p>
   </div>
 
-  <div className="mt-5 flex gap-2">
+  <div className="mt-3 flex gap-2">
   <button
     onClick={() =>
       router.push(
         `/payments?booking=${heavenBooking.bookingNumber}`
       )
     }
-    className="flex-1 rounded-lg bg-green-600 py-2 text-sm font-medium text-white hover:bg-green-700"
+    className="flex-1 rounded-lg bg-green-600 py-1.5 text-sm font-medium text-white hover:bg-green-700"
   >
     💰 Payments
   </button>
@@ -162,7 +176,7 @@ export default function BookingDrawer({
         `/payments?whatsapp=${heavenBooking.bookingNumber}`
       )
     }
-    className="flex-1 rounded-lg bg-blue-600 py-2 text-sm font-medium text-white hover:bg-blue-700"
+    className="flex-1 rounded-lg bg-blue-600 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
   >
     📲 WhatsApp
   </button>
