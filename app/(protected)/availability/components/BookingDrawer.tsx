@@ -69,28 +69,28 @@ export default function BookingDrawer({
   </div>
 
   <div className="mt-5 flex gap-2">
-    <button
-      onClick={() =>
-        router.push(
-  `/payments?booking=${paradiseBooking.bookingNumber}`
-)
-      }
-      className="flex-1 rounded-lg bg-green-600 py-2 text-sm font-medium text-white hover:bg-green-700"
-    >
-      💰 Payments
-    </button>
+  <button
+    onClick={() =>
+      router.push(
+        `/payments?booking=${paradiseBooking.bookingNumber}`
+      )
+    }
+    className="flex-1 rounded-lg bg-green-600 py-2 text-sm font-medium text-white hover:bg-green-700"
+  >
+    💰 Payments
+  </button>
 
-    <button
-  onClick={() =>
-    router.push(
-      `/payments?booking=${paradiseBooking.bookingNumber}`
-    )
-  }
-  className="flex-1 rounded-lg bg-blue-600 py-2 text-sm font-medium text-white hover:bg-blue-700"
->
-  📲 WhatsApp
-</button>
-  </div>
+  <button
+    onClick={() =>
+      router.push(
+        `/payments?whatsapp=${paradiseBooking.bookingNumber}`
+      )
+    }
+    className="flex-1 rounded-lg bg-blue-600 py-2 text-sm font-medium text-white hover:bg-blue-700"
+  >
+    📲 WhatsApp
+  </button>
+</div>
 </>
           ) : (
             <p className="text-green-600 font-medium">
@@ -145,29 +145,28 @@ export default function BookingDrawer({
   </div>
 
   <div className="mt-5 flex gap-2">
-    <button
-  onClick={() =>
-    router.push(
-      `/payments?booking=${heavenBooking.bookingNumber}`
-    )
-  }
-  className="flex-1 rounded-lg bg-blue-600 py-2 text-sm font-medium text-white hover:bg-blue-700"
->
-  📲 WhatsApp
-</button>
+  <button
+    onClick={() =>
+      router.push(
+        `/payments?booking=${heavenBooking.bookingNumber}`
+      )
+    }
+    className="flex-1 rounded-lg bg-green-600 py-2 text-sm font-medium text-white hover:bg-green-700"
+  >
+    💰 Payments
+  </button>
 
-    <button
-      onClick={() =>
-        window.open(
-          `/payments/booking-receipt/${heavenBooking.id}`,
-          "_blank"
-        )
-      }
-      className="flex-1 rounded-lg bg-blue-600 py-2 text-sm font-medium text-white hover:bg-blue-700"
-    >
-      📄 Receipt
-    </button>
-  </div>
+  <button
+    onClick={() =>
+      router.push(
+        `/payments?whatsapp=${heavenBooking.bookingNumber}`
+      )
+    }
+    className="flex-1 rounded-lg bg-blue-600 py-2 text-sm font-medium text-white hover:bg-blue-700"
+  >
+    📲 WhatsApp
+  </button>
+</div>
 </>
           ) : (
             <p className="text-green-600 font-medium">

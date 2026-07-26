@@ -45,6 +45,7 @@ const [paymentType, setPaymentType] = useState("Advance");
 const [notes, setNotes] = useState("");
 const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
 const [bookingParam, setBookingParam] = useState("");
+const [whatsappParam, setWhatsappParam] = useState("");
 const [totalAmount, setTotalAmount] = useState(0);
 const [advancePaid, setAdvancePaid] = useState(0);
 const [balanceAmount, setBalanceAmount] = useState(0);
@@ -71,9 +72,11 @@ async function loadPayments() {
     ...doc.data(),
   })) as Payment[];
 
-  if (bookingParam) {
+  const targetBooking = bookingParam || whatsappParam;
+
+if (targetBooking) {
   data = data.filter(
-    (payment) => payment.bookingNumber === bookingParam
+    (payment) => payment.bookingNumber === targetBooking
   );
 }
 
@@ -111,10 +114,12 @@ async function loadBookings() {
 
     setBookings(data);
 
-    if (bookingParam) {
+    const targetBooking = bookingParam || whatsappParam;
+
+if (targetBooking) {
       const booking = data.find(
-        (b) => b.bookingNumber === bookingParam
-      );
+  (b) => b.bookingNumber === targetBooking
+);
 
       if (booking) {
   setSelectedBooking(booking);
@@ -126,11 +131,11 @@ async function loadBookings() {
   setAdvancePaid(booking.advancePaid);
   setBalanceAmount(booking.balanceAmount);
 
-  if (booking.balanceAmount > 0) {
-    setPaymentType("Balance");
-    setAmount(String(booking.balanceAmount));
-    setShowForm(true);
-  }
+  if (bookingParam && booking.balanceAmount > 0) {
+  setPaymentType("Balance");
+  setAmount(String(booking.balanceAmount));
+  setShowForm(true);
+}
 }
     }
   } catch (err) {
@@ -238,13 +243,16 @@ useEffect(() => {
   if (typeof window === "undefined") return;
 
   const params = new URLSearchParams(window.location.search);
+
   setBookingParam(params.get("booking") || "");
+  setWhatsappParam(params.get("whatsapp") || "");
 }, []);
 useEffect(() => {
-    console.log("Payments useEffect", bookingParam);
+  console.log("Payments useEffect", bookingParam, whatsappParam);
+
   loadBookings();
   loadPayments();
-}, [bookingParam]);
+}, [bookingParam, whatsappParam]);
 
 const filteredBookings = bookings
   .filter((booking) => {
