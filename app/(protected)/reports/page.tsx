@@ -180,24 +180,47 @@ return date >= start && date <= end;
     [filteredBookings]
   );
 
-  const totalBookings = filteredBookings.length;
+  const totalBookings = useMemo(() => {
+  let total = 0;
+
+  filteredBookings.forEach((booking) => {
+    if (!booking.checkIn || !booking.checkOut) return;
+
+    let current = new Date(booking.checkIn);
+    const checkOut = new Date(booking.checkOut);
+
+    while (current < checkOut) {
+      total++;
+      current.setDate(current.getDate() + 1);
+    }
+  });
+
+  return total;
+}, [filteredBookings]);
 
   const monthlyBookings = useMemo(() => {
-    const stats: Record<string, number> = {};
+  const stats: Record<string, number> = {};
 
-    filteredBookings.forEach((booking) => {
-      if (!booking.checkIn) return;
+  filteredBookings.forEach((booking) => {
+    if (!booking.checkIn || !booking.checkOut) return;
 
-      const month = new Date(booking.checkIn).toLocaleString("en-IN", {
+    let current = new Date(booking.checkIn);
+    const checkOut = new Date(booking.checkOut);
+
+    while (current < checkOut) {
+      const month = current.toLocaleString("en-IN", {
         month: "short",
         year: "numeric",
       });
 
       stats[month] = (stats[month] || 0) + 1;
-    });
 
-    return stats;
-  }, [filteredBookings]);
+      current.setDate(current.getDate() + 1);
+    }
+  });
+
+  return stats;
+}, [filteredBookings]);
 
   const villaRevenue = useMemo(() => {
     const stats: Record<string, number> = {};
