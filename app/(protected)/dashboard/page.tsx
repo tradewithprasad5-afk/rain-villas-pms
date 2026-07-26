@@ -110,7 +110,7 @@ setTotalBookings(monthlyBookings);
 
     setMonthlyRevenue(revenue);
 
-    const now = new Date();
+    
 
 const today = `${now.getFullYear()}-${String(
   now.getMonth() + 1
