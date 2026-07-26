@@ -85,7 +85,7 @@ Thank you for choosing Rain Villa!`;
 >
               <div className="flex h-full flex-col">
   <div className="flex items-start justify-between">
-    <h2 className="text-lg font-semibold truncate pr-2">
+    <h2 className="text-base font-semibold leading-tight pr-2 line-clamp-2">
       {booking.customerName}
     </h2>
 
