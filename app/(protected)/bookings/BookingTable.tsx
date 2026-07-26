@@ -140,13 +140,19 @@ export default function BookingTable({
   {formatDateRange(booking.checkIn, booking.checkOut)}
 </p>
 
+  <div className="mt-3 border-t pt-2 flex flex-wrap gap-1">
   {booking.consentStatus !== "Completed" && (
-  <div className="mt-3 border-t pt-2">
     <span className="inline-flex rounded-full bg-amber-100 px-2 py-1 text-[10px] font-medium text-amber-700">
       Consent Pending
     </span>
-  </div>
-)}
+  )}
+
+  {booking.balanceAmount > 0 && (
+    <span className="inline-flex rounded-full bg-red-100 px-2 py-1 text-[10px] font-medium text-red-700">
+      Balance ₹{booking.balanceAmount}
+    </span>
+  )}
+</div>
 </div>
             </div>
           );
