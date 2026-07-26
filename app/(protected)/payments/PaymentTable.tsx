@@ -68,7 +68,7 @@ Thank you for choosing Rain Villa!`;
   return (
     <>
       {/* ================= MOBILE VIEW ================= */}
-      <div className="space-y-4 md:hidden">
+      <div className="grid grid-cols-2 gap-3 md:hidden">
         {loading ? (
           <div className="rounded-xl bg-white p-6 text-center shadow">
             Loading bookings...
@@ -81,100 +81,80 @@ Thank you for choosing Rain Villa!`;
           filteredBookings.map((booking) => (
             <div
   key={booking.id}
-  className="relative rounded-xl border bg-white p-3 shadow overflow-visible"
+  className="relative rounded-2xl border bg-white p-4 shadow overflow-visible min-h-[180px]"
 >
-              <div className="flex items-start justify-between">
-  <div>
-    <h2 className="text-lg font-semibold">
+              <div className="flex h-full flex-col">
+  <div className="flex items-start justify-between">
+    <h2 className="text-lg font-semibold truncate pr-2">
       {booking.customerName}
     </h2>
 
-    
-  </div>
-
-  <div className="flex items-start gap-2">
-
-    {booking.balanceAmount === 0 ? (
-      <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
-        Paid
-      </span>
-    ) : booking.advancePaid === 0 ? (
-      <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-700">
-        Pending
-      </span>
-    ) : (
-      <span className="rounded-full bg-yellow-100 px-3 py-1 text-xs font-medium text-yellow-700">
-        Partial
-      </span>
-    )}
-
     <OverflowMenu
-  items={[
-  {
-    label: "Send Receipt",
-    icon: "📤",
-    onClick: () => sendReceiptWhatsApp(booking),
-  },
-  ...(booking.balanceAmount > 0
-    ? [
+      items={[
         {
-          label: "Receive Payment",
-          icon: "💰",
-          onClick: () => {
-            setSelectedBooking(booking);
-            setBookingNumber(booking.bookingNumber);
-            setCustomerName(booking.customerName);
-            setTotalAmount(booking.totalAmount);
-            setAdvancePaid(booking.advancePaid);
-            setBalanceAmount(booking.balanceAmount);
-            setPaymentType("Balance");
-            setAmount(String(booking.balanceAmount));
-            setShowForm(true);
-          },
+          label: "Send Receipt",
+          icon: "📤",
+          onClick: () => sendReceiptWhatsApp(booking),
         },
-      ]
-    : []),
-]}
-/>
-
+        ...(booking.balanceAmount > 0
+          ? [
+              {
+                label: "Receive Payment",
+                icon: "💰",
+                onClick: () => {
+                  setSelectedBooking(booking);
+                  setBookingNumber(booking.bookingNumber);
+                  setCustomerName(booking.customerName);
+                  setTotalAmount(booking.totalAmount);
+                  setAdvancePaid(booking.advancePaid);
+                  setBalanceAmount(booking.balanceAmount);
+                  setPaymentType("Balance");
+                  setAmount(String(booking.balanceAmount));
+                  setShowForm(true);
+                },
+              },
+            ]
+          : []),
+      ]}
+    />
   </div>
-</div>
 
-              <div className="mt-2">
-  <p className="text-sm text-gray-500">{booking.villa}</p>
+  <p className="mt-5 text-sm text-gray-500">
+    {booking.villa}
+  </p>
 
-  <p className="mt-1 text-xl font-bold text-green-600">
+  <p className="mt-2 text-3xl font-bold text-green-600">
     ₹{booking.totalAmount}
   </p>
 
-  <p className="mt-1 text-sm text-gray-500">
-  {booking.checkIn
-    ? new Date(booking.checkIn).toLocaleDateString("en-IN", {
-        day: "2-digit",
-        month: "short",
-      })
-    : "-"}
-  {" → "}
-  {booking.checkOut
-    ? new Date(booking.checkOut).toLocaleDateString("en-IN", {
-        day: "2-digit",
-        month: "short",
-      })
-    : "-"}
-</p>
-
-  <p
-  className={`mt-1 text-sm font-semibold ${
-      booking.balanceAmount === 0
-        ? "text-green-600"
-        : "text-red-600"
-    }`}
-  >
-    Balance ₹{booking.balanceAmount}
+  <p className="mt-2 text-sm text-gray-500">
+    {booking.checkIn
+      ? new Date(booking.checkIn).toLocaleDateString("en-IN", {
+          day: "numeric",
+          month: "short",
+        })
+      : "-"}
+    {" → "}
+    {booking.checkOut
+      ? new Date(booking.checkOut).toLocaleDateString("en-IN", {
+          day: "numeric",
+          month: "short",
+        })
+      : "-"}
   </p>
-</div>
 
-              
+  <div className="mt-auto border-t pt-2">
+    <p
+      className={`text-sm font-semibold ${
+        booking.balanceAmount === 0
+          ? "text-green-600"
+          : "text-red-600"
+      }`}
+    >
+      Balance ₹{booking.balanceAmount}
+    </p>
+  </div>
+</div>
             </div>
           ))
         )}
