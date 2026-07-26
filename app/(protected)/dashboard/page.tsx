@@ -57,7 +57,32 @@ export default function DashboardPage() {
 
     setBookings(data);
 
-    setTotalBookings(data.length);
+    const now = new Date();
+const currentMonth = now.getMonth();
+const currentYear = now.getFullYear();
+
+let monthlyBookings = 0;
+
+data.forEach((booking) => {
+  if (booking.status === "Cancelled") return;
+  if (!booking.checkIn || !booking.checkOut) return;
+
+  let current = new Date(booking.checkIn);
+  const checkOut = new Date(booking.checkOut);
+
+  while (current < checkOut) {
+    if (
+      current.getMonth() === currentMonth &&
+      current.getFullYear() === currentYear
+    ) {
+      monthlyBookings++;
+    }
+
+    current.setDate(current.getDate() + 1);
+  }
+});
+
+setTotalBookings(monthlyBookings);
 
     setTotalRevenue(
       data.reduce((sum, booking) => sum + (booking.totalAmount || 0), 0)
