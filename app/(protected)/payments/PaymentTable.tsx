@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Booking } from "./paymentTypes";
 
 interface PaymentTableProps {
@@ -31,6 +32,7 @@ export default function PaymentTable({
   setAmount,
   setShowForm,
 }: PaymentTableProps) {
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
    const sendReceiptWhatsApp = (booking: Booking) => {
   if (!booking.phone) {
     alert("Guest phone number is not available.");
@@ -77,159 +79,134 @@ Thank you for choosing Rain Villa!`;
         ) : (
           filteredBookings.map((booking) => (
             <div
-              key={booking.id}
-              className="rounded-xl border bg-white p-4 shadow"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-lg font-semibold">
-                    {booking.customerName}
-                  </h2>
-
-                  <p className="text-sm text-gray-500">
-                    {booking.bookingNumber}
-                  </p>
-                </div>
-
-                {booking.balanceAmount === 0 ? (
-                  <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
-                    Paid
-                  </span>
-                ) : booking.advancePaid === 0 ? (
-                  <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-700">
-                    Unpaid
-                  </span>
-                ) : (
-                  <span className="rounded-full bg-yellow-100 px-3 py-1 text-xs font-medium text-yellow-700">
-                    Partial
-                  </span>
-                )}
-              </div>
-
-              <div className="mt-4 space-y-2 text-sm">
-
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Villa</span>
-                  <span>{booking.villa}</span>
-                </div>
-
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Phone</span>
-                  <span>{booking.phone || "-"}</span>
-                </div>
-
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Stay</span>
-
-                  <span>
-                    {booking.checkIn
-                      ? new Date(
-                          booking.checkIn
-                        ).toLocaleDateString("en-IN", {
-                          day: "2-digit",
-                          month: "short",
-                        })
-                      : "-"}
-
-                    {" → "}
-
-                    {booking.checkOut
-                      ? new Date(
-                          booking.checkOut
-                        ).toLocaleDateString("en-IN", {
-                          day: "2-digit",
-                          month: "short",
-                        })
-                      : "-"}
-                  </span>
-                </div>
-
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Total</span>
-
-                  <span className="font-semibold">
-                    ₹{booking.totalAmount}
-                  </span>
-                </div>
-
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Paid</span>
-
-                  <span className="font-semibold text-green-600">
-                    ₹{booking.advancePaid}
-                  </span>
-                </div>
-
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Balance</span>
-
-                  <span className="font-semibold text-red-600">
-                    ₹{booking.balanceAmount}
-                  </span>
-                </div>
-
-              </div>
-
-              <div className="mt-5 flex gap-2">
-
-                <button
-                  onClick={() =>
-                    window.open(
-                      `/payments/booking-receipt/${booking.id}`,
-                      "_blank"
-                    )
-                  }
-                  className="flex-1 rounded-lg bg-blue-600 py-2 text-sm font-medium text-white hover:bg-blue-700"
-                >
-                  📄 Receipt
-                </button>
-                <button
-  onClick={() => sendReceiptWhatsApp(booking)}
-  className="flex-1 rounded-lg bg-green-600 py-2 text-sm font-medium text-white hover:bg-green-700"
+  key={booking.id}
+  className="relative rounded-xl border bg-white p-4 shadow overflow-visible"
 >
-  📲 WhatsApp
-</button>
+              <div className="flex items-start justify-between">
+  <div>
+    <h2 className="text-lg font-semibold">
+      {booking.customerName}
+    </h2>
 
-                {booking.balanceAmount > 0 && (
-                  <button
-                    onClick={() => {
-                      setSelectedBooking(booking);
+    
+  </div>
 
-                      setBookingNumber(
-                        booking.bookingNumber
-                      );
+  <div className="flex items-start gap-2">
 
-                      setCustomerName(
-                        booking.customerName
-                      );
+    {booking.balanceAmount === 0 ? (
+      <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+        Paid
+      </span>
+    ) : booking.advancePaid === 0 ? (
+      <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-700">
+        Pending
+      </span>
+    ) : (
+      <span className="rounded-full bg-yellow-100 px-3 py-1 text-xs font-medium text-yellow-700">
+        Partial
+      </span>
+    )}
 
-                      setTotalAmount(
-                        booking.totalAmount
-                      );
+    <div className="relative">
+  <button
+    onClick={() =>
+      setOpenMenu(
+        openMenu === booking.id ? null : booking.id
+      )
+    }
+    className="rounded p-1 hover:bg-gray-100"
+  >
+    ⋮
+  </button>
 
-                      setAdvancePaid(
-                        booking.advancePaid
-                      );
+  {openMenu === booking.id && (
+    <div className="absolute right-0 mt-2 w-44 rounded-lg border bg-white shadow-lg z-20">
 
-                      setBalanceAmount(
-                        booking.balanceAmount
-                      );
+      <button
+        onClick={() => {
+          window.open(
+            `/payments/booking-receipt/${booking.id}`,
+            "_blank"
+          );
+          setOpenMenu(null);
+        }}
+        className="block w-full px-4 py-2 text-left hover:bg-gray-100"
+      >
+        📄 Receipt
+      </button>
 
-                      setPaymentType("Balance");
+      <button
+        onClick={() => {
+          sendReceiptWhatsApp(booking);
+          setOpenMenu(null);
+        }}
+        className="block w-full px-4 py-2 text-left hover:bg-gray-100"
+      >
+        📲 WhatsApp
+      </button>
 
-                      setAmount(
-                        String(booking.balanceAmount)
-                      );
+      {booking.balanceAmount > 0 && (
+        <button
+          onClick={() => {
+            setSelectedBooking(booking);
+            setBookingNumber(booking.bookingNumber);
+            setCustomerName(booking.customerName);
+            setTotalAmount(booking.totalAmount);
+            setAdvancePaid(booking.advancePaid);
+            setBalanceAmount(booking.balanceAmount);
+            setPaymentType("Balance");
+            setAmount(String(booking.balanceAmount));
+            setShowForm(true);
+            setOpenMenu(null);
+          }}
+          className="block w-full px-4 py-2 text-left hover:bg-gray-100"
+        >
+          💰 Receive Payment
+        </button>
+      )}
 
-                      setShowForm(true);
-                    }}
-                    className="flex-1 rounded-lg bg-green-600 py-2 text-sm font-medium text-white hover:bg-green-700"
-                  >
-                    💰 Receive
-                  </button>
-                )}
+    </div>
+  )}
+</div>
 
-              </div>
+  </div>
+</div>
+
+              <div className="mt-3">
+  <p className="text-sm text-gray-500">{booking.villa}</p>
+
+  <p className="mt-2 text-xl font-bold text-green-600">
+    ₹{booking.totalAmount}
+  </p>
+
+  <p className="mt-1 text-sm text-gray-500">
+  {booking.checkIn
+    ? new Date(booking.checkIn).toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "short",
+      })
+    : "-"}
+  {" → "}
+  {booking.checkOut
+    ? new Date(booking.checkOut).toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "short",
+      })
+    : "-"}
+</p>
+
+  <p
+    className={`mt-2 text-sm font-semibold ${
+      booking.balanceAmount === 0
+        ? "text-green-600"
+        : "text-red-600"
+    }`}
+  >
+    Balance ₹{booking.balanceAmount}
+  </p>
+</div>
+
+              
             </div>
           ))
         )}
