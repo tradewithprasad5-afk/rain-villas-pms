@@ -119,7 +119,7 @@ Thank you for choosing Rain Villa!`;
     />
   </div>
 
-  <p className="mt-5 text-sm text-gray-500">
+  <p className="mt-1 text-sm text-gray-500">
     {booking.villa}
   </p>
 
