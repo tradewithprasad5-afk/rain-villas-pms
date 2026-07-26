@@ -140,23 +140,13 @@ export default function BookingTable({
   {formatDateRange(booking.checkIn, booking.checkOut)}
 </p>
 
-  <div className="mt-3 flex items-center justify-between border-t pt-2">
-
-    <span className="text-lg">
-  {booking.status === "Confirmed"
-    ? "🟢"
-    : booking.status === "Pending"
-    ? "🟡"
-    : "🔴"}
-</span>
-
-    <span className="text-lg">
-  {booking.consentStatus === "Completed"
-    ? "✅"
-    : "⏳"}
-</span>
-
+  {booking.consentStatus !== "Completed" && (
+  <div className="mt-3 border-t pt-2">
+    <span className="inline-flex rounded-full bg-amber-100 px-2 py-1 text-[10px] font-medium text-amber-700">
+      Consent Pending
+    </span>
   </div>
+)}
 </div>
             </div>
           );
