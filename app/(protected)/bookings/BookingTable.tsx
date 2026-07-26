@@ -48,17 +48,15 @@ export default function BookingTable({
   const inDate = new Date(checkIn);
   const outDate = new Date(checkOut);
 
-  const inDay = inDate.getDate();
-  const outDay = outDate.getDate();
-
-  const inMonth = inDate.toLocaleString("en-GB", { month: "short" });
-  const outMonth = outDate.toLocaleString("en-GB", { month: "short" });
-
-  if (inMonth === outMonth) {
-    return `${inDay}→${outDay} ${inMonth}`;
-  }
-
-  return `${inDay} ${inMonth} → ${outDay} ${outMonth}`;
+  return `${inDate.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  })} → ${outDate.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  })}`;
 };
 
   return (
@@ -74,11 +72,11 @@ export default function BookingTable({
           return (
             <div
               key={booking.id}
-              className="flex flex-col justify-between rounded-xl border bg-white p-3 shadow-sm"
+              className="flex flex-col justify-between rounded-xl border bg-white p-2.5 shadow-sm"
             >
               <div className="flex items-start justify-between">
                 <div>
-                  <h3 className="truncate text-sm font-semibold">
+                  <h3 className="truncate text-xs font-semibold">
                     {booking.customerName}
                   </h3>
 
@@ -127,12 +125,12 @@ export default function BookingTable({
                 </DropdownMenu>
               </div>
 
-              <div className="mt-3">
+              <div className="mt-2">
   <p className="truncate text-xs text-gray-600">
   {booking.villa}
 </p>
 
-  <p className="mt-1 text-base font-bold text-green-700">
+  <p className="mt-1 text-sm font-bold text-green-700">
   ₹{booking.totalAmount}
 </p>
 
@@ -140,7 +138,7 @@ export default function BookingTable({
   {formatDateRange(booking.checkIn, booking.checkOut)}
 </p>
 
-  <div className="mt-3 border-t pt-2 flex flex-wrap gap-1">
+  <div className="mt-2 border-t pt-2 flex flex-wrap gap-1">
   {booking.consentStatus !== "Completed" && (
     <span className="inline-flex rounded-full bg-amber-100 px-2 py-1 text-[10px] font-medium text-amber-700">
       Consent Pending
