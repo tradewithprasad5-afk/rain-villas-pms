@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Booking } from "./paymentTypes";
 
 interface PaymentTableProps {
@@ -33,6 +33,26 @@ export default function PaymentTable({
   setShowForm,
 }: PaymentTableProps) {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+  function handleClickOutside(event: MouseEvent) {
+    if (
+      menuRef.current &&
+      !menuRef.current.contains(event.target as Node)
+    ) {
+      setOpenMenu(null);
+    }
+  }
+
+  document.addEventListener("mousedown", handleClickOutside);
+
+  return () => {
+    document.removeEventListener(
+      "mousedown",
+      handleClickOutside
+    );
+  };
+}, []);
    const sendReceiptWhatsApp = (booking: Booking) => {
   if (!booking.phone) {
     alert("Guest phone number is not available.");
@@ -80,7 +100,7 @@ Thank you for choosing Rain Villa!`;
           filteredBookings.map((booking) => (
             <div
   key={booking.id}
-  className="relative rounded-xl border bg-white p-4 shadow overflow-visible"
+  className="relative rounded-xl border bg-white p-3 shadow overflow-visible"
 >
               <div className="flex items-start justify-between">
   <div>
@@ -107,7 +127,10 @@ Thank you for choosing Rain Villa!`;
       </span>
     )}
 
-    <div className="relative">
+    <div
+  className="relative"
+  ref={menuRef}
+>
   <button
     onClick={() =>
       setOpenMenu(
@@ -172,10 +195,10 @@ Thank you for choosing Rain Villa!`;
   </div>
 </div>
 
-              <div className="mt-3">
+              <div className="mt-2">
   <p className="text-sm text-gray-500">{booking.villa}</p>
 
-  <p className="mt-2 text-xl font-bold text-green-600">
+  <p className="mt-1 text-xl font-bold text-green-600">
     ₹{booking.totalAmount}
   </p>
 
@@ -196,7 +219,7 @@ Thank you for choosing Rain Villa!`;
 </p>
 
   <p
-    className={`mt-2 text-sm font-semibold ${
+  className={`mt-1 text-sm font-semibold ${
       booking.balanceAmount === 0
         ? "text-green-600"
         : "text-red-600"
