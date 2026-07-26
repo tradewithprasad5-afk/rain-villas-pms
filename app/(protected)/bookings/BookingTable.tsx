@@ -74,7 +74,7 @@ export default function BookingTable({
           return (
             <div
               key={booking.id}
-              className="flex h-36 flex-col justify-between rounded-xl border bg-white p-3 shadow-sm"
+              className="flex flex-col justify-between rounded-xl border bg-white p-3 shadow-sm"
             >
               <div className="flex items-start justify-between">
                 <div>
