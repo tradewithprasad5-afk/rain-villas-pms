@@ -44,12 +44,28 @@ export default function BookingTable({
       </div>
     );
   }
+  const formatDateRange = (checkIn: string, checkOut: string) => {
+  const inDate = new Date(checkIn);
+  const outDate = new Date(checkOut);
+
+  const inDay = inDate.getDate();
+  const outDay = outDate.getDate();
+
+  const inMonth = inDate.toLocaleString("en-GB", { month: "short" });
+  const outMonth = outDate.toLocaleString("en-GB", { month: "short" });
+
+  if (inMonth === outMonth) {
+    return `${inDay}→${outDay} ${inMonth}`;
+  }
+
+  return `${inDay} ${inMonth} → ${outDay} ${outMonth}`;
+};
 
   return (
     <>
       {/* ================= MOBILE VIEW ================= */}
 
-      <div className="space-y-2 md:hidden">
+      <div className="grid grid-cols-2 gap-2 md:hidden">
         {bookings.map((booking) => {
           const customer = customers.find(
             (c) => c.id === booking.customerId
@@ -58,21 +74,19 @@ export default function BookingTable({
           return (
             <div
               key={booking.id}
-              className="rounded-xl border bg-white p-3 shadow-sm"
+              className="flex h-36 flex-col justify-between rounded-xl border bg-white p-3 shadow-sm"
             >
               <div className="flex items-start justify-between">
                 <div>
-                  <h3 className="text-base font-semibold">
+                  <h3 className="truncate text-sm font-semibold">
                     {booking.customerName}
                   </h3>
 
-                  <p className="text-sm text-gray-500">
-                    {customer?.phone || "-"}
-                  </p>
+                  
                 </div>
 
                 <DropdownMenu>
-                  <DropdownMenuTrigger className="rounded-lg border p-2 hover:bg-gray-100">
+                  <DropdownMenuTrigger className="rounded-md p-1 hover:bg-gray-100">
                     <MoreVertical className="h-4 w-4" />
                   </DropdownMenuTrigger>
 
@@ -113,59 +127,36 @@ export default function BookingTable({
                 </DropdownMenu>
               </div>
 
-              <div className="mt-3 space-y-3 text-sm">
+              <div className="mt-3">
+  <p className="truncate text-xs text-gray-600">
+  {booking.villa}
+</p>
 
-  <div className="flex items-center justify-between">
-    <span>📍 {booking.villa}</span>
+  <p className="mt-1 text-base font-bold text-green-700">
+  ₹{booking.totalAmount}
+</p>
 
-    <span className="font-semibold">
-      ₹{booking.totalAmount}
-    </span>
+  <p className="mt-1 text-xs text-gray-500">
+  {formatDateRange(booking.checkIn, booking.checkOut)}
+</p>
+
+  <div className="mt-3 flex items-center justify-between border-t pt-2">
+
+    <span className="text-lg">
+  {booking.status === "Confirmed"
+    ? "🟢"
+    : booking.status === "Pending"
+    ? "🟡"
+    : "🔴"}
+</span>
+
+    <span className="text-lg">
+  {booking.consentStatus === "Completed"
+    ? "✅"
+    : "⏳"}
+</span>
+
   </div>
-
-  <div>
-    📅 {booking.checkIn} → {booking.checkOut}
-  </div>
-
-  <div className="flex items-center justify-between">
-    <span>👥 {booking.guests} Guests</span>
-
-    <div className="flex gap-2">
-
-      <span
-        className={`rounded-full px-2 py-1 text-xs font-medium ${
-          booking.status === "Confirmed"
-            ? "bg-green-100 text-green-700"
-            : booking.status === "Pending"
-            ? "bg-yellow-100 text-yellow-700"
-            : "bg-red-100 text-red-700"
-        }`}
-      >
-        {booking.status}
-      </span>
-
-      <span
-        className={`rounded-full px-2 py-1 text-xs font-medium ${
-          booking.consentStatus === "Completed"
-            ? "bg-green-100 text-green-700"
-            : "bg-yellow-100 text-yellow-700"
-        }`}
-      >
-        {booking.consentStatus || "Pending"}
-      </span>
-
-    </div>
-  </div>
-
-  {booking.consentStatus !== "Completed" && (
-    <button
-      onClick={() => onCompleteConsent(booking.id)}
-      className="w-full rounded-lg bg-green-600 py-2 text-sm font-medium text-white hover:bg-green-700"
-    >
-      ✓ Complete Consent
-    </button>
-  )}
-
 </div>
             </div>
           );
