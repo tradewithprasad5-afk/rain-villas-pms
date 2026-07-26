@@ -26,7 +26,7 @@ export default function DashboardPage() {
   
 
   const [bookings, setBookings] = useState<Booking[]>([]);
-
+  const [filter, setFilter] = useState<"month" | "year" | "all">("month");
   const [totalBookings, setTotalBookings] = useState(0);
   const [totalRevenue, setTotalRevenue] = useState(0);
   const [advanceReceived, setAdvanceReceived] = useState(0);
@@ -60,10 +60,29 @@ export default function DashboardPage() {
     const now = new Date();
 const currentMonth = now.getMonth();
 const currentYear = now.getFullYear();
+const filteredData = data.filter((booking) => {
+  if (booking.status === "Cancelled") return false;
+  if (!booking.checkIn) return false;
 
+  const checkIn = new Date(booking.checkIn);
+
+  switch (filter) {
+    case "month":
+      return (
+        checkIn.getMonth() === currentMonth &&
+        checkIn.getFullYear() === currentYear
+      );
+
+    case "year":
+      return checkIn.getFullYear() === currentYear;
+
+    case "all":
+      return true;
+  }
+});
 let monthlyBookings = 0;
 
-data.forEach((booking) => {
+filteredData.forEach((booking) => {
   if (booking.status === "Cancelled") return;
   if (!booking.checkIn || !booking.checkOut) return;
 
@@ -71,34 +90,42 @@ data.forEach((booking) => {
   const checkOut = new Date(booking.checkOut);
 
   while (current < checkOut) {
+  if (filter === "month") {
     if (
       current.getMonth() === currentMonth &&
       current.getFullYear() === currentYear
     ) {
       monthlyBookings++;
     }
-
-    current.setDate(current.getDate() + 1);
+  } else if (filter === "year") {
+    if (current.getFullYear() === currentYear) {
+      monthlyBookings++;
+    }
+  } else {
+    monthlyBookings++;
   }
+
+  current.setDate(current.getDate() + 1);
+}
 });
 
 setTotalBookings(monthlyBookings);
 
     setTotalRevenue(
-      data.reduce((sum, booking) => sum + (booking.totalAmount || 0), 0)
-    );
+  filteredData.reduce((sum, booking) => sum + (booking.totalAmount || 0), 0)
+);
 
-    setAdvanceReceived(
-      data.reduce((sum, booking) => sum + (booking.advancePaid || 0), 0)
-    );
+setAdvanceReceived(
+  filteredData.reduce((sum, booking) => sum + (booking.advancePaid || 0), 0)
+);
 
-    setPendingBalance(
-      data.reduce((sum, booking) => sum + (booking.balanceAmount || 0), 0)
-    );
+setPendingBalance(
+  filteredData.reduce((sum, booking) => sum + (booking.balanceAmount || 0), 0)
+);
 
     const revenue = new Array(12).fill(0);
 
-    data.forEach((booking) => {
+    filteredData.forEach((booking) => {
       if (!booking.checkIn) return;
 
       const date = new Date(booking.checkIn);
@@ -194,8 +221,8 @@ if (heavenOccupied) {
   }
 
   useEffect(() => {
-    loadDashboard();
-  }, []);
+  loadDashboard();
+}, [filter]);
 
   return (
   <div className="mx-auto max-w-7xl space-y-8 px-4 py-4 sm:px-6">
@@ -204,6 +231,8 @@ if (heavenOccupied) {
 
           <DashboardHeader
   todayBalanceDue={todayBalanceDue}
+  filter={filter}
+  onFilterChange={setFilter}
 />
 
           <StatsCards

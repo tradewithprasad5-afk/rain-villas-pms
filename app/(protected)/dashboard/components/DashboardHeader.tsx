@@ -8,10 +8,14 @@ import { Booking } from "@/app/types/booking";
 
 interface DashboardHeaderProps {
   todayBalanceDue: Booking[];
+  filter: "month" | "year" | "all";
+  onFilterChange: (value: "month" | "year" | "all") => void;
 }
 
 export default function DashboardHeader({
   todayBalanceDue,
+  filter,
+  onFilterChange,
 }: DashboardHeaderProps) {
   const router = useRouter();
 
@@ -62,8 +66,21 @@ export default function DashboardHeader({
       </div>
 
       {/* Right */}
-
-      <div className="flex items-center gap-4">
+       
+      <div className="flex flex-wrap items-center gap-4 justify-end">
+        <select
+  value={filter}
+  onChange={(e) =>
+    onFilterChange(
+      e.target.value as "month" | "year" | "all"
+    )
+  }
+  className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-medium shadow-sm focus:border-blue-500 focus:outline-none"
+>
+  <option value="month">This Month</option>
+  <option value="year">This Year</option>
+  <option value="all">All Time</option>
+</select>
         {/* Date */}
 
         <div className="flex items-center gap-3 rounded-xl bg-slate-50 px-4 py-3">
