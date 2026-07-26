@@ -42,7 +42,7 @@ export default function DashboardPage() {
   const [heavenCheckout, setHeavenCheckout] = useState("");
 
   const [activities, setActivities] = useState<Activity[]>([]);
-
+  const [todayBalanceDue, setTodayBalanceDue] = useState<Booking[]>([]);
   const [monthlyRevenue, setMonthlyRevenue] = useState<number[]>(
     new Array(12).fill(0)
   );
@@ -105,8 +105,16 @@ const CHECK_OUT_HOUR = 11;
     setHeavenCheckout("");
 
     const activityList: Activity[] = [];
-
+    const balanceDueToday: Booking[] = [];
     data.forEach((booking) => {
+      if (
+  booking.status === "Confirmed" &&
+  booking.checkIn <= today &&
+booking.checkOut >= today &&
+booking.balanceAmount > 0
+) {
+  balanceDueToday.push(booking);
+}
       if (booking.status !== "Confirmed") return;
 
       const paradiseOccupied =
@@ -157,6 +165,7 @@ if (heavenOccupied) {
     });
 
     setActivities(activityList);
+    setTodayBalanceDue(balanceDueToday);
   }
 
   useEffect(() => {
@@ -168,7 +177,9 @@ if (heavenOccupied) {
 
       
 
-          <DashboardHeader />
+          <DashboardHeader
+  todayBalanceDue={todayBalanceDue}
+/>
 
           <StatsCards
             totalBookings={totalBookings}
