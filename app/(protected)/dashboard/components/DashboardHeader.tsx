@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CalendarDays, Bell } from "lucide-react";
 
@@ -16,6 +16,28 @@ export default function DashboardHeader({
   const router = useRouter();
 
   const [showNotifications, setShowNotifications] = useState(false);
+
+  const notificationRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: PointerEvent) {
+      if (
+        notificationRef.current &&
+        !notificationRef.current.contains(event.target as Node)
+      ) {
+        setShowNotifications(false);
+      }
+    }
+
+    document.addEventListener("pointerdown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener(
+        "pointerdown",
+        handleClickOutside
+      );
+    };
+  }, []);
 
   const greeting = () => {
     const hour = new Date().getHours();
@@ -70,10 +92,13 @@ export default function DashboardHeader({
 
         {/* Notification Bell */}
 
-        <div className="relative">
+        <div
+          ref={notificationRef}
+          className="relative"
+        >
           <button
             onClick={() =>
-              setShowNotifications(!showNotifications)
+              setShowNotifications((prev) => !prev)
             }
             className="relative rounded-xl bg-slate-50 p-3 transition hover:bg-slate-100"
           >
@@ -115,11 +140,13 @@ export default function DashboardHeader({
                     </div>
 
                     <button
-                      onClick={() =>
+                      onClick={() => {
+                        setShowNotifications(false);
+
                         router.push(
                           `/payments?booking=${booking.bookingNumber}`
-                        )
-                      }
+                        );
+                      }}
                       className="mt-3 w-full rounded-lg bg-blue-600 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
                     >
                       Collect Payment

@@ -22,9 +22,9 @@ export default function LoginPage() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       router.push("/");
-    } catch (err: any) {
-      setError("Invalid email or password.");
-    } finally {
+    } catch {
+  setError("Invalid email or password.");
+} finally {
       setLoading(false);
     }
   }
