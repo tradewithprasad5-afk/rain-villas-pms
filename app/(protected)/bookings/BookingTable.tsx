@@ -138,11 +138,27 @@ export default function BookingTable({
   {formatDateRange(booking.checkIn, booking.checkOut)}
 </p>
 
-  <div className="mt-2 border-t pt-2 flex flex-wrap gap-1">
+  <div className="mt-2 border-t pt-2 flex flex-wrap items-center gap-2">
+
+  <span
+    className={`inline-flex rounded-full px-2 py-1 text-[10px] font-medium ${
+      booking.consentStatus === "Completed"
+        ? "bg-green-100 text-green-700"
+        : "bg-amber-100 text-amber-700"
+    }`}
+  >
+    {booking.consentStatus === "Completed"
+      ? "Completed"
+      : "Pending"}
+  </span>
+
   {booking.consentStatus !== "Completed" && (
-    <span className="inline-flex rounded-full bg-amber-100 px-2 py-1 text-[10px] font-medium text-amber-700">
-      Consent Pending
-    </span>
+    <button
+      onClick={() => onCompleteConsent(booking.id)}
+      className="rounded-md bg-green-600 px-2 py-1 text-[10px] font-medium text-white hover:bg-green-700"
+    >
+      ✓ Complete
+    </button>
   )}
 
   {booking.balanceAmount > 0 && (
@@ -150,6 +166,7 @@ export default function BookingTable({
       Balance ₹{booking.balanceAmount}
     </span>
   )}
+
 </div>
 </div>
             </div>
