@@ -117,20 +117,21 @@ async function loadBookings() {
       );
 
       if (booking) {
-        setSelectedBooking(booking);
+  setSelectedBooking(booking);
 
-        setBookingNumber(booking.bookingNumber);
-        setCustomerName(booking.customerName);
+  setBookingNumber(booking.bookingNumber);
+  setCustomerName(booking.customerName);
 
-        setTotalAmount(booking.totalAmount);
-        setAdvancePaid(booking.advancePaid);
-        setBalanceAmount(booking.balanceAmount);
+  setTotalAmount(booking.totalAmount);
+  setAdvancePaid(booking.advancePaid);
+  setBalanceAmount(booking.balanceAmount);
 
-        setPaymentType("Balance");
-        setAmount(String(booking.balanceAmount));
-
-        setShowForm(true);
-      }
+  if (booking.balanceAmount > 0) {
+    setPaymentType("Balance");
+    setAmount(String(booking.balanceAmount));
+    setShowForm(true);
+  }
+}
     }
   } catch (err) {
     console.error("Error loading bookings:", err);
