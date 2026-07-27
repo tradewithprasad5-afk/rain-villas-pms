@@ -31,6 +31,7 @@ export default function PaymentsPage() {
     
     const [payments, setPayments] = useState<Payment[]>([]);
     const [bookings, setBookings] = useState<Booking[]>([]);
+    const [filter, setFilter] = useState<"month" | "year" | "all">("month");
 const [loading, setLoading] = useState(true);
 const [showForm, setShowForm] = useState(false);
 const [search, setSearch] = useState("");
@@ -49,21 +50,76 @@ const [whatsappParam, setWhatsappParam] = useState("");
 const [totalAmount, setTotalAmount] = useState(0);
 const [advancePaid, setAdvancePaid] = useState(0);
 const [balanceAmount, setBalanceAmount] = useState(0);
+const now = new Date();
+const currentMonth = now.getMonth();
+const currentYear = now.getFullYear();
 
-const totalRevenue = bookings.reduce(
+const filteredStatsBookings = bookings.filter((booking) => {
+  if (booking.status === "Cancelled") return false;
+  if (!booking.checkIn) return false;
+
+  const checkIn = new Date(booking.checkIn);
+
+  switch (filter) {
+    case "month":
+      return (
+        checkIn.getMonth() === currentMonth &&
+        checkIn.getFullYear() === currentYear
+      );
+
+    case "year":
+  return (
+    new Date(booking.checkOut).getFullYear() === currentYear ||
+    checkIn.getFullYear() === currentYear
+  );
+
+    case "all":
+      return true;
+  }
+});
+
+const totalRevenue = filteredStatsBookings.reduce(
   (sum, booking) => sum + booking.totalAmount,
   0
 );
 
-const totalReceived = bookings.reduce(
+const totalReceived = filteredStatsBookings.reduce(
   (sum, booking) => sum + booking.advancePaid,
   0
 );
 
-const totalOutstanding = bookings.reduce(
+const totalOutstanding = filteredStatsBookings.reduce(
   (sum, booking) => sum + booking.balanceAmount,
   0
 );
+
+let totalBookings = 0;
+
+filteredStatsBookings.forEach((booking) => {
+  if (booking.status === "Cancelled") return;
+  if (!booking.checkIn || !booking.checkOut) return;
+
+  let current = new Date(booking.checkIn);
+  const checkOut = new Date(booking.checkOut);
+
+  while (current < checkOut) {
+    if (filter === "month") {
+  if (
+    current.getMonth() === currentMonth &&
+    current.getFullYear() === currentYear
+  ) {
+    totalBookings++;
+  }
+} else if (filter === "year") {
+  if (current.getFullYear() === currentYear) {
+    totalBookings++;
+  }
+} else {
+  totalBookings++;
+}
+    current.setDate(current.getDate() + 1);
+  }
+});
 async function loadPayments() {
   const snapshot = await getDocs(collection(db, "payments"));
 
@@ -254,6 +310,8 @@ useEffect(() => {
   loadPayments();
 }, [bookingParam, whatsappParam]);
 
+
+
 const filteredBookings = bookings
   .filter((booking) => {
     const matchesSearch =
@@ -282,13 +340,16 @@ const filteredBookings = bookings
   });
   return (
   <>
-    <PaymentHeader />
+    <PaymentHeader
+  filter={filter}
+  onFilterChange={setFilter}
+/>
 
     <PaymentStats
       totalRevenue={totalRevenue}
       totalReceived={totalReceived}
       totalOutstanding={totalOutstanding}
-      totalBookings={bookings.length}
+      totalBookings={totalBookings}
     />
 
     <PaymentSearch
