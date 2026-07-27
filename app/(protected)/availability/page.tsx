@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../lib/firebase";
-import DashboardCards from "./components/DashboardCards";
+
 import CalendarGrid from "./components/CalendarGrid";
 import BookingDrawer from "./components/BookingDrawer";
 import Legend from "./components/Legend";
@@ -375,17 +375,7 @@ return (
 
 </div>
 
-              </div>
-              {/* Dashboard */}
-
-<div className="mt-6">
-  <DashboardCards
-    totalBookings={bookings.length}
-    occupiedToday={occupiedToday}
-    availableToday={availableToday}
-    occupancyRate={occupancyRate}
-  />
-</div>
+ </div>             
 
 {/* Legend */}
 
