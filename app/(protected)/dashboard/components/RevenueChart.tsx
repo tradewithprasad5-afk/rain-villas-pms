@@ -70,27 +70,27 @@ export default function RevenueChart({
   }, [filter, revenueData]);
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm">
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 sm:gap-4">
 
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100">
-            <TrendingUp className="h-6 w-6 text-emerald-600" />
+          <div className="flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-100">
+            <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-emerald-600" />
           </div>
 
-          <div>
+          <div className="min-w-0">
 
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500">
               Revenue Analytics
             </p>
 
-            <h2 className="mt-1 text-3xl font-bold text-slate-900">
+            <h2 className="mt-1 text-xl sm:text-3xl font-bold text-slate-900 truncate">
               ₹{totalRevenue.toLocaleString("en-IN")}
             </h2>
 
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-0.5 sm:mt-1 text-xs sm:text-sm text-slate-500">
               Total revenue generated
             </p>
 
@@ -103,7 +103,7 @@ export default function RevenueChart({
           onChange={(e) =>
             setFilter(e.target.value as Filter)
           }
-          className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium outline-none focus:border-blue-500"
+          className="w-full sm:w-auto rounded-xl border border-slate-300 bg-white px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium outline-none focus:border-blue-500"
         >
           <option value="month">This Month</option>
           <option value="6months">Last 6 Months</option>
@@ -112,11 +112,11 @@ export default function RevenueChart({
 
       </div>
 
-      <div className="mt-8 h-[320px]">
+      <div className="mt-5 sm:mt-8 h-[220px] sm:h-[320px]">
 
         <ResponsiveContainer width="100%" height="100%">
 
-          <LineChart data={chartData}>
+          <LineChart data={chartData} margin={{ left: -20 }}>
 
             <CartesianGrid
               strokeDasharray="3 3"
@@ -126,16 +126,16 @@ export default function RevenueChart({
 
             <XAxis
               dataKey="month"
-              tick={{ fontSize: 12 }}
+              tick={{ fontSize: 11 }}
               tickLine={false}
               axisLine={false}
             />
 
             <YAxis
-              tick={{ fontSize: 12 }}
+              tick={{ fontSize: 11 }}
               tickLine={false}
               axisLine={false}
-              width={60}
+              width={50}
             />
 
             <Tooltip
@@ -147,6 +147,7 @@ export default function RevenueChart({
                 borderRadius: "12px",
                 border: "1px solid #e2e8f0",
                 boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
+                fontSize: "12px",
               }}
             />
 
@@ -154,14 +155,14 @@ export default function RevenueChart({
               type="monotone"
               dataKey="revenue"
               stroke="#10b981"
-              strokeWidth={4}
+              strokeWidth={3}
               dot={{
-                r: 5,
+                r: 4,
                 strokeWidth: 2,
                 fill: "#10b981",
               }}
               activeDot={{
-                r: 8,
+                r: 7,
               }}
             />
 

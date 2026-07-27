@@ -43,68 +43,27 @@ export default function DashboardHeader({
     };
   }, []);
 
-  const greeting = () => {
-    const hour = new Date().getHours();
-
-    if (hour < 12) return "Good Morning ☀️";
-    if (hour < 17) return "Good Afternoon 🌤️";
-    return "Good Evening 🌙";
-  };
+  const filterOptions: { value: "month" | "year" | "all"; label: string }[] = [
+    { value: "month", label: "Month" },
+    { value: "year", label: "Year" },
+    { value: "all", label: "All time" },
+  ];
 
   return (
-    <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:flex-row md:items-center md:justify-between">
-      {/* Left */}
+    <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm">
 
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900 md:text-3xl">
-          {greeting()}, Admin
-        </h1>
+      {/* Top row */}
 
-        <p className="mt-1 text-sm text-slate-500 md:text-base">
-          Welcome back! Here's what's happening at Rain Villa today.
-        </p>
-      </div>
+      <div className="flex flex-wrap items-start justify-between gap-3">
 
-      {/* Right */}
-       
-      <div className="flex flex-wrap items-center gap-4 justify-end">
-        <select
-  value={filter}
-  onChange={(e) =>
-    onFilterChange(
-      e.target.value as "month" | "year" | "all"
-    )
-  }
-  className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-medium shadow-sm focus:border-blue-500 focus:outline-none"
->
-  <option value="month">This Month</option>
-  <option value="year">This Year</option>
-  <option value="all">All Time</option>
-</select>
-        {/* Date */}
+        <div>
+          <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-slate-900">
+            Rain Villa Dashboard
+          </h1>
 
-        <div className="flex items-center gap-3 rounded-xl bg-slate-50 px-4 py-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100">
-            <CalendarDays
-              size={20}
-              className="text-blue-600"
-            />
-          </div>
-
-          <div>
-            <p className="text-xs uppercase tracking-wide text-slate-500">
-              Today
-            </p>
-
-            <p className="text-sm font-semibold text-slate-900">
-              {new Date().toLocaleDateString("en-IN", {
-                weekday: "long",
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              })}
-            </p>
-          </div>
+          <p className="mt-1 text-xs sm:text-sm text-slate-500">
+            Here&apos;s what&apos;s happening at Rain Villa today.
+          </p>
         </div>
 
         {/* Notification Bell */}
@@ -117,20 +76,20 @@ export default function DashboardHeader({
             onClick={() =>
               setShowNotifications((prev) => !prev)
             }
-            className="relative rounded-xl bg-slate-50 p-3 transition hover:bg-slate-100"
+            className="relative rounded-xl border border-slate-200 p-2.5 transition hover:bg-slate-50"
           >
-            <Bell className="h-6 w-6 text-slate-700" />
+            <Bell className="h-5 w-5 text-slate-700" />
 
             {todayBalanceDue.length > 0 && (
-              <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-xs font-bold text-white">
+              <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white">
                 {todayBalanceDue.length}
               </span>
             )}
           </button>
 
           {showNotifications && (
-            <div className="absolute right-0 z-50 mt-2 w-80 overflow-hidden rounded-xl border bg-white shadow-xl">
-              <div className="border-b bg-gray-50 px-4 py-3 font-semibold">
+            <div className="absolute right-0 z-50 mt-2 w-72 sm:w-80 overflow-hidden rounded-xl border bg-white shadow-xl">
+              <div className="border-b bg-gray-50 px-4 py-3 font-semibold text-sm">
                 💰 Balance Due Today
               </div>
 
@@ -144,7 +103,7 @@ export default function DashboardHeader({
                     key={booking.id}
                     className="border-b p-4 last:border-b-0"
                   >
-                    <div className="font-semibold">
+                    <div className="font-semibold text-sm">
                       {booking.customerName}
                     </div>
 
@@ -152,7 +111,7 @@ export default function DashboardHeader({
                       {booking.villa}
                     </div>
 
-                    <div className="mt-1 font-semibold text-red-600">
+                    <div className="mt-1 font-semibold text-red-600 text-sm">
                       Balance ₹{booking.balanceAmount}
                     </div>
 
@@ -174,7 +133,41 @@ export default function DashboardHeader({
             </div>
           )}
         </div>
+
       </div>
+
+      {/* Bottom row */}
+
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-3">
+
+        <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-500">
+          <CalendarDays size={15} className="text-slate-400 shrink-0" />
+          {new Date().toLocaleDateString("en-IN", {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          })}
+        </div>
+
+        <div className="flex items-center gap-0.5 rounded-lg border border-slate-200 bg-slate-50 p-0.5">
+          {filterOptions.map((option) => (
+            <button
+              key={option.value}
+              onClick={() => onFilterChange(option.value)}
+              className={`rounded-md px-2.5 sm:px-3 py-1.5 text-xs font-semibold transition ${
+                filter === option.value
+                  ? "bg-white text-slate-900 shadow-sm border border-slate-200"
+                  : "text-slate-500 hover:text-slate-700"
+              }`}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+
+      </div>
+
     </div>
   );
 }

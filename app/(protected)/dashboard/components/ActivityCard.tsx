@@ -21,28 +21,28 @@ export default function ActivityCard({
   activities,
 }: Props) {
   return (
-    <div className="h-full rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div className="h-full rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm">
 
       {/* Header */}
-      <div className="mb-6 flex items-start justify-between">
+      <div className="mb-4 sm:mb-6 flex items-start justify-between gap-2">
 
         <div>
 
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+          <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500">
             Activity
           </p>
 
-          <h2 className="mt-1 text-2xl font-bold text-slate-900">
-            Today's Activity
+          <h2 className="mt-1 text-lg sm:text-2xl font-bold text-slate-900">
+            Today&apos;s Activity
           </h2>
 
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-xs sm:text-sm text-slate-500">
             Check-ins & Check-outs
           </p>
 
         </div>
 
-        <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
+        <span className="shrink-0 rounded-full bg-blue-100 px-2.5 sm:px-3 py-1 text-[11px] sm:text-xs font-semibold text-blue-700">
           {activities.length}{" "}
           {activities.length === 1 ? "Event" : "Events"}
         </span>
@@ -53,19 +53,19 @@ export default function ActivityCard({
 
       {activities.length === 0 ? (
 
-        <div className="flex min-h-[260px] flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50">
+        <div className="flex min-h-[180px] sm:min-h-[260px] flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50">
 
-          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-200">
+          <div className="mb-3 sm:mb-4 flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-slate-200">
 
-            <Clock3 className="h-8 w-8 text-slate-500" />
+            <Clock3 className="h-6 w-6 sm:h-8 sm:w-8 text-slate-500" />
 
           </div>
 
-          <h3 className="text-lg font-semibold text-slate-700">
+          <h3 className="text-base sm:text-lg font-semibold text-slate-700">
             No Activity Today
           </h3>
 
-          <p className="mt-2 text-center text-sm text-slate-500">
+          <p className="mt-1.5 sm:mt-2 text-center text-xs sm:text-sm text-slate-500 px-4">
             There are no scheduled check-ins or
             check-outs for today.
           </p>
@@ -74,7 +74,7 @@ export default function ActivityCard({
 
       ) : (
 
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
 
           {activities.map((activity, index) => {
 
@@ -85,15 +85,15 @@ export default function ActivityCard({
 
               <div
                 key={index}
-                className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 p-4 transition-all duration-300 hover:border-blue-200 hover:bg-white hover:shadow-md"
+                className="flex items-center justify-between gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:p-4 transition-all duration-300 hover:border-blue-200 hover:bg-white hover:shadow-md"
               >
 
                 {/* Left */}
 
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3 sm:gap-4 min-w-0">
 
                   <div
-                    className={`flex h-12 w-12 items-center justify-center rounded-xl ${
+                    className={`flex h-9 w-9 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl ${
                       isCheckIn
                         ? "bg-green-100"
                         : "bg-red-100"
@@ -101,20 +101,20 @@ export default function ActivityCard({
                   >
 
                     {isCheckIn ? (
-                      <CalendarCheck className="h-6 w-6 text-green-600" />
+                      <CalendarCheck className="h-4 w-4 sm:h-6 sm:w-6 text-green-600" />
                     ) : (
-                      <CalendarX className="h-6 w-6 text-red-600" />
+                      <CalendarX className="h-4 w-4 sm:h-6 sm:w-6 text-red-600" />
                     )}
 
                   </div>
 
-                  <div>
+                  <div className="min-w-0">
 
-                    <h3 className="font-semibold text-slate-900">
+                    <h3 className="text-sm sm:text-base font-semibold text-slate-900 truncate">
                       {activity.guest}
                     </h3>
 
-                    <p className="mt-1 text-sm text-slate-500">
+                    <p className="mt-0.5 sm:mt-1 text-xs sm:text-sm text-slate-500 truncate">
                       {activity.villa}
                     </p>
 
@@ -124,10 +124,10 @@ export default function ActivityCard({
 
                 {/* Right */}
 
-                <div className="text-right">
+                <div className="text-right shrink-0">
 
                   <span
-                    className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
+                    className={`inline-flex items-center rounded-full px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-semibold ${
                       isCheckIn
                         ? "bg-green-100 text-green-700"
                         : "bg-red-100 text-red-700"
@@ -138,7 +138,7 @@ export default function ActivityCard({
                       : "Check-Out"}
                   </span>
 
-                  <p className="mt-2 text-sm font-medium text-slate-500">
+                  <p className="mt-1.5 sm:mt-2 text-[11px] sm:text-sm font-medium text-slate-500">
                     {activity.date}
                   </p>
 

@@ -225,7 +225,7 @@ if (heavenOccupied) {
 }, [filter]);
 
   return (
-  <div className="mx-auto max-w-7xl space-y-8 px-4 py-4 sm:px-6">
+  <div className="mx-auto max-w-7xl space-y-5 sm:space-y-8 px-3 py-3 sm:px-6 sm:py-4">
 
       
 
@@ -249,7 +249,7 @@ if (heavenOccupied) {
             totalRevenue={totalRevenue}
           />
 
-          <div className="grid gap-6 lg:grid-cols-3">
+          <div className="grid gap-5 sm:gap-6 lg:grid-cols-3">
 
   <div className="lg:col-span-2">
     <ActivityCard activities={activities} />
