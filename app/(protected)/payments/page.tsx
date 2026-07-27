@@ -69,7 +69,8 @@ const filteredStatsBookings = bookings.filter((booking) => {
 
     case "year":
   return (
-    new Date(booking.checkOut).getFullYear() === currentYear ||
+    (booking.checkOut &&
+      new Date(booking.checkOut).getFullYear() === currentYear) ||
     checkIn.getFullYear() === currentYear
   );
 
