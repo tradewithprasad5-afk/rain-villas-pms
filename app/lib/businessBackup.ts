@@ -3,6 +3,90 @@ import { db } from "@/app/lib/firebase";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 
+const HEADER_FILL = "2563EB";
+const BORDER_COLOR = "D1D5DB";
+
+const THIN_BORDER: Partial<ExcelJS.Borders> = {
+  top: { style: "thin", color: { argb: BORDER_COLOR } },
+  left: { style: "thin", color: { argb: BORDER_COLOR } },
+  bottom: { style: "thin", color: { argb: BORDER_COLOR } },
+  right: { style: "thin", color: { argb: BORDER_COLOR } },
+};
+
+function styleHeaderRow(sheet: ExcelJS.Worksheet) {
+  const headerRow = sheet.getRow(1);
+
+  headerRow.height = 22;
+
+  headerRow.eachCell((cell) => {
+    cell.font = { bold: true, color: { argb: "FFFFFFFF" } };
+    cell.fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: HEADER_FILL },
+    };
+    cell.alignment = { vertical: "middle", horizontal: "left" };
+    cell.border = THIN_BORDER;
+  });
+
+  sheet.views = [{ state: "frozen", ySplit: 1 }];
+  sheet.autoFilter = {
+    from: { row: 1, column: 1 },
+    to: { row: 1, column: sheet.columnCount },
+  };
+}
+
+function styleDataRows(sheet: ExcelJS.Worksheet) {
+  for (let i = 2; i <= sheet.rowCount; i++) {
+    const row = sheet.getRow(i);
+
+    row.eachCell({ includeEmpty: true }, (cell) => {
+      cell.border = THIN_BORDER;
+      cell.alignment = { vertical: "middle" };
+    });
+
+    if (i % 2 === 0) {
+      row.eachCell({ includeEmpty: true }, (cell) => {
+        if (!cell.fill || cell.fill.type !== "pattern") {
+          cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "F8FAFC" },
+          };
+        }
+      });
+    }
+  }
+}
+
+function applyCurrencyFormat(sheet: ExcelJS.Worksheet, keys: string[]) {
+  keys.forEach((key) => {
+    const column = sheet.getColumn(key);
+    column.numFmt = "₹#,##0";
+    column.alignment = { horizontal: "right" };
+  });
+}
+
+function colorStatusColumn(
+  sheet: ExcelJS.Worksheet,
+  key: string,
+  positiveValues: string[]
+) {
+  const column = sheet.getColumn(key);
+
+  column.eachCell({ includeEmpty: false }, (cell, rowNumber) => {
+    if (rowNumber === 1) return;
+
+    const value = String(cell.value || "");
+    const isPositive = positiveValues.includes(value);
+
+    cell.font = {
+      bold: true,
+      color: { argb: isPositive ? "FF15803D" : "FFB91C1C" },
+    };
+  });
+}
+
 export async function downloadBusinessBackup() {
   try {
     // Read Firestore collections
@@ -57,17 +141,6 @@ summarySheet.columns = [
   { header: "Value", key: "value", width: 30 },
 ];
 
-summarySheet.getRow(1).font = {
-  bold: true,
-  color: { argb: "FFFFFFFF" },
-};
-
-summarySheet.getRow(1).fill = {
-  type: "pattern",
-  pattern: "solid",
-  fgColor: { argb: "2563EB" },
-};
-
 const totalRevenue = bookings.reduce(
   (sum: number, booking: any) => sum + Number(booking.totalAmount || 0),
   0
@@ -97,6 +170,9 @@ summarySheet.addRows([
   { srNo: 7, field: "Advance Received", value: advanceReceived },
   { srNo: 8, field: "Pending Balance", value: pendingBalance },
 ]);
+
+styleHeaderRow(summarySheet);
+styleDataRows(summarySheet);
   
 // ======================
 // Bookings Sheet
@@ -117,17 +193,6 @@ bookingsSheet.columns = [
   { header: "Advance Paid", key: "advancePaid", width: 18 },
   { header: "Balance Amount", key: "balanceAmount", width: 18 },
 ];
-
-bookingsSheet.getRow(1).font = {
-  bold: true,
-  color: { argb: "FFFFFFFF" },
-};
-
-bookingsSheet.getRow(1).fill = {
-  type: "pattern",
-  pattern: "solid",
-  fgColor: { argb: "2563EB" },
-};
 
 bookings.forEach((booking: any, index: number) => {
     const phone =
@@ -153,6 +218,15 @@ bookings.forEach((booking: any, index: number) => {
 
 });
 bookingsSheet.getColumn("phone").numFmt = "@";
+
+applyCurrencyFormat(bookingsSheet, [
+  "totalAmount",
+  "advancePaid",
+  "balanceAmount",
+]);
+colorStatusColumn(bookingsSheet, "status", ["Confirmed"]);
+styleHeaderRow(bookingsSheet);
+styleDataRows(bookingsSheet);
 // ======================
 // Payments Sheet
 // ======================
@@ -167,16 +241,6 @@ paymentsSheet.columns = [
   { header: "Balance Amount", key: "balanceAmount", width: 18 },
   { header: "Payment Status", key: "paymentStatus", width: 20 },
 ];
-paymentsSheet.getRow(1).font = {
-  bold: true,
-  color: { argb: "FFFFFFFF" },
-};
-
-paymentsSheet.getRow(1).fill = {
-  type: "pattern",
-  pattern: "solid",
-  fgColor: { argb: "2563EB" },
-};
 
 bookings.forEach((booking: any, index: number) => {
     const phone =
@@ -201,6 +265,15 @@ bookings.forEach((booking: any, index: number) => {
 });
 
 paymentsSheet.getColumn("phone").numFmt = "@";
+
+applyCurrencyFormat(paymentsSheet, [
+  "totalAmount",
+  "advancePaid",
+  "balanceAmount",
+]);
+colorStatusColumn(paymentsSheet, "paymentStatus", ["Paid"]);
+styleHeaderRow(paymentsSheet);
+styleDataRows(paymentsSheet);
 // ======================
 // Revenue Report Sheet
 // ======================
@@ -210,16 +283,6 @@ revenueSheet.columns = [
   { header: "Description", key: "description", width: 35 },
   { header: "Amount", key: "amount", width: 20 },
 ];
-revenueSheet.getRow(1).font = {
-  bold: true,
-  color: { argb: "FFFFFFFF" },
-};
-
-revenueSheet.getRow(1).fill = {
-  type: "pattern",
-  pattern: "solid",
-  fgColor: { argb: "2563EB" },
-};
 
 revenueSheet.addRows([
   {
@@ -238,6 +301,10 @@ revenueSheet.addRows([
     amount: pendingBalance,
   },
 ]);
+
+applyCurrencyFormat(revenueSheet, ["amount"]);
+styleHeaderRow(revenueSheet);
+styleDataRows(revenueSheet);
     // Generate file
     const buffer = await workbook.xlsx.writeBuffer();
 
