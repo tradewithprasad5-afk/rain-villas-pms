@@ -9,9 +9,7 @@ import {
   Wallet,
   AlertCircle,
   BookOpen,
-  Calendar,
   Download,
-  ChevronDown,
 } from "lucide-react";
 
 
@@ -46,22 +44,22 @@ function StatCard({
   iconColor,
 }: StatCardProps) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-sm text-slate-500">{title}</p>
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <p className="text-xs sm:text-sm text-slate-500">{title}</p>
 
-          <h2 className="mt-3 text-3xl font-bold text-slate-900">
+          <h2 className="mt-2 sm:mt-3 text-xl sm:text-3xl font-bold text-slate-900 truncate">
             {value}
           </h2>
 
-          <p className="mt-2 text-sm text-slate-400">
+          <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm text-slate-400 truncate">
             {subtitle}
           </p>
         </div>
 
         <div
-          className={`h-14 w-14 rounded-2xl flex items-center justify-center ${iconBg}`}
+          className={`h-10 w-10 sm:h-14 sm:w-14 shrink-0 rounded-2xl flex items-center justify-center ${iconBg}`}
         >
           <div className={iconColor}>{icon}</div>
         </div>
@@ -268,26 +266,30 @@ return date >= start && date <= end;
     );
   }
 
+  const sortedMonthlyBookings = Object.entries(monthlyBookings).sort(
+    ([a], [b]) => new Date(b).getTime() - new Date(a).getTime()
+  );
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="max-w-7xl mx-auto px-3 py-4 sm:px-6 lg:px-8 sm:py-8 space-y-5 sm:space-y-8">
 
       {/* Header */}
 
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-col gap-3 sm:gap-4 md:flex-row md:items-center md:justify-between">
 
         <div>
 
-          <h1 className="text-3xl font-bold text-slate-900">
+          <h1 className="text-xl sm:text-3xl font-bold text-slate-900">
             Reports
           </h1>
 
-          <p className="mt-2 text-slate-500">
+          <p className="mt-1 sm:mt-2 text-sm text-slate-500">
             Revenue, occupancy and booking reports.
           </p>
 
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3">
 
           <select
   value={period}
@@ -304,7 +306,7 @@ return date >= start && date <= end;
 
           <button
   onClick={handleExport}
-  className="flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
+  className="flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
 >
 
             <Download size={18} />
@@ -319,13 +321,13 @@ return date >= start && date <= end;
 
       {/* KPI Cards */}
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-6 xl:grid-cols-4">
 
         <StatCard
           title="Total Revenue"
           value={`₹${totalRevenue.toLocaleString("en-IN")}`}
           subtitle="Total booking value"
-          icon={<IndianRupee size={24} />}
+          icon={<IndianRupee size={22} />}
           iconBg="bg-blue-100"
           iconColor="text-blue-600"
         />
@@ -334,7 +336,7 @@ return date >= start && date <= end;
           title="Amount Received"
           value={`₹${totalReceived.toLocaleString("en-IN")}`}
           subtitle="Collected payments"
-          icon={<Wallet size={24} />}
+          icon={<Wallet size={22} />}
           iconBg="bg-emerald-100"
           iconColor="text-emerald-600"
         />
@@ -343,7 +345,7 @@ return date >= start && date <= end;
           title="Outstanding"
           value={`₹${totalBalance.toLocaleString("en-IN")}`}
           subtitle="Pending payments"
-          icon={<AlertCircle size={24} />}
+          icon={<AlertCircle size={22} />}
           iconBg="bg-red-100"
           iconColor="text-red-600"
         />
@@ -352,7 +354,7 @@ return date >= start && date <= end;
           title="Total Bookings"
           value={totalBookings.toString()}
           subtitle="Confirmed bookings"
-          icon={<BookOpen size={24} />}
+          icon={<BookOpen size={22} />}
           iconBg="bg-violet-100"
           iconColor="text-violet-600"
         />
@@ -361,29 +363,43 @@ return date >= start && date <= end;
 
             {/* Reports Grid */}
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-5 sm:gap-6">
 
         {/* Monthly Bookings */}
 
         <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
 
-          <div className="flex items-center justify-between border-b border-slate-100 p-6">
+          <div className="border-b border-slate-100 p-4 sm:p-6">
 
-            <div>
+            <h2 className="text-base sm:text-lg font-semibold text-slate-900">
+              Monthly Bookings
+            </h2>
 
-              <h2 className="text-lg font-semibold text-slate-900">
-                Monthly Bookings
-              </h2>
-
-              <p className="mt-1 text-sm text-slate-500">
-                Booking summary by month
-              </p>
-
-            </div>
+            <p className="mt-1 text-xs sm:text-sm text-slate-500">
+              Booking summary by month
+            </p>
 
           </div>
 
-          <div className="overflow-x-auto">
+          {/* Mobile: compact list */}
+
+          <div className="sm:hidden divide-y divide-slate-100">
+            {sortedMonthlyBookings.map(([month, count]) => (
+              <div
+                key={month}
+                className="flex items-center justify-between px-4 py-3"
+              >
+                <span className="text-sm text-slate-700">{month}</span>
+                <span className="text-sm font-semibold text-slate-900">
+                  {count}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop: table */}
+
+          <div className="hidden sm:block overflow-x-auto">
 
             <table className="w-full">
 
@@ -405,13 +421,7 @@ return date >= start && date <= end;
 
               <tbody>
 
-                {Object.entries(monthlyBookings)
-                  .sort(
-                    ([a], [b]) =>
-                      new Date(b).getTime() -
-                      new Date(a).getTime()
-                  )
-                  .map(([month, count]) => (
+                {sortedMonthlyBookings.map(([month, count]) => (
 
                     <tr
                       key={month}
@@ -442,19 +452,19 @@ return date >= start && date <= end;
 
         <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
 
-          <div className="border-b border-slate-100 p-6">
+          <div className="border-b border-slate-100 p-4 sm:p-6">
 
-            <h2 className="text-lg font-semibold text-slate-900">
+            <h2 className="text-base sm:text-lg font-semibold text-slate-900">
               Villa Revenue
             </h2>
 
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-xs sm:text-sm text-slate-500">
               Revenue contribution by villa
             </p>
 
           </div>
 
-          <div className="space-y-8 p-6">
+          <div className="space-y-5 sm:space-y-8 p-4 sm:p-6">
 
             {Object.entries(villaRevenue)
               .sort(([, a], [, b]) => b - a)
@@ -467,27 +477,27 @@ return date >= start && date <= end;
 
                   <div key={villa}>
 
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between gap-2">
 
-                      <div>
+                      <div className="min-w-0">
 
-                        <h3 className="font-medium text-slate-800">
+                        <h3 className="text-sm sm:text-base font-medium text-slate-800 truncate">
                           {villa}
                         </h3>
 
-                        <p className="mt-1 text-sm text-slate-500">
+                        <p className="mt-0.5 sm:mt-1 text-xs sm:text-sm text-slate-500">
                           ₹{amount.toLocaleString("en-IN")}
                         </p>
 
                       </div>
 
-                      <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
+                      <span className="shrink-0 rounded-full bg-blue-50 px-2.5 sm:px-3 py-1 text-xs font-medium text-blue-700">
                         {percent.toFixed(0)}%
                       </span>
 
                     </div>
 
-                    <div className="mt-3 h-3 overflow-hidden rounded-full bg-slate-100">
+                    <div className="mt-2.5 sm:mt-3 h-2.5 sm:h-3 overflow-hidden rounded-full bg-slate-100">
 
                       <div
                         className="h-full rounded-full bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-600 transition-all duration-700 ease-out"
@@ -512,7 +522,7 @@ return date >= start && date <= end;
 
       {/* Footer */}
 
-      <div className="flex flex-col gap-3 border-t border-slate-200 pt-6 text-sm text-slate-500 md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-col gap-2 sm:gap-3 border-t border-slate-200 pt-4 sm:pt-6 text-xs sm:text-sm text-slate-500 md:flex-row md:items-center md:justify-between">
 
         <p>
           Showing revenue generated from all completed
