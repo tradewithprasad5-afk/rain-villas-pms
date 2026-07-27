@@ -8,7 +8,7 @@ import { db } from "../../lib/firebase";
 
 import CalendarGrid from "./components/CalendarGrid";
 import BookingDrawer from "./components/BookingDrawer";
-import Legend from "./components/Legend";
+
 
 
 interface Booking {
@@ -375,13 +375,10 @@ return (
 
 </div>
 
- </div>             
+ </div>
 
-{/* Legend */}
-
-<div className="mt-6">
-  <Legend />
 </div>
-  </div>
-);
+
+  
+  );
 }
