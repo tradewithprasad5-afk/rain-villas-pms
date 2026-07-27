@@ -184,6 +184,12 @@ Rain Villa`;
           >
             📲 Share payment details
           </button>
+          <button
+  onClick={downloadBusinessBackup}
+  className="w-full flex items-center justify-center gap-2 rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+>
+  📥 Download Business Backup (.xlsx)
+</button>
 
         </div>
 
@@ -216,6 +222,12 @@ Rain Villa`;
           >
             📲 Share payment details
           </button>
+          <button
+  onClick={downloadBusinessBackup}
+  className="lg:hidden mt-3 w-full flex items-center justify-center gap-2 rounded-lg bg-blue-600 py-3 text-sm font-semibold text-white hover:bg-blue-700"
+>
+  📥 Download Business Backup (.xlsx)
+</button>
 
         </div>
 
