@@ -27,12 +27,12 @@ export default function DayCell({
   return (
     <button
       onClick={onClick}
-      className="h-full w-full p-2 text-left transition hover:bg-slate-50"
+      className="h-full w-full p-1.5 sm:p-2 text-left transition hover:bg-slate-50"
     >
       {/* Day */}
 
       <div
-        className={`mb-2 flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold sm:h-9 sm:w-9 sm:text-lg ${
+        className={`mb-1 sm:mb-2 flex h-6 w-6 sm:h-9 sm:w-9 items-center justify-center rounded-full text-xs sm:text-lg font-bold ${
           isToday
             ? "bg-slate-900 text-white shadow-md"
             : "text-slate-800"
@@ -43,15 +43,15 @@ export default function DayCell({
 
       {/* Mobile */}
 
-      <div className="space-y-1 sm:hidden">
+      <div className="space-y-0.5 sm:hidden">
         {paradise && (
-          <div className="rounded bg-green-600 px-2 py-1 text-center text-[10px] font-semibold text-white">
+          <div className="rounded bg-green-600 px-1 py-0.5 text-center text-[9px] font-semibold text-white">
             RP
           </div>
         )}
 
         {heaven && (
-          <div className="rounded bg-blue-600 px-2 py-1 text-center text-[10px] font-semibold text-white">
+          <div className="rounded bg-blue-600 px-1 py-0.5 text-center text-[9px] font-semibold text-white">
             RH
           </div>
         )}

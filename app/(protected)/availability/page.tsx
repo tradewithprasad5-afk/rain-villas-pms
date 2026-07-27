@@ -250,45 +250,45 @@ async function loadBookings() {
   }
 
 return (
-  <div className="space-y-6">
+  <div className="space-y-4 sm:space-y-6">
           {/* Page Header */}
 
-<div className="flex flex-col gap-5 rounded-2xl bg-white p-6 shadow-sm lg:flex-row lg:items-center lg:justify-between">
+<div className="flex flex-col gap-4 sm:gap-5 rounded-2xl bg-white p-4 sm:p-6 shadow-sm lg:flex-row lg:items-center lg:justify-between">
 
   <div>
 
-    <h1 className="text-3xl font-bold text-slate-800">
+    <h1 className="text-xl sm:text-3xl font-bold text-slate-800">
       Availability Calendar
     </h1>
 
-    <p className="mt-2 text-slate-500">
+    <p className="mt-1 sm:mt-2 text-xs sm:text-base text-slate-500">
       View villa availability and create bookings.
     </p>
 
   </div>
 
-  <div className="flex w-full items-center justify-center gap-4 lg:w-auto">
+  <div className="flex w-full items-center justify-center gap-3 sm:gap-4 lg:w-auto">
 
   <button
     onClick={handlePreviousMonth}
-    className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-300 bg-white text-slate-700 shadow-sm transition hover:border-green-600 hover:bg-green-50 hover:text-green-600"
+    className="flex h-9 w-9 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-xl border border-slate-300 bg-white text-slate-700 shadow-sm transition hover:border-green-600 hover:bg-green-50 hover:text-green-600"
     aria-label="Previous Month"
   >
-    <ChevronLeft size={20} />
+    <ChevronLeft size={18} />
   </button>
 
-  <div className="flex min-w-[220px] items-center justify-center">
-  <h2 className="text-2xl font-bold tracking-tight text-slate-800">
+  <div className="flex min-w-[160px] sm:min-w-[220px] items-center justify-center">
+  <h2 className="text-base sm:text-2xl font-bold tracking-tight text-slate-800">
     {months[selectedMonth]} {selectedYear}
   </h2>
 </div>
 
   <button
     onClick={handleNextMonth}
-    className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-300 bg-white text-slate-700 shadow-sm transition hover:border-green-600 hover:bg-green-50 hover:text-green-600"
+    className="flex h-9 w-9 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-xl border border-slate-300 bg-white text-slate-700 shadow-sm transition hover:border-green-600 hover:bg-green-50 hover:text-green-600"
     aria-label="Next Month"
   >
-    <ChevronRight size={20} />
+    <ChevronRight size={18} />
   </button>
 
 </div>
@@ -298,15 +298,15 @@ return (
 
           {/* Calendar Layout */}
 
-          <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 sm:gap-6 xl:grid-cols-4">
 
             <div className="xl:col-span-3">
 
               {loading ? (
 
-  <div className="flex h-[600px] items-center justify-center rounded-3xl bg-white shadow-sm">
+  <div className="flex h-[400px] sm:h-[600px] items-center justify-center rounded-2xl sm:rounded-3xl bg-white shadow-sm">
 
-    <p className="text-lg font-medium text-slate-500">
+    <p className="text-sm sm:text-lg font-medium text-slate-500">
       Loading availability...
     </p>
 
@@ -335,13 +335,13 @@ return (
 
   {selectedDate && (
 
-    <div className="mt-6 rounded-3xl bg-white p-6 shadow-sm">
+    <div className="mt-4 sm:mt-6 rounded-2xl sm:rounded-3xl bg-white p-4 sm:p-6 shadow-sm">
 
-      <h3 className="mb-4 text-lg font-semibold text-slate-800">
+      <h3 className="mb-3 sm:mb-4 text-sm sm:text-lg font-semibold text-slate-800">
         Quick Actions
       </h3>
 
-      <div className="space-y-3">
+      <div className="space-y-2.5 sm:space-y-3">
 
         <button
           onClick={() =>
@@ -350,7 +350,7 @@ return (
               selectedDate
             )
           }
-          className="w-full rounded-xl bg-green-600 px-4 py-3 text-white hover:bg-green-700"
+          className="w-full rounded-xl bg-green-600 px-4 py-2.5 sm:py-3 text-sm sm:text-base text-white hover:bg-green-700"
         >
           Book Rain Paradise
         </button>
@@ -362,7 +362,7 @@ return (
               selectedDate
             )
           }
-          className="w-full rounded-xl bg-blue-600 px-4 py-3 text-white hover:bg-blue-700"
+          className="w-full rounded-xl bg-blue-600 px-4 py-2.5 sm:py-3 text-sm sm:text-base text-white hover:bg-blue-700"
         >
           Book Rain Heaven
         </button>
@@ -377,8 +377,6 @@ return (
 
  </div>
 
-</div>
-
-  
+  </div>
   );
 }

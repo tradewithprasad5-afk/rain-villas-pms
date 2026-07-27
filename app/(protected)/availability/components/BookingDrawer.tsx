@@ -21,9 +21,9 @@ export default function BookingDrawer({
   });
 
   return (
-    <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-6">
+    <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-4 sm:p-6">
 
-      <h2 className="text-lg font-bold mb-4">
+      <h2 className="text-base sm:text-lg font-bold mb-3 sm:mb-4">
         {selectedDate
   ? selectedDate.toLocaleDateString("en-GB", {
       weekday: "short",
@@ -34,19 +34,19 @@ export default function BookingDrawer({
   : "Select a Date"}
       </h2>
 
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
 
         {/* Paradise */}
 
         <div className="rounded-xl border p-3">
 
-          <h3 className="font-semibold mb-3">
+          <h3 className="text-sm sm:text-base font-semibold mb-2 sm:mb-3">
             Rain Paradise
           </h3>
 
           {paradiseBooking ? (
             <>
-  <p className="text-red-600 font-medium">
+  <p className="text-sm text-red-600 font-medium">
     🔴 Booked
   </p>
 
@@ -88,7 +88,7 @@ export default function BookingDrawer({
         `/payments?booking=${paradiseBooking.bookingNumber}`
       )
     }
-    className="flex-1 rounded-lg bg-green-600 py-1.5 text-sm font-medium text-white hover:bg-green-700"
+    className="flex-1 rounded-lg bg-green-600 py-1.5 text-xs sm:text-sm font-medium text-white hover:bg-green-700"
   >
     💰 Payments
   </button>
@@ -99,14 +99,14 @@ export default function BookingDrawer({
         `/payments?whatsapp=${paradiseBooking.bookingNumber}`
       )
     }
-    className="flex-1 rounded-lg bg-blue-600 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
+    className="flex-1 rounded-lg bg-blue-600 py-1.5 text-xs sm:text-sm font-medium text-white hover:bg-blue-700"
   >
     📲 WhatsApp
   </button>
 </div>
 </>
           ) : (
-            <p className="text-green-600 font-medium">
+            <p className="text-sm text-green-600 font-medium">
               🟢 Available
             </p>
           )}
@@ -117,13 +117,13 @@ export default function BookingDrawer({
 
         <div className="rounded-xl border p-3">
 
-          <h3 className="font-semibold mb-3">
+          <h3 className="text-sm sm:text-base font-semibold mb-2 sm:mb-3">
             Rain Heaven
           </h3>
 
           {heavenBooking ? (
             <>
-  <p className="text-red-600 font-medium">
+  <p className="text-sm text-red-600 font-medium">
     🔴 Booked
   </p>
 
@@ -165,7 +165,7 @@ export default function BookingDrawer({
         `/payments?booking=${heavenBooking.bookingNumber}`
       )
     }
-    className="flex-1 rounded-lg bg-green-600 py-1.5 text-sm font-medium text-white hover:bg-green-700"
+    className="flex-1 rounded-lg bg-green-600 py-1.5 text-xs sm:text-sm font-medium text-white hover:bg-green-700"
   >
     💰 Payments
   </button>
@@ -176,14 +176,14 @@ export default function BookingDrawer({
         `/payments?whatsapp=${heavenBooking.bookingNumber}`
       )
     }
-    className="flex-1 rounded-lg bg-blue-600 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
+    className="flex-1 rounded-lg bg-blue-600 py-1.5 text-xs sm:text-sm font-medium text-white hover:bg-blue-700"
   >
     📲 WhatsApp
   </button>
 </div>
 </>
           ) : (
-            <p className="text-green-600 font-medium">
+            <p className="text-sm text-green-600 font-medium">
               🟢 Available
             </p>
           )}

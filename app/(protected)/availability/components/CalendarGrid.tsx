@@ -80,7 +80,7 @@ export default function CalendarGrid({
   
   
     return (
-  <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+  <div className="overflow-hidden rounded-2xl sm:rounded-3xl border border-slate-200 bg-white shadow-sm">
 
       {/* Week Header */}
 
@@ -90,7 +90,7 @@ export default function CalendarGrid({
 
           <div
             key={day}
-            className="border-b py-2 text-center text-xs font-semibold text-slate-600 sm:p-4 sm:text-base"
+            className="border-b py-2 text-center text-[10px] sm:text-xs font-semibold text-slate-600 sm:p-4 sm:text-base"
           >
             {day}
           </div>
@@ -107,7 +107,7 @@ export default function CalendarGrid({
 
           <div
             key={index}
-            className="min-h-[70px] border sm:min-h-[140px]"
+            className="min-h-[56px] sm:min-h-[140px] border"
           >
 
             {day && (
@@ -143,45 +143,42 @@ export default function CalendarGrid({
 
       </div>
 
-      
-      
+      {/* Bottom Legend */}
 
-            {/* Bottom Legend */}
+      <div className="border-t bg-slate-50 p-3 sm:p-5">
 
-      <div className="border-t bg-slate-50 p-5">
+        <div className="flex flex-wrap gap-4 sm:gap-8">
 
-        <div className="flex flex-wrap gap-8">
+          <div className="flex items-center gap-2 sm:gap-3">
 
-          <div className="flex items-center gap-3">
-
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 font-semibold text-green-700">
+            <div className="flex h-7 w-7 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-full bg-green-100 text-xs sm:text-base font-semibold text-green-700">
               RP
             </div>
 
             <div>
-              <p className="font-medium">
+              <p className="text-xs sm:text-base font-medium">
                 Rain Paradise
               </p>
 
-              <p className="text-sm text-slate-500">
+              <p className="text-[11px] sm:text-sm text-slate-500">
                 Ground Floor
               </p>
             </div>
 
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
 
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 font-semibold text-blue-700">
+            <div className="flex h-7 w-7 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs sm:text-base font-semibold text-blue-700">
               RH
             </div>
 
             <div>
-              <p className="font-medium">
+              <p className="text-xs sm:text-base font-medium">
                 Rain Heaven
               </p>
 
-              <p className="text-sm text-slate-500">
+              <p className="text-[11px] sm:text-sm text-slate-500">
                 First Floor
               </p>
             </div>
