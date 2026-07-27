@@ -51,11 +51,9 @@ export default function BookingTable({
   return `${inDate.toLocaleDateString("en-GB", {
     day: "numeric",
     month: "short",
-    year: "numeric",
   })} → ${outDate.toLocaleDateString("en-GB", {
     day: "numeric",
     month: "short",
-    year: "numeric",
   })}`;
 };
 
@@ -63,28 +61,27 @@ export default function BookingTable({
     <>
       {/* ================= MOBILE VIEW ================= */}
 
-      <div className="grid grid-cols-2 gap-2 md:hidden">
+      <div className="grid grid-cols-2 gap-2.5 md:hidden">
         {bookings.map((booking) => {
           const customer = customers.find(
             (c) => c.id === booking.customerId
           );
 
+          const consentCompleted =
+            booking.consentStatus === "Completed";
+
           return (
             <div
               key={booking.id}
-              className="flex flex-col justify-between rounded-xl border bg-white p-2.5 shadow-sm"
+              className="relative flex flex-col rounded-2xl border bg-white p-3 shadow overflow-visible"
             >
-              <div className="flex items-start justify-between">
-                <div>
-                  <h3 className="truncate text-xs font-semibold">
-                    {booking.customerName}
-                  </h3>
-
-                  
-                </div>
+              <div className="flex items-start justify-between gap-1">
+                <h3 className="text-sm font-semibold leading-tight line-clamp-2">
+                  {booking.customerName}
+                </h3>
 
                 <DropdownMenu>
-                  <DropdownMenuTrigger className="rounded-md p-1 hover:bg-gray-100">
+                  <DropdownMenuTrigger className="-m-0.5 shrink-0 rounded-md p-1 hover:bg-gray-100">
                     <MoreVertical className="h-4 w-4" />
                   </DropdownMenuTrigger>
 
@@ -101,7 +98,7 @@ export default function BookingTable({
                       📲 Send Consent
                     </DropdownMenuItem>
 
-                    {booking.consentStatus === "Completed" ? (
+                    {consentCompleted ? (
                       <DropdownMenuItem
                         onClick={() => {
                           window.location.href = `/admin/consents/${booking.bookingNumber}`;
@@ -125,50 +122,59 @@ export default function BookingTable({
                 </DropdownMenu>
               </div>
 
-              <div className="mt-2">
-  <p className="truncate text-xs text-gray-600">
-  {booking.villa}
-</p>
+              <p className="mt-0.5 text-[11px] text-gray-500">
+                {booking.villa}
+              </p>
 
-  <p className="mt-1 text-sm font-bold text-green-700">
-  ₹{booking.totalAmount}
-</p>
+              <p className="mt-2 text-[22px] font-bold leading-none text-gray-900">
+                ₹{booking.totalAmount}
+              </p>
 
-  <p className="mt-1 text-xs text-gray-500">
-  {formatDateRange(booking.checkIn, booking.checkOut)}
-</p>
+              <div className="mt-1.5 flex items-center gap-1 text-[11px] text-gray-500">
+                <span>📅</span>
+                {formatDateRange(booking.checkIn, booking.checkOut)}
+              </div>
 
-  <div className="mt-2 border-t pt-2 flex flex-wrap items-center gap-2">
+              <div className="mt-auto flex flex-wrap items-center gap-1.5 border-t pt-2 mt-2">
 
-  <span
-    className={`inline-flex rounded-full px-2 py-1 text-[10px] font-medium ${
-      booking.consentStatus === "Completed"
-        ? "bg-green-100 text-green-700"
-        : "bg-amber-100 text-amber-700"
-    }`}
-  >
-    {booking.consentStatus === "Completed"
-      ? "Completed"
-      : "Pending"}
-  </span>
+                <span
+                  className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                    booking.status === "Confirmed"
+                      ? "bg-green-100 text-green-700"
+                      : booking.status === "Pending"
+                      ? "bg-yellow-100 text-yellow-700"
+                      : "bg-red-100 text-red-700"
+                  }`}
+                >
+                  {booking.status}
+                </span>
 
-  {booking.consentStatus !== "Completed" && (
-    <button
-      onClick={() => onCompleteConsent(booking.id)}
-      className="rounded-md bg-green-600 px-2 py-1 text-[10px] font-medium text-white hover:bg-green-700"
-    >
-      ✓ Complete
-    </button>
-  )}
+                <span
+                  className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                    consentCompleted
+                      ? "bg-green-100 text-green-700"
+                      : "bg-amber-100 text-amber-700"
+                  }`}
+                >
+                  {consentCompleted ? "Completed" : "Pending"}
+                </span>
 
-  {booking.balanceAmount > 0 && (
-    <span className="inline-flex rounded-full bg-red-100 px-2 py-1 text-[10px] font-medium text-red-700">
-      Balance ₹{booking.balanceAmount}
-    </span>
-  )}
+                {!consentCompleted && (
+                  <button
+                    onClick={() => onCompleteConsent(booking.id)}
+                    className="rounded-md bg-green-600 px-2 py-0.5 text-[10px] font-semibold text-white hover:bg-green-700"
+                  >
+                    ✓ Complete
+                  </button>
+                )}
 
-</div>
-</div>
+                {booking.balanceAmount > 0 && (
+                  <span className="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-semibold text-red-700">
+                    Balance ₹{booking.balanceAmount}
+                  </span>
+                )}
+
+              </div>
             </div>
           );
         })}
