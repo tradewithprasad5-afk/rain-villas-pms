@@ -38,32 +38,32 @@ Rain Villa`;
   }
 
   return (
-    <div className="p-8 max-w-7xl mx-auto">
+    <div className="p-4 sm:p-8 max-w-7xl mx-auto">
 
-      <h1 className="text-3xl font-bold mb-8">
+      <h1 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8">
         Company Information
       </h1>
 
       {/* Company Information */}
 
-      <div className="bg-white rounded-xl shadow p-8 mb-8">
+      <div className="bg-white rounded-xl shadow p-4 sm:p-8 mb-6 sm:mb-8">
 
-        <h2 className="text-2xl font-bold mb-8">
+        <h2 className="text-xl sm:text-2xl font-bold mb-6 sm:mb-8">
           Company Information
         </h2>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-12 items-center">
 
           {/* Logo */}
 
           <div className="flex justify-center">
 
-            <div className="bg-gray-50 border rounded-2xl p-8 shadow-sm">
+            <div className="bg-gray-50 border rounded-2xl p-4 sm:p-8 shadow-sm">
 
               <img
                 src="/logo/rain-villa-logo.jpeg"
                 alt="Rain Villa Logo"
-                className="h-64 w-auto object-contain"
+                className="h-40 sm:h-64 w-auto object-contain"
               />
 
             </div>
@@ -118,9 +118,9 @@ Rain Villa`;
 
         </div>
 
-        <div className="mt-10 border-t pt-8">
+        <div className="mt-6 sm:mt-10 border-t pt-6 sm:pt-8">
 
-          <div className="rounded-xl border bg-gray-50 p-5">
+          <div className="rounded-xl border bg-gray-50 p-4 sm:p-5">
 
             <p className="text-xs uppercase tracking-wide text-gray-500 mb-3">
               Address
@@ -144,19 +144,19 @@ Rain Villa`;
 
       {/* Payment Details */}
 
-      <div className="bg-white rounded-xl shadow p-8 mb-8">
+      <div className="bg-white rounded-xl shadow p-4 sm:p-8 mb-6 sm:mb-8">
 
-        <h2 className="text-2xl font-bold mb-8">
+        <h2 className="text-xl sm:text-2xl font-bold mb-6 sm:mb-8">
           Payment Details
         </h2>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-10 items-center">
 
           {/* Left Side */}
 
           <div className="space-y-5">
 
-            <div className="rounded-xl border bg-gray-50 p-5">
+            <div className="rounded-xl border bg-gray-50 p-4 sm:p-5">
               <p className="text-xs uppercase tracking-wide text-gray-500">
                 Bank Name
               </p>
@@ -166,7 +166,7 @@ Rain Villa`;
               </p>
             </div>
 
-            <div className="rounded-xl border bg-gray-50 p-5">
+            <div className="rounded-xl border bg-gray-50 p-4 sm:p-5">
               <p className="text-xs uppercase tracking-wide text-gray-500">
                 Account Number
               </p>
@@ -176,7 +176,7 @@ Rain Villa`;
               </p>
             </div>
 
-            <div className="rounded-xl border bg-gray-50 p-5">
+            <div className="rounded-xl border bg-gray-50 p-4 sm:p-5">
               <p className="text-xs uppercase tracking-wide text-gray-500">
                 IFSC Code
               </p>
@@ -186,7 +186,7 @@ Rain Villa`;
               </p>
             </div>
 
-            <div className="rounded-xl border bg-gray-50 p-5">
+            <div className="rounded-xl border bg-gray-50 p-4 sm:p-5">
 
               <p className="text-xs uppercase tracking-wide text-gray-500">
                 UPI ID
@@ -243,13 +243,13 @@ Rain Villa`;
 
       {/* Support */}
 
-      <div className="bg-white rounded-xl shadow p-8">
+      <div className="bg-white rounded-xl shadow p-4 sm:p-8">
 
-        <h2 className="text-2xl font-bold mb-6">
+        <h2 className="text-xl sm:text-2xl font-bold mb-6">
           Support
         </h2>
 
-        <div className="rounded-xl border bg-blue-50 border-blue-200 p-6">
+        <div className="rounded-xl border bg-blue-50 border-blue-200 p-4 sm:p-6">
 
           <h3 className="text-xl font-semibold text-blue-900">
             Rain Villa PMS
