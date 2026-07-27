@@ -52,7 +52,7 @@ Rain Villa`;
 
       {/* Header */}
 
-      <div className="flex items-center gap-3 mb-5 sm:mb-8">
+      <div className="flex items-center gap-3 mb-4 sm:mb-8">
 
         <div className="h-14 w-14 rounded-xl bg-white border flex items-center justify-center overflow-hidden shrink-0">
           <img
@@ -86,21 +86,21 @@ Rain Villa`;
 
           <div className="rounded-xl border bg-white overflow-hidden">
 
-            <div className="flex items-center gap-3 px-4 py-3 border-b">
+            <div className="flex items-center gap-3 px-3.5 py-2.5 sm:px-4 sm:py-3 border-b">
               <Mail className="h-[18px] w-[18px] text-gray-400 shrink-0" />
               <p className="text-sm break-all">
                 rainvilla.igatpuri@gmail.com
               </p>
             </div>
 
-            <div className="flex items-center gap-3 px-4 py-3 border-b">
+            <div className="flex items-center gap-3 px-3.5 py-2.5 sm:px-4 sm:py-3 border-b">
               <Phone className="h-[18px] w-[18px] text-gray-400 shrink-0" />
               <p className="text-sm">
                 9923506006 / 9527249988
               </p>
             </div>
 
-            <div className="flex gap-3 px-4 py-3">
+            <div className="flex gap-3 px-3.5 py-2.5 sm:px-4 sm:py-3">
               <MapPin className="h-[18px] w-[18px] text-gray-400 shrink-0 mt-0.5" />
               <p className="text-sm leading-relaxed">
                 Ritiksha Homeland, Plot No. 36, Igatpuri – 422403,
@@ -186,11 +186,11 @@ Rain Villa`;
             📲 Share payment details
           </button>
           <button
-  onClick={downloadBusinessBackup}
-  className="w-full flex items-center justify-center gap-2 rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
->
-  📥 Download Business Backup (.xlsx)
-</button>
+            onClick={downloadBusinessBackup}
+            className="w-full flex items-center justify-center gap-2 rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+          >
+            📥 Download Business Backup (.xlsx)
+          </button>
 
         </div>
 
@@ -224,11 +224,11 @@ Rain Villa`;
             📲 Share payment details
           </button>
           <button
-  onClick={downloadBusinessBackup}
-  className="lg:hidden mt-3 w-full flex items-center justify-center gap-2 rounded-lg bg-blue-600 py-3 text-sm font-semibold text-white hover:bg-blue-700"
->
-  📥 Download Business Backup (.xlsx)
-</button>
+            onClick={downloadBusinessBackup}
+            className="lg:hidden mt-3 w-full flex items-center justify-center gap-2 rounded-lg bg-blue-600 py-3 text-sm font-semibold text-white hover:bg-blue-700"
+          >
+            📥 Download Business Backup (.xlsx)
+          </button>
 
         </div>
 
