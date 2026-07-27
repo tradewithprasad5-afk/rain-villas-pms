@@ -138,7 +138,7 @@ bookings.forEach((booking: any, index: number) => {
     srNo: index + 1,
     bookingNumber: booking.bookingNumber || "",
     customerName: booking.customerName || "",
-    phone,
+    phone: "'" + phone,
     villa: booking.villa || "",
     checkIn: booking.checkIn || "",
     checkOut: booking.checkOut || "",
@@ -150,8 +150,9 @@ bookings.forEach((booking: any, index: number) => {
     balanceAmount: booking.balanceAmount || 0,
   });
   // Format Phone column as Text
-bookingsSheet.getColumn("phone").numFmt = "@";
+
 });
+bookingsSheet.getColumn("phone").numFmt = "@";
 // ======================
 // Payments Sheet
 // ======================
@@ -186,7 +187,7 @@ bookings.forEach((booking: any, index: number) => {
     srNo: index + 1,
     bookingNumber: booking.bookingNumber || "",
     customerName: booking.customerName || "",
-    phone,
+    phone: "'" + phone,
     totalAmount: booking.totalAmount || 0,
     advancePaid: booking.advancePaid || 0,
     balanceAmount: booking.balanceAmount || 0,
@@ -195,9 +196,11 @@ bookings.forEach((booking: any, index: number) => {
         ? "Balance Pending"
         : "Paid",
   });
-  // Format Phone column as Text
-paymentsSheet.getColumn("phone").numFmt = "@";
+  
+  
 });
+
+paymentsSheet.getColumn("phone").numFmt = "@";
 // ======================
 // Revenue Report Sheet
 // ======================
