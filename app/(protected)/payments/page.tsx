@@ -55,7 +55,7 @@ const currentMonth = now.getMonth();
 const currentYear = now.getFullYear();
 
 const filteredStatsBookings = bookings.filter((booking) => {
-  if (booking.status === "Cancelled") return false;
+  
   if (!booking.checkIn) return false;
 
   const checkIn = new Date(booking.checkIn);
@@ -96,7 +96,7 @@ const totalOutstanding = filteredStatsBookings.reduce(
 let totalBookings = 0;
 
 filteredStatsBookings.forEach((booking) => {
-  if (booking.status === "Cancelled") return;
+  
   if (!booking.checkIn || !booking.checkOut) return;
 
   let current = new Date(booking.checkIn);
