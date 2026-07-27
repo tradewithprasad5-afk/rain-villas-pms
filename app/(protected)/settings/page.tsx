@@ -1,6 +1,16 @@
 "use client";
 
 import Image from "next/image";
+import {
+  Building2,
+  BadgeCheck,
+  Mail,
+  Phone,
+  MapPin,
+  Copy,
+  Landmark,
+  QrCode,
+} from "lucide-react";
 
 export default function SettingsPage() {
   const upiId = "bom260701342840@mahb";
@@ -38,240 +48,153 @@ Rain Villa`;
   }
 
   return (
-    <div className="p-4 sm:p-8 max-w-7xl mx-auto">
+    <div className="p-4 sm:p-8 max-w-3xl mx-auto">
 
-      <h1 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8">
-        Company Information
-      </h1>
+      {/* Header */}
+
+      <div className="flex items-center gap-3 mb-5 sm:mb-8">
+
+        <div className="h-14 w-14 rounded-xl bg-white border flex items-center justify-center overflow-hidden shrink-0">
+          <img
+            src="/logo/rain-villa-logo.jpeg"
+            alt="Rain Villa Logo"
+            className="h-full w-full object-contain"
+          />
+        </div>
+
+        <div className="min-w-0">
+          <p className="flex items-center gap-1.5 font-semibold text-base">
+            Rain Villa
+            <BadgeCheck className="h-4 w-4 text-blue-600 shrink-0" />
+          </p>
+          <p className="text-sm text-gray-500 truncate">
+            www.rainvilla.in
+          </p>
+        </div>
+
+      </div>
 
       {/* Company Information */}
 
-      <div className="bg-white rounded-xl shadow p-4 sm:p-8 mb-6 sm:mb-8">
+      <div className="rounded-xl border bg-white overflow-hidden mb-5 sm:mb-8">
 
-        <h2 className="text-xl sm:text-2xl font-bold mb-6 sm:mb-8">
-          Company Information
-        </h2>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-12 items-center">
-
-          {/* Logo */}
-
-          <div className="flex justify-center">
-
-            <div className="bg-gray-50 border rounded-2xl p-4 sm:p-8 shadow-sm">
-
-              <img
-                src="/logo/rain-villa-logo.jpeg"
-                alt="Rain Villa Logo"
-                className="h-40 sm:h-64 w-auto object-contain"
-              />
-
-            </div>
-
-          </div>
-
-          {/* Company Details */}
-
-          <div className="space-y-5">
-
-            <div className="rounded-xl border bg-gray-50 p-4">
-              <p className="text-xs uppercase tracking-wide text-gray-500">
-                Company Name
-              </p>
-
-              <p className="mt-1 text-xl font-semibold">
-                Rain Villa
-              </p>
-            </div>
-
-            <div className="rounded-xl border bg-gray-50 p-4">
-              <p className="text-xs uppercase tracking-wide text-gray-500">
-                Website
-              </p>
-
-              <p className="mt-1 text-lg font-medium">
-                www.rainvilla.in
-              </p>
-            </div>
-
-            <div className="rounded-xl border bg-gray-50 p-4">
-              <p className="text-xs uppercase tracking-wide text-gray-500">
-                Email
-              </p>
-
-              <p className="mt-1 text-lg font-medium break-all">
-                rainvilla.igatpuri@gmail.com
-              </p>
-            </div>
-
-            <div className="rounded-xl border bg-gray-50 p-4">
-              <p className="text-xs uppercase tracking-wide text-gray-500">
-                Phone
-              </p>
-
-              <p className="mt-1 text-lg font-medium">
-                9923506006 / 9527249988
-              </p>
-            </div>
-
-          </div>
-
+        <div className="flex items-center gap-3 px-4 py-3 border-b">
+          <Mail className="h-[18px] w-[18px] text-gray-400 shrink-0" />
+          <p className="text-sm break-all">
+            rainvilla.igatpuri@gmail.com
+          </p>
         </div>
 
-        <div className="mt-6 sm:mt-10 border-t pt-6 sm:pt-8">
+        <div className="flex items-center gap-3 px-4 py-3 border-b">
+          <Phone className="h-[18px] w-[18px] text-gray-400 shrink-0" />
+          <p className="text-sm">
+            9923506006 / 9527249988
+          </p>
+        </div>
 
-          <div className="rounded-xl border bg-gray-50 p-4 sm:p-5">
-
-            <p className="text-xs uppercase tracking-wide text-gray-500 mb-3">
-              Address
-            </p>
-
-            <p className="text-lg font-medium leading-8">
-              Ritiksha Homeland,
-              <br />
-              Plot No. 36,
-              <br />
-              Igatpuri – 422403,
-              <br />
-              Maharashtra, India
-            </p>
-
-          </div>
-
+        <div className="flex gap-3 px-4 py-3">
+          <MapPin className="h-[18px] w-[18px] text-gray-400 shrink-0 mt-0.5" />
+          <p className="text-sm leading-relaxed">
+            Ritiksha Homeland, Plot No. 36, Igatpuri – 422403,
+            Maharashtra, India
+          </p>
         </div>
 
       </div>
 
       {/* Payment Details */}
 
-      <div className="bg-white rounded-xl shadow p-4 sm:p-8 mb-6 sm:mb-8">
+      <p className="text-sm text-gray-500 mb-2">
+        Payment details
+      </p>
 
-        <h2 className="text-xl sm:text-2xl font-bold mb-6 sm:mb-8">
-          Payment Details
-        </h2>
+      <div className="rounded-xl border bg-white overflow-hidden mb-3">
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-10 items-center">
-
-          {/* Left Side */}
-
-          <div className="space-y-5">
-
-            <div className="rounded-xl border bg-gray-50 p-4 sm:p-5">
-              <p className="text-xs uppercase tracking-wide text-gray-500">
-                Bank Name
-              </p>
-
-              <p className="mt-2 text-lg font-semibold">
+        <div className="flex items-center justify-between gap-3 px-4 py-3 border-b">
+          <div className="flex items-center gap-3 min-w-0">
+            <Landmark className="h-[18px] w-[18px] text-gray-400 shrink-0" />
+            <div className="min-w-0">
+              <p className="text-xs text-gray-400">
                 Bank of Maharashtra
               </p>
-            </div>
-
-            <div className="rounded-xl border bg-gray-50 p-4 sm:p-5">
-              <p className="text-xs uppercase tracking-wide text-gray-500">
-                Account Number
-              </p>
-
-              <p className="mt-2 text-lg font-semibold">
+              <p className="text-sm mt-0.5">
                 60582272804
               </p>
             </div>
+          </div>
+          <p className="text-xs text-gray-500 shrink-0">
+            MAHB0000959
+          </p>
+        </div>
 
-            <div className="rounded-xl border bg-gray-50 p-4 sm:p-5">
-              <p className="text-xs uppercase tracking-wide text-gray-500">
-                IFSC Code
-              </p>
-
-              <p className="mt-2 text-lg font-semibold">
-                MAHB0000959
-              </p>
-            </div>
-
-            <div className="rounded-xl border bg-gray-50 p-4 sm:p-5">
-
-              <p className="text-xs uppercase tracking-wide text-gray-500">
-                UPI ID
-              </p>
-
-              <div className="mt-3 flex items-center justify-between">
-
-                <p className="text-lg font-semibold break-all">
-                  {upiId}
-                </p>
-
-                <button
-                  onClick={copyUPI}
-                  className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-                >
-                  📋 Copy
-                </button>
-
-              </div>
-
-            </div>
-
-            <button
-              onClick={sharePaymentDetails}
-              className="w-full rounded-xl bg-green-600 py-3 text-lg font-semibold text-white hover:bg-green-700"
-            >
-              📲 Share Payment Details on WhatsApp
-            </button>
-
+        <div className="flex items-center justify-between gap-3 px-4 py-3 border-b">
+          <div className="min-w-0">
+            <p className="text-xs text-gray-400">
+              UPI ID
+            </p>
+            <p className="text-sm mt-0.5 break-all">
+              {upiId}
+            </p>
           </div>
 
-          {/* Right Side */}
+          <button
+            onClick={copyUPI}
+            className="shrink-0 flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-medium hover:bg-gray-50"
+          >
+            <Copy className="h-[14px] w-[14px]" />
+            Copy
+          </button>
+        </div>
 
-          <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center gap-2 px-4 py-4">
 
+          <div className="h-36 w-36 rounded-lg border bg-gray-50 flex items-center justify-center overflow-hidden">
             <Image
               src="/payment/upi-qr.jpeg"
               alt="UPI QR"
-              width={280}
-              height={420}
-              className="rounded-2xl border shadow-lg"
+              width={144}
+              height={144}
+              className="h-full w-full object-contain"
             />
-
-            <p className="mt-4 text-center text-gray-500">
-              Scan this QR Code using Google Pay, PhonePe,
-              Paytm or any UPI application.
-            </p>
-
           </div>
+
+          <p className="text-xs text-gray-500 text-center flex items-center gap-1">
+            <QrCode className="h-3.5 w-3.5" />
+            Scan with any UPI app
+          </p>
 
         </div>
 
       </div>
 
+      <button
+        onClick={sharePaymentDetails}
+        className="w-full flex items-center justify-center gap-2 rounded-lg bg-green-600 py-3 text-sm font-semibold text-white hover:bg-green-700 mb-5 sm:mb-8"
+      >
+        📲 Share payment details
+      </button>
+
       {/* Support */}
 
-      <div className="bg-white rounded-xl shadow p-4 sm:p-8">
+      <div className="rounded-xl border bg-blue-50 border-blue-200 p-4 sm:p-6">
 
-        <h2 className="text-xl sm:text-2xl font-bold mb-6">
-          Support
-        </h2>
+        <h3 className="text-base font-semibold text-blue-900">
+          Rain Villa PMS
+        </h3>
 
-        <div className="rounded-xl border bg-blue-50 border-blue-200 p-4 sm:p-6">
+        <p className="text-sm text-gray-700 mt-3 leading-relaxed">
+          This Property Management System has been developed
+          exclusively for <strong>Rain Villa, Igatpuri</strong>
+          to simplify reservations, guest management,
+          payments, reports and daily operations.
+        </p>
 
-          <h3 className="text-xl font-semibold text-blue-900">
-            Rain Villa PMS
-          </h3>
-
-          <p className="text-gray-700 mt-4 leading-7">
-            This Property Management System has been developed
-            exclusively for <strong>Rain Villa, Igatpuri</strong>
-            to simplify reservations, guest management,
-            payments, reports and daily operations.
+        <div className="mt-4 border-t border-blue-200 pt-3">
+          <p className="text-xs text-gray-600">
+            <strong>Support:</strong> Please contact the
+            Rain Villa PMS administrator for technical
+            assistance, maintenance or future enhancements.
           </p>
-
-          <div className="mt-6 border-t pt-4">
-
-            <p className="text-sm text-gray-600">
-              <strong>Support:</strong> Please contact the
-              Rain Villa PMS administrator for technical
-              assistance, maintenance or future enhancements.
-            </p>
-
-          </div>
-
         </div>
 
       </div>
