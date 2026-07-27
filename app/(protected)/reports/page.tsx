@@ -35,27 +35,25 @@ interface StatCardProps {
 }
 
 /**
- * Formats large rupee amounts the way Indian users expect to read them
- * on a phone — Lakhs / Crores — instead of a long digit string that
- * gets clipped by the card width.
- *   861000    -> ₹8.61L
- * 11400000    -> ₹1.14Cr
- *      4200   -> ₹4,200
+ * Full rupee amount, Indian digit grouping — e.g. 495000 -> ₹4,95,000
  */
-function formatCompactINR(amount: number) {
+function formatFullINR(amount: number) {
   const sign = amount < 0 ? "-" : "";
-  const abs = Math.abs(amount);
+  return `${sign}₹${Math.abs(amount).toLocaleString("en-IN")}`;
+}
 
-  if (abs >= 1_00_00_000) {
-    return `${sign}₹${(abs / 1_00_00_000).toFixed(2)}Cr`;
-  }
-  if (abs >= 1_00_000) {
-    return `${sign}₹${(abs / 1_00_000).toFixed(2)}L`;
-  }
-  if (abs >= 1_000) {
-    return `${sign}₹${(abs / 1_000).toFixed(1)}K`;
-  }
-  return `${sign}₹${abs.toLocaleString("en-IN")}`;
+/**
+ * Picks a font-size class based on how many characters the value
+ * string will be, so a long full amount (₹12,45,67,890) shrinks just
+ * enough to fit the card instead of getting clipped, while a short
+ * one (₹0) stays nice and large.
+ */
+function sizeForLength(text: string) {
+  const len = text.length;
+  if (len <= 8) return "text-2xl sm:text-3xl";
+  if (len <= 11) return "text-xl sm:text-2xl";
+  if (len <= 14) return "text-lg sm:text-xl";
+  return "text-base sm:text-lg";
 }
 
 function StatCard({
@@ -68,27 +66,22 @@ function StatCard({
   isCurrency = true,
 }: StatCardProps) {
   const displayValue = isCurrency
-    ? formatCompactINR(value)
+    ? formatFullINR(value)
     : value.toLocaleString("en-IN");
 
-  // Full, untruncated value — shown as a tooltip on long-press/hover
-  // so the exact figure is always one tap away, without breaking layout.
-  const exactValue = isCurrency
-    ? `₹${value.toLocaleString("en-IN")}`
-    : value.toLocaleString("en-IN");
+  const valueSizeClass = sizeForLength(displayValue);
 
   return (
-    <div
-      title={exactValue}
-      className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm transition-all duration-300 active:scale-[0.98] hover:-translate-y-1 hover:shadow-md"
-    >
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm transition-all duration-300 active:scale-[0.98] hover:-translate-y-1 hover:shadow-md">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
           <p className="text-xs sm:text-sm text-slate-500 truncate">
             {title}
           </p>
 
-          <h2 className="mt-2 sm:mt-3 text-2xl sm:text-3xl font-bold text-slate-900 tabular-nums leading-tight">
+          <h2
+            className={`mt-2 sm:mt-3 font-bold text-slate-900 tabular-nums leading-tight ${valueSizeClass}`}
+          >
             {displayValue}
           </h2>
 
@@ -510,11 +503,8 @@ export default function ReportsPage() {
                             {villa}
                           </h3>
 
-                          <p
-                            className="mt-0.5 sm:mt-1 text-xs sm:text-sm text-slate-500 tabular-nums"
-                            title={`₹${amount.toLocaleString("en-IN")}`}
-                          >
-                            {formatCompactINR(amount)}
+                          <p className="mt-0.5 sm:mt-1 text-xs sm:text-sm text-slate-500 tabular-nums">
+                            {formatFullINR(amount)}
                           </p>
                         </div>
 
