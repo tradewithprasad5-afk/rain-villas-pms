@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import {
-  Building2,
   BadgeCheck,
   Mail,
   Phone,
@@ -11,6 +10,7 @@ import {
   Landmark,
   QrCode,
 } from "lucide-react";
+import { downloadBusinessBackup } from "@/app/lib/businessBackup";
 
 export default function SettingsPage() {
   const upiId = "bom260701342840@mahb";
@@ -168,15 +168,22 @@ Rain Villa`;
       </div>
 
       <button
-        onClick={sharePaymentDetails}
-        className="w-full flex items-center justify-center gap-2 rounded-lg bg-green-600 py-3 text-sm font-semibold text-white hover:bg-green-700 mb-5 sm:mb-8"
-      >
-        📲 Share payment details
-      </button>
+  onClick={sharePaymentDetails}
+  className="w-full flex items-center justify-center gap-2 rounded-lg bg-green-600 py-3 text-sm font-semibold text-white hover:bg-green-700 mb-5"
+>
+  📲 Share payment details
+</button>
 
-      {/* Support */}
+<button
+  onClick={downloadBusinessBackup}
+  className="w-full flex items-center justify-center gap-2 rounded-lg bg-blue-600 py-3 text-sm font-semibold text-white hover:bg-blue-700 mb-8"
+>
+  📥 Download Business Backup (.xlsx)
+</button>
 
-      <div className="rounded-xl border bg-blue-50 border-blue-200 p-4 sm:p-6">
+{/* Support */}
+
+<div className="rounded-xl border bg-blue-50 border-blue-200 p-4 sm:p-6">
 
         <h3 className="text-base font-semibold text-blue-900">
           Rain Villa PMS
