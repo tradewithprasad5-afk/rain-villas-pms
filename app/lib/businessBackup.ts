@@ -1,7 +1,9 @@
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/app/lib/firebase";
 import ExcelJS from "exceljs";
-import { saveAs } from "file-saver";
+import { Capacitor } from "@capacitor/core";
+import { Filesystem, Directory } from "@capacitor/filesystem";
+import { Share } from "@capacitor/share";
 
 const HEADER_FILL = "2563EB";
 const BORDER_COLOR = "D1D5DB";
@@ -313,22 +315,56 @@ styleDataRows(revenueSheet);
     // Generate file
     const buffer = await workbook.xlsx.writeBuffer();
 
-    const blob = new Blob([buffer], {
-      type:
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
+const now = new Date();
 
-    const now = new Date();
+const filename = `RainVillas_Business_Backup_${
+  now.toISOString().split("T")[0]
+}.xlsx`;
 
-    const filename = `RainVillas_Business_Backup_${
-      now.toISOString().split("T")[0]
-    }.xlsx`;
+if (Capacitor.getPlatform() === "web") {
+  const blob = new Blob([buffer], {
+    type:
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
 
-    saveAs(blob, filename);
+  const url = URL.createObjectURL(blob);
 
-    console.log(
-      `Backup exported (${bookings.length} bookings, ${payments.length} payments)`
-    );
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+
+  URL.revokeObjectURL(url);
+} else {
+  // Convert workbook to Base64
+  const bytes = new Uint8Array(buffer);
+
+  let binary = "";
+  bytes.forEach((b) => {
+    binary += String.fromCharCode(b);
+  });
+
+  const base64 = btoa(binary);
+
+  const result = await Filesystem.writeFile({
+    path: filename,
+    data: base64,
+    directory: Directory.Documents,
+  });
+
+  await Share.share({
+    title: "Business Backup",
+    text: "Rain Villa PMS Business Backup",
+    url: result.uri,
+    dialogTitle: "Save or Share Backup",
+  });
+}
+
+console.log(
+  `Backup exported (${bookings.length} bookings, ${payments.length} payments)`
+);
   } catch (error) {
     console.error("Business backup failed:", error);
     alert("Failed to generate business backup.");
