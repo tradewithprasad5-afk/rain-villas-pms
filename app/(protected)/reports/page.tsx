@@ -3,6 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import * as XLSX from "xlsx";
+import { Capacitor } from "@capacitor/core";
+import { Filesystem, Directory } from "@capacitor/filesystem";
+import { Share } from "@capacitor/share";
 import { db } from "../../lib/firebase";
 import {
   IndianRupee,
@@ -266,7 +269,7 @@ export default function ReportsPage() {
 
   const maxRevenue = Math.max(...Object.values(villaRevenue), 1);
 
-  const handleExport = () => {
+  const handleExport = async () => {
     const data = filteredBookings.map((booking) => ({
       "Booking No": booking.bookingNumber,
       Customer: booking.customerName,
@@ -283,7 +286,29 @@ export default function ReportsPage() {
 
     XLSX.utils.book_append_sheet(workbook, worksheet, "Reports");
 
-    XLSX.writeFile(workbook, `Reports-${period}.xlsx`);
+    const filename = `Reports-${period}.xlsx`;
+
+if (Capacitor.getPlatform() === "web") {
+  XLSX.writeFile(workbook, filename);
+} else {
+  const base64 = XLSX.write(workbook, {
+    type: "base64",
+    bookType: "xlsx",
+  });
+
+  const result = await Filesystem.writeFile({
+    path: filename,
+    data: base64,
+    directory: Directory.Documents,
+  });
+
+  await Share.share({
+    title: "Reports Export",
+    text: "Rain Villa PMS Report",
+    url: result.uri,
+    dialogTitle: "Save or Share Report",
+  });
+}
   };
 
   if (loading) {
