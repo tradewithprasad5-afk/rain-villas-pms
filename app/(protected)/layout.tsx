@@ -5,7 +5,7 @@ import { useSwipeable } from "react-swipeable";
 import { usePathname, useRouter } from "next/navigation";
 import { App } from "@capacitor/app";
 import { Capacitor } from "@capacitor/core";
-
+import BottomNavigation from "@/app/components/BottomNavigation";
 import ProtectedRoute from "../components/ProtectedRoute";
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
@@ -97,7 +97,7 @@ export default function ProtectedLayout({
 {!mobileOpen && (
   <div
     {...handlers}
-    className="fixed left-0 top-0 z-50 h-screen w-6 md:hidden"
+    className="fixed left-0 top-0 z-30 h-screen w-6 touch-pan-y md:hidden"
   />
 )}
         {/* Mobile Sidebar */}
@@ -122,9 +122,10 @@ export default function ProtectedLayout({
             onMenuClick={() => setMobileOpen(true)}
           />
 
-          <main className="flex-1 p-4 md:p-6 lg:p-8">
-            {children}
-          </main>
+          <main className="flex-1 p-4 pb-24 md:p-6 lg:p-8">
+  {children}
+</main>
+<BottomNavigation />
         </div>
       </div>
     </ProtectedRoute>
