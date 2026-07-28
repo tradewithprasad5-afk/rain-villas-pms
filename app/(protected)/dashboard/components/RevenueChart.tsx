@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo, useState } from "react";
 import {
   ResponsiveContainer,
   LineChart,
@@ -32,83 +31,39 @@ const months = [
   "Dec",
 ];
 
-type Filter = "month" | "6months" | "year";
-
 export default function RevenueChart({
   revenueData,
   totalRevenue,
 }: Props) {
-  const [filter, setFilter] = useState<Filter>("year");
-
-  const chartData = useMemo(() => {
-    const currentMonth = new Date().getMonth();
-
-    if (filter === "month") {
-      return [
-        {
-          month: months[currentMonth],
-          revenue: revenueData[currentMonth],
-        },
-      ];
-    }
-
-    if (filter === "6months") {
-      const start = Math.max(currentMonth - 5, 0);
-
-      return months
-        .slice(start, currentMonth + 1)
-        .map((month, index) => ({
-          month,
-          revenue: revenueData[start + index],
-        }));
-    }
-
-    return months.map((month, index) => ({
-      month,
-      revenue: revenueData[index],
-    }));
-  }, [filter, revenueData]);
+  const chartData = months.map((month, index) => ({
+    month,
+    revenue: revenueData[index],
+  }));
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm">
 
-      <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex items-center gap-3 sm:gap-4">
 
-        <div className="flex items-center gap-3 sm:gap-4">
-
-          <div className="flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-100">
-            <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-emerald-600" />
-          </div>
-
-          <div className="min-w-0">
-
-            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500">
-              Revenue Analytics
-            </p>
-
-            <h2 className="mt-1 text-xl sm:text-3xl font-bold text-slate-900 truncate">
-              ₹{totalRevenue.toLocaleString("en-IN")}
-            </h2>
-
-            <p className="mt-0.5 sm:mt-1 text-xs sm:text-sm text-slate-500">
-              Total revenue generated
-            </p>
-
-          </div>
-
+        <div className="flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-100">
+          <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-emerald-600" />
         </div>
 
-        <select
-          value={filter}
-          onChange={(e) =>
-            setFilter(e.target.value as Filter)
-          }
-          className="w-full sm:w-auto rounded-xl border border-slate-300 bg-white px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium outline-none focus:border-blue-500"
-        >
-          <option value="month">This Month</option>
-          <option value="6months">Last 6 Months</option>
-          <option value="year">This Year</option>
-        </select>
+        <div className="min-w-0">
+
+          <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500">
+            Revenue Analytics
+          </p>
+
+          <h2 className="mt-1 text-xl sm:text-3xl font-bold text-slate-900 truncate">
+            ₹{totalRevenue.toLocaleString("en-IN")}
+          </h2>
+
+          <p className="mt-0.5 sm:mt-1 text-xs sm:text-sm text-slate-500">
+            Total revenue generated
+          </p>
+
+        </div>
 
       </div>
 
@@ -175,3 +130,4 @@ export default function RevenueChart({
     </div>
   );
 }
+
