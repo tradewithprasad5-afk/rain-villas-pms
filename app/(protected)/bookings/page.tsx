@@ -5,6 +5,9 @@ import BookingHeader from "./BookingHeader";
 import BookingSearch from "./BookingSearch";
 import BookingTable from "./BookingTable";
 import DeletePinDialog from "./DeletePinDialog";
+import { Capacitor } from "@capacitor/core";
+import { Filesystem, Directory } from "@capacitor/filesystem";
+import { Share } from "@capacitor/share";
 import {
   collection,
   addDoc,
@@ -718,7 +721,7 @@ The Rain Villa Team`;
     setShowForm(true);
 
   }
-  function exportBookingsCSV() {
+  async function exportBookingsCSV() {
   const headers = [
     "Booking No",
     "Customer",
@@ -770,6 +773,11 @@ The Rain Villa Team`;
     ),
   ].join("\n");
 
+  const filename = `Bookings_${new Date()
+  .toISOString()
+  .slice(0, 10)}.csv`;
+
+if (Capacitor.getPlatform() === "web") {
   const blob = new Blob([csv], {
     type: "text/csv;charset=utf-8;",
   });
@@ -778,15 +786,27 @@ The Rain Villa Team`;
 
   const link = document.createElement("a");
   link.href = url;
-  link.download = `Bookings_${new Date()
-    .toISOString()
-    .slice(0, 10)}.csv`;
+  link.download = filename;
 
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
 
   window.URL.revokeObjectURL(url);
+} else {
+  const result = await Filesystem.writeFile({
+    path: filename,
+    data: btoa(unescape(encodeURIComponent(csv))),
+    directory: Directory.Documents,
+  });
+
+  await Share.share({
+    title: "Bookings Export",
+    text: "Rain Villa PMS Bookings CSV",
+    url: result.uri,
+    dialogTitle: "Save or Share CSV",
+  });
+}
 }
     /* ==========================================
       Page UI
