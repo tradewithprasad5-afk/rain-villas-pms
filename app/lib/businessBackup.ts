@@ -89,11 +89,7 @@ function colorStatusColumn(
   });
 }
 
-  export async function downloadBusinessBackup() {
-  alert("Backup function started");
 
-  
-  try {
     // Read Firestore collections
     const bookingsSnapshot = await getDocs(collection(db, "bookings"));
     const paymentsSnapshot = await getDocs(collection(db, "payments"));
