@@ -76,8 +76,7 @@ const pageTitle = useMemo(() => {
         {/* Title */}
         <div>
   <h1 className="text-xl font-bold text-slate-900 md:text-2xl">
-  {pageTitle}
-</h1>
+  
     {pageTitle}
   </h1>
 
