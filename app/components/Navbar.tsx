@@ -7,9 +7,9 @@ import {
   PanelLeftOpen,
 } from "lucide-react";
 import { useMemo } from "react";
+import { usePathname } from "next/navigation";
 import { useSearch } from "../context/SearchContext";
 import SearchDropdown from "./SearchDropdown";
-
 interface NavbarProps {
   collapsed: boolean;
   toggleSidebar: () => void;
@@ -23,6 +23,19 @@ export default function Navbar({
 }: NavbarProps) {
   // Global Search
   const { search, setSearch } = useSearch();
+  const pathname = usePathname();
+
+const pageTitle = useMemo(() => {
+  if (pathname === "/dashboard") return "Dashboard";
+  if (pathname.startsWith("/bookings")) return "Bookings";
+  if (pathname.startsWith("/customers")) return "Customers";
+  if (pathname.startsWith("/payments")) return "Payments";
+  if (pathname.startsWith("/reports")) return "Reports";
+  if (pathname.startsWith("/consents")) return "Guest Consents";
+  if (pathname.startsWith("/settings")) return "Settings";
+
+  return "Rain Villa PMS";
+}, [pathname]);
 
   // Today's Date
   const today = useMemo(() => {
@@ -62,14 +75,16 @@ export default function Navbar({
 
         {/* Title */}
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">
-            Dashboard
-          </h1>
+  <h1 className="text-xl font-bold text-slate-900 md:text-2xl">
+  {pageTitle}
+</h1>
+    {pageTitle}
+  </h1>
 
-          <p className="text-sm text-slate-500">
-            {today}
-          </p>
-        </div>
+  <p className="hidden text-sm text-slate-500 md:block">
+    {today}
+  </p>
+</div>
 
       </div>
 
