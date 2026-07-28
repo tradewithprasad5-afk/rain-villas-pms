@@ -89,7 +89,6 @@ function colorStatusColumn(
   });
 }
 
-export async function downloadBusinessBackup() {
   export async function downloadBusinessBackup() {
   alert("Backup function started");
 
