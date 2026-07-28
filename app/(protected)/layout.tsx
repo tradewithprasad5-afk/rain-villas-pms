@@ -70,29 +70,36 @@ export default function ProtectedLayout({
 
   // Swipe gestures
   const handlers = useSwipeable({
-    onSwipedRight: ({ initial }) => {
-      if (initial[0] < 30) {
-        setMobileOpen(true);
-      }
-    },
+  onSwipedRight: ({ initial, deltaX }) => {
+    // Only allow opening when the swipe starts at the left edge
+    if (!mobileOpen && initial[0] <= 24 && deltaX > 60) {
+      setMobileOpen(true);
+    }
+  },
 
-    onSwipedLeft: () => {
+  onSwipedLeft: ({ deltaX }) => {
+    if (mobileOpen && deltaX < -60) {
       setMobileOpen(false);
-    },
+    }
+  },
 
-    trackTouch: true,
-    preventScrollOnSwipe: false,
-  });
+  trackTouch: true,
+  trackMouse: false,
+  preventScrollOnSwipe: false,
+});
 
   return (
     <ProtectedRoute>
-      <div
-        {...handlers}
-        className="flex min-h-screen bg-slate-100"
-      >
+      <div className="flex min-h-screen bg-slate-100">
         {/* Desktop Sidebar */}
         <Sidebar collapsed={collapsed} />
-
+        {/* Left Edge Swipe Zone */}
+{!mobileOpen && (
+  <div
+    {...handlers}
+    className="fixed left-0 top-0 z-50 h-screen w-6 md:hidden"
+  />
+)}
         {/* Mobile Sidebar */}
         <MobileSidebar
           open={mobileOpen}
