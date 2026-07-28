@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   CalendarDays,
-  Users,
   CreditCard,
   ChartColumn,
 } from "lucide-react";
@@ -22,10 +21,10 @@ const items = [
     icon: CalendarDays,
   },
   {
-    href: "/customers",
-    label: "Customers",
-    icon: Users,
-  },
+  href: "/availability",
+  label: "Availability",
+  icon: CalendarDays,
+},
   {
     href: "/payments",
     label: "Payments",
