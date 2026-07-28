@@ -88,6 +88,11 @@ function colorStatusColumn(
 }
 
 export async function downloadBusinessBackup() {
+  export async function downloadBusinessBackup() {
+  alert("Backup function started");
+
+  try {
+    ...
   try {
     // Read Firestore collections
     const bookingsSnapshot = await getDocs(collection(db, "bookings"));
