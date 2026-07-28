@@ -363,8 +363,14 @@ if (Capacitor.getPlatform() === "web") {
 console.log(
   `Backup exported (${bookings.length} bookings, ${payments.length} payments)`
 );
-  } catch (error) {
-    console.error("Business backup failed:", error);
-    alert("Failed to generate business backup.");
-  }
+  } 
+  catch (error: any) {
+  console.error("Business backup failed:", error);
+
+  alert(
+    error?.message ||
+    JSON.stringify(error) ||
+    String(error)
+  );
+}
 }
