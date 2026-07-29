@@ -110,7 +110,9 @@ const generatePdf = async () => {
 
 setPdfUrl(url);
 setShowWhatsAppButton(true);
-  } catch (error) {
+  } 
+  }
+  catch (error) {
     console.error("Failed to generate receipt PDF:", error);
     alert("Failed to generate receipt PDF.");
   }
