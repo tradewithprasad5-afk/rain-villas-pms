@@ -81,14 +81,20 @@ const searchParams = useSearchParams();
   if (searchParams.get("share") !== "true") return;
   if (!booking) return;
 
-  const generatePdf = async () => {
+  const timer = setTimeout(() => {
+    generatePdf();
+  }, 300);
+
+  return () => clearTimeout(timer);
+}, [booking, searchParams]);
+
+const generatePdf = async () => {
   if (!receiptRef.current || !booking) return;
 
   try {
     const pdfBlob = await generateReceiptPdfBlob(receiptRef.current);
 
     if (Capacitor.isNativePlatform()) {
-      // Android (Capacitor)
       const fileUri = await saveReceiptPdf(
         pdfBlob,
         `Receipt-${booking.bookingNumber}.pdf`
@@ -99,7 +105,6 @@ const searchParams = useSearchParams();
         `Receipt-${booking.bookingNumber}.pdf`
       );
     } else {
-      // Web (Vercel)
       const url = URL.createObjectURL(pdfBlob);
 
       const link = document.createElement("a");
