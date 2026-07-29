@@ -11,7 +11,7 @@ import "./print.css";
 import { shareReceiptPdf } from "../../../../lib/shareReceiptPdf";
 import { useParams, useSearchParams } from "next/navigation";
 import { Capacitor } from "@capacitor/core";
-
+interface Booking {
   id: string;
   bookingNumber: string;
   customerId: string;
