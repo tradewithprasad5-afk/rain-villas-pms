@@ -145,10 +145,17 @@ const generatePdf = async () => {
 
         </div>
            {showWhatsAppButton && booking && (
-  <div className="mb-5 flex justify-end">
+  <div className="mb-5 rounded-xl border border-green-200 bg-green-50 p-4">
+    <p className="text-sm text-green-800">
+      ✅ Receipt downloaded successfully.
+      <br />
+      Click <strong>Open WhatsApp</strong>, then attach the downloaded PDF
+      using the 📎 icon.
+    </p>
+
     <button
       onClick={() => {
-  const message = `Dear Guest,
+        const message = `Dear Guest,
 
 Thank you for choosing Rain Villa.
 
@@ -161,12 +168,14 @@ Rain Villa
 📞 9527249988
 🌐 www.rainvilla.in`;
 
-  setShowWhatsAppButton(false);
+        setShowWhatsAppButton(false);
 
-  window.location.href =
-    `https://wa.me/?text=${encodeURIComponent(message)}`;
-}}
-      className="rounded-lg bg-green-600 px-5 py-2 text-white shadow hover:bg-green-700"
+        window.open(
+          `https://wa.me/?text=${encodeURIComponent(message)}`,
+          "_blank"
+        );
+      }}
+      className="mt-4 rounded-lg bg-green-600 px-5 py-2 text-white shadow hover:bg-green-700"
     >
       📲 Open WhatsApp
     </button>
