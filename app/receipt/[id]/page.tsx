@@ -4,7 +4,7 @@
 import { useEffect, useRef, useState } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import Image from "next/image";
-import { db } from "../../../../lib/firebase";
+import { db } from "../../../lib/firebase";
 
 
 import { useParams } from "next/navigation";
