@@ -1,10 +1,11 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import Image from "next/image";
 import { db } from "../../../../lib/firebase";
+import html2pdf from "html2pdf.js";
 import "./print.css";
 
 interface Booking {
@@ -27,7 +28,7 @@ interface Customer {
 
 export default function BookingReceiptPage() {
   const { id } = useParams();
-
+  const receiptRef = useRef<HTMLDivElement>(null);
   const [booking, setBooking] = useState<Booking | null>(null);
   const [phone, setPhone] = useState("");
 
@@ -73,6 +74,30 @@ export default function BookingReceiptPage() {
     );
   };
 
+  const generatePdf = async () => {
+  if (!receiptRef.current || !booking) return;
+
+  const options = {
+    margin: 8,
+    filename: `Receipt-${booking.bookingNumber}.pdf`,
+    image: { type: "jpeg", quality: 1 },
+    html2canvas: {
+      scale: 2,
+      useCORS: true,
+    },
+    jsPDF: {
+      unit: "mm",
+      format: "a4",
+      orientation: "portrait",
+    },
+  };
+
+  await html2pdf()
+    .set(options)
+    .from(receiptRef.current)
+    .save();
+};
+
   return (
     <div className="min-h-screen bg-slate-100 py-10 px-4">
 
@@ -81,7 +106,7 @@ export default function BookingReceiptPage() {
         <div className="flex justify-end mb-5 print:hidden">
 
           <button
-            onClick={() => window.print()}
+            onClick={generatePdf}
             className="rounded-lg bg-blue-600 px-5 py-2 text-white shadow hover:bg-blue-700"
           >
             🖨 Print Receipt
@@ -89,7 +114,10 @@ export default function BookingReceiptPage() {
 
         </div>
 
-        <div className="overflow-hidden rounded-3xl bg-white shadow-2xl print:shadow-none">
+        <div
+  ref={receiptRef}
+  className="overflow-hidden rounded-3xl bg-white shadow-2xl print:shadow-none"
+>
 
           <div className="bg-gradient-to-r from-blue-700 to-blue-500 px-4 sm:px-6 lg:px-10 py-6 sm:py-8">
 
