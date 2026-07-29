@@ -367,15 +367,7 @@ const filteredBookings = bookings
           break;
         }
 
-        case "last30": {
-          const last30 = new Date(today);
-          last30.setDate(today.getDate() - 30);
-
-          matchesDate =
-            bookingDate >= last30 &&
-            bookingDate <= today;
-          break;
-        }
+        
 
         case "thisMonth":
           matchesDate =

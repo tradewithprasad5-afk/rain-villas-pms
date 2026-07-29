@@ -28,7 +28,7 @@ export default function PaymentFilters({
           <option value="today">Today</option>
           <option value="yesterday">Yesterday</option>
           <option value="last7">Last 7 Days</option>
-          <option value="last30">Last 30 Days</option>
+          
           <option value="thisMonth">This Month</option>
           <option value="lastMonth">Last Month</option>
           
