@@ -5,9 +5,10 @@ import { useEffect, useRef, useState } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import Image from "next/image";
 import { db } from "../../../../lib/firebase";
-import html2pdf from "html2pdf.js";
+import { generateReceiptPdfBlob } from "../../../../lib/receiptPdf";
+import { saveReceiptPdf } from "../../../../lib/saveReceiptPdf";
 import "./print.css";
-
+import { shareReceiptPdf } from "../../../../lib/shareReceiptPdf";
 interface Booking {
   id: string;
   bookingNumber: string;
@@ -77,28 +78,22 @@ export default function BookingReceiptPage() {
   const generatePdf = async () => {
   if (!receiptRef.current || !booking) return;
 
-  const options = {
-  margin: 8,
-  filename: `Receipt-${booking.bookingNumber}.pdf`,
-  image: {
-  type: "jpeg" as const,
-  quality: 1,
-},
-  html2canvas: {
-    scale: 2,
-    useCORS: true,
-  },
-  jsPDF: {
-  unit: "mm",
-  format: "a4",
-  orientation: "portrait" as const,
-},
-};
+  try {
+    const pdfBlob = await generateReceiptPdfBlob(receiptRef.current);
 
-  await html2pdf()
-    .set(options)
-    .from(receiptRef.current)
-    .save();
+    const fileUri = await saveReceiptPdf(
+      pdfBlob,
+      `Receipt-${booking.bookingNumber}.pdf`
+    );
+
+    await shareReceiptPdf(
+  fileUri,
+  `Receipt-${booking.bookingNumber}.pdf`
+);
+  } catch (error) {
+    console.error("Failed to generate receipt PDF:", error);
+    alert("Failed to generate receipt PDF.");
+  }
 };
 
   return (

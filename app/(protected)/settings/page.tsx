@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { downloadBusinessBackup } from "@/app/lib/businessBackup";
+import { downloadBusinessBackup } from "@/app/lib/saveReceiptPdf";
 import {
   BadgeCheck,
   Mail,
