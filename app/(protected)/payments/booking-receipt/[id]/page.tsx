@@ -78,19 +78,22 @@ export default function BookingReceiptPage() {
   if (!receiptRef.current || !booking) return;
 
   const options = {
-    margin: 8,
-    filename: `Receipt-${booking.bookingNumber}.pdf`,
-    image: { type: "jpeg", quality: 1 },
-    html2canvas: {
-      scale: 2,
-      useCORS: true,
-    },
-    jsPDF: {
-      unit: "mm",
-      format: "a4",
-      orientation: "portrait",
-    },
-  };
+  margin: 8,
+  filename: `Receipt-${booking.bookingNumber}.pdf`,
+  image: {
+    type: "jpeg" as const,
+    quality: 1,
+  },
+  html2canvas: {
+    scale: 2,
+    useCORS: true,
+  },
+  jsPDF: {
+    unit: "mm",
+    format: "a4",
+    orientation: "portrait" as const,
+  },
+};
 
   await html2pdf()
     .set(options)
