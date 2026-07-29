@@ -2,7 +2,7 @@
 
 
 import { useEffect, useRef, useState } from "react";
-import { doc, getDoc } from "firebase/firestore";
+
 import Image from "next/image";
 import { db } from "../../../../lib/firebase";
 import { generateReceiptPdfBlob } from "../../../../lib/receiptPdf";
@@ -48,18 +48,7 @@ const searchParams = useSearchParams();
 
     setBooking(bookingData);
 
-    if (bookingData.customerId) {
-      const customerSnap = await getDoc(
-        doc(db, "customers", bookingData.customerId)
-      );
-
-      if (customerSnap.exists()) {
-        const customer =
-          customerSnap.data() as Customer;
-
-        setPhone(customer.phone || "");
-      }
-    }
+    setPhone(bookingData.phone || "");
   }
 
   useEffect(() => {
