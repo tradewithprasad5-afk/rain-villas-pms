@@ -2,7 +2,7 @@
 
 
 import { useEffect, useRef, useState } from "react";
-
+import { doc, getDoc } from "firebase/firestore";
 import Image from "next/image";
 import { db } from "../../../../lib/firebase";
 import { generateReceiptPdfBlob } from "../../../../lib/receiptPdf";
@@ -37,19 +37,7 @@ const searchParams = useSearchParams();
   const [phone, setPhone] = useState("");
   const [showWhatsAppButton, setShowWhatsAppButton] = useState(false);
 
-  async function loadBooking() {
-    const bookingSnap = await getDoc(
-      doc(db, "bookings", id as string)
-    );
-
-    if (!bookingSnap.exists()) return;
-
-    const bookingData = bookingSnap.data() as Booking;
-
-    setBooking(bookingData);
-
-    setPhone(bookingData.phone || "");
-  }
+  
 
   useEffect(() => {
     if (id) loadBooking();
