@@ -104,19 +104,40 @@ const generatePdf = async () => {
         fileUri,
         `Receipt-${booking.bookingNumber}.pdf`
       );
-    } else {
-      const url = URL.createObjectURL(pdfBlob);
+   } else {
+  // Download PDF
+  const url = URL.createObjectURL(pdfBlob);
 
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `Receipt-${booking.bookingNumber}.pdf`;
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `Receipt-${booking.bookingNumber}.pdf`;
 
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 
-      URL.revokeObjectURL(url);
-    }
+  // Clean up the blob URL
+  URL.revokeObjectURL(url);
+
+  // Open WhatsApp Web with a pre-filled message
+  const message = `Dear Guest,
+
+Thank you for choosing Rain Villa.
+
+Please find your booking receipt attached.
+
+Booking No: ${booking.bookingNumber}
+
+Regards,
+Rain Villa
+📞 9527249988
+🌐 www.rainvilla.in`;
+
+  window.open(
+    `https://wa.me/?text=${encodeURIComponent(message)}`,
+    "_blank"
+  );
+}
   } catch (error) {
     console.error("Failed to generate receipt PDF:", error);
     alert("Failed to generate receipt PDF.");

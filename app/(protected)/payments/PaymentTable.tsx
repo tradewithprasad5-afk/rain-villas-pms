@@ -84,10 +84,10 @@ export default function PaymentTable({
                     <OverflowMenu
                       items={[
                         {
-                          label: "Send Receipt",
-                          icon: "📤",
-                          onClick: () => sendReceiptWhatsApp(booking),
-                        },
+  label: "Send via WhatsApp",
+  icon: "📲",
+  onClick: () => sendReceiptWhatsApp(booking),
+},
                         ...(booking.balanceAmount > 0
                           ? [
                               {
@@ -282,7 +282,7 @@ export default function PaymentTable({
   onClick={() => sendReceiptWhatsApp(booking)}
   className="rounded-lg bg-green-600 px-3 py-2 text-sm text-white hover:bg-green-700"
 >
-  📲 WhatsApp
+  📲 Send via WhatsApp
 </button>
 
                     {booking.balanceAmount > 0 && (

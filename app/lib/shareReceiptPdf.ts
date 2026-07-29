@@ -6,7 +6,16 @@ export async function shareReceiptPdf(
 ) {
   await Share.share({
     title: "Rain Villa Receipt",
-    text: "Please find your booking receipt attached.",
+    text: `Dear Guest,
+
+Thank you for choosing Rain Villa.
+
+Please find your booking receipt attached.
+
+Regards,
+Rain Villa
+📞 9527249988
+🌐 www.rainvilla.in`,
     url: fileUri,
     dialogTitle: "Share Receipt",
   });
