@@ -10,6 +10,7 @@ import { saveReceiptPdf } from "../../../../lib/saveReceiptPdf";
 import "./print.css";
 import { shareReceiptPdf } from "../../../../lib/shareReceiptPdf";
 import { useParams, useSearchParams } from "next/navigation";
+import { Capacitor } from "@capacitor/core";
 interface Booking {
   id: string;
   bookingNumber: string;
@@ -80,28 +81,37 @@ const searchParams = useSearchParams();
   if (searchParams.get("share") !== "true") return;
   if (!booking) return;
 
-  const timer = setTimeout(() => {
-    generatePdf();
-  }, 300);
-
-  return () => clearTimeout(timer);
-}, [booking, searchParams]);
-
   const generatePdf = async () => {
   if (!receiptRef.current || !booking) return;
 
   try {
     const pdfBlob = await generateReceiptPdfBlob(receiptRef.current);
 
-    const fileUri = await saveReceiptPdf(
-      pdfBlob,
-      `Receipt-${booking.bookingNumber}.pdf`
-    );
+    if (Capacitor.isNativePlatform()) {
+      // Android (Capacitor)
+      const fileUri = await saveReceiptPdf(
+        pdfBlob,
+        `Receipt-${booking.bookingNumber}.pdf`
+      );
 
-    await shareReceiptPdf(
-  fileUri,
-  `Receipt-${booking.bookingNumber}.pdf`
-);
+      await shareReceiptPdf(
+        fileUri,
+        `Receipt-${booking.bookingNumber}.pdf`
+      );
+    } else {
+      // Web (Vercel)
+      const url = URL.createObjectURL(pdfBlob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `Receipt-${booking.bookingNumber}.pdf`;
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      URL.revokeObjectURL(url);
+    }
   } catch (error) {
     console.error("Failed to generate receipt PDF:", error);
     alert("Failed to generate receipt PDF.");
