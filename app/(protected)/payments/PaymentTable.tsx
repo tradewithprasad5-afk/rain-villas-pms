@@ -36,8 +36,32 @@ export default function PaymentTable({
 }: PaymentTableProps) {
   
    const sendReceiptWhatsApp = (booking: Booking) => {
+  const mobile = (booking.phone || "").replace(/\D/g, "");
+
+  if (!mobile) {
+    alert("Customer mobile number not found.");
+    return;
+  }
+
+  const receiptUrl = `${window.location.origin}/receipt/${booking.id}`;
+
+  const message = `Dear Guest,
+
+Thank you for choosing Rain Villa.
+
+View your booking receipt:
+
+${receiptUrl}
+
+Booking No: ${booking.bookingNumber}
+
+Regards,
+Rain Villa
+📞 9527249988
+🌐 www.rainvilla.in`;
+
   window.open(
-    `/payments/booking-receipt/${booking.id}?share=true`,
+    `https://wa.me/91${mobile}?text=${encodeURIComponent(message)}`,
     "_blank"
   );
 };
