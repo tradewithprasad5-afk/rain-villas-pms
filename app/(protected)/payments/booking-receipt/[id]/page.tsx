@@ -109,6 +109,8 @@ const generatePdf = async () => {
     pdfBlob,
     booking.bookingNumber
   );
+  console.log("Firebase PDF URL:", downloadUrl);
+alert(downloadUrl);
 
   const message = `Dear Guest,
 
