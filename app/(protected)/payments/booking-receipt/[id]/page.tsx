@@ -38,7 +38,18 @@ const searchParams = useSearchParams();
   const [showWhatsAppButton, setShowWhatsAppButton] = useState(false);
 
   
+async function loadBooking() {
+  const bookingSnap = await getDoc(
+    doc(db, "bookings", id as string)
+  );
 
+  if (!bookingSnap.exists()) return;
+
+  const bookingData = bookingSnap.data() as Booking;
+
+  setBooking(bookingData);
+  setPhone(bookingData.phone || "");
+}
   useEffect(() => {
     if (id) loadBooking();
   }, [id]);
