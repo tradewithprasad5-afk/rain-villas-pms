@@ -36,7 +36,7 @@ const searchParams = useSearchParams();
   const [booking, setBooking] = useState<Booking | null>(null);
   const [phone, setPhone] = useState("");
   const [showWhatsAppButton, setShowWhatsAppButton] = useState(false);
-
+  const [pdfUrl, setPdfUrl] = useState("");
   
 async function loadBooking() {
   const bookingSnap = await getDoc(
@@ -108,24 +108,43 @@ const generatePdf = async () => {
   // Download PDF
   const url = URL.createObjectURL(pdfBlob);
 
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `Receipt-${booking.bookingNumber}.pdf`;
-
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-
-  // Clean up the blob URL
-  URL.revokeObjectURL(url);
-
-  // Open WhatsApp Web with a pre-filled message
-  setShowWhatsAppButton(true);
-}
+setPdfUrl(url);
+setShowWhatsAppButton(true);
   } catch (error) {
     console.error("Failed to generate receipt PDF:", error);
     alert("Failed to generate receipt PDF.");
   }
+};
+  
+  const openWhatsApp = () => {
+  if (!booking) return;
+
+  const message = `Dear Guest,
+
+Thank you for choosing Rain Villa.
+
+Please find your booking receipt attached.
+
+Booking No: ${booking.bookingNumber}
+
+Regards,
+Rain Villa
+📞 9527249988
+🌐 www.rainvilla.in`;
+
+  setShowWhatsAppButton(false);
+
+  const mobile = (phone || booking.phone || "").replace(/\D/g, "");
+
+  if (!mobile) {
+    alert("Customer mobile number not found.");
+    return;
+  }
+
+  window.open(
+    `https://wa.me/91${mobile}?text=${encodeURIComponent(message)}`,
+    "_blank"
+  );
 };
 
   return (
@@ -146,46 +165,30 @@ const generatePdf = async () => {
            {showWhatsAppButton && booking && (
   <div className="mb-5 rounded-xl border border-green-200 bg-green-50 p-4">
     <p className="text-sm text-green-800">
-      ✅ Receipt downloaded successfully.
-      <br />
-      Click <strong>Open WhatsApp</strong>, then attach the downloaded PDF
-      using the 📎 icon.
-    </p>
+  ✅ Receipt is ready.
 
-    <button
-      onClick={() => {
-        const message = `Dear Guest,
+  <br />
 
-Thank you for choosing Rain Villa.
+  First click <strong>Download Receipt</strong>, then click
+  <strong> Open WhatsApp</strong> and attach the PDF using the 📎 icon.
+</p>
 
-Please find your booking receipt attached.
+    <div className="mt-4 flex gap-3">
+  <a
+    href={pdfUrl}
+    download={`Receipt-${booking.bookingNumber}.pdf`}
+    className="rounded-lg bg-blue-600 px-5 py-2 text-white shadow hover:bg-blue-700"
+  >
+    ⬇️ Download Receipt
+  </a>
 
-Booking No: ${booking.bookingNumber}
-
-Regards,
-Rain Villa
-📞 9527249988
-🌐 www.rainvilla.in`;
-
-        setShowWhatsAppButton(false);
-
-        const mobile = (phone || booking.phone || "").replace(/\D/g, "");
-        console.log("phone state:", phone);
-console.log("booking.phone:", booking.phone);
-
-if (mobile) {
-  window.open(
-    `https://wa.me/91${mobile}?text=${encodeURIComponent(message)}`,
-    "_blank"
-  );
-} else {
-  alert("Customer mobile number not found.");
-}
-      }}
-      className="mt-4 rounded-lg bg-green-600 px-5 py-2 text-white shadow hover:bg-green-700"
-    >
-      📲 Open WhatsApp
-    </button>
+  <button
+    onClick={openWhatsApp}
+    className="rounded-lg bg-green-600 px-5 py-2 text-white shadow hover:bg-green-700"
+  >
+    📲 Open WhatsApp
+  </button>
+</div>
   </div>
 )}
 
