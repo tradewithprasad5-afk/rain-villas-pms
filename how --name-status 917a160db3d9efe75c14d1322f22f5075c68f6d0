@@ -1,0 +1,173 @@
+[33mcommit 1eab139f1fa926315ec9249b6765c2c4a827552b[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m
+Author: prasad raut <your-email@example.com>
+Date:   Wed Jul 29 10:00:28 2026 +0530
+
+    Add PDF generation and sharing for booking receipts
+
+[33mcommit 47ce0c6186ad655f99d1640b7fb11d35ed14f433[m
+Author: prasad raut <your-email@example.com>
+Date:   Wed Jul 29 09:24:39 2026 +0530
+
+    Add PDF receipt generation
+
+[33mcommit 917a160db3d9efe75c14d1322f22f5075c68f6d0[m
+Author: prasad raut <your-email@example.com>
+Date:   Tue Jul 28 10:58:39 2026 +0530
+
+    Remove debug alert from backup function
+
+[33mcommit 19a8f53792e1b7a3aec7fc0bf3213fa57600f10a[m
+Author: prasad raut <your-email@example.com>
+Date:   Tue Jul 28 10:56:04 2026 +0530
+
+    Remove debug alert from backup function
+
+[33mcommit 9be437c901bd64c628e6318b5d3eb50215d2911c[m
+Author: prasad raut <your-email@example.com>
+Date:   Tue Jul 28 10:16:16 2026 +0530
+
+    Show backup error details
+
+[33mcommit 410b3d6b0d564b8cde9ab9abb8238c993a79f8ea[m
+Author: prasad raut <your-email@example.com>
+Date:   Tue Jul 28 10:06:21 2026 +0530
+
+    Fix business backup syntax
+
+[33mcommit 9086c3269a2a21536aca1767e2365a3bc9b7cac3[m
+Author: prasad raut <your-email@example.com>
+Date:   Tue Jul 28 10:03:13 2026 +0530
+
+    Fix duplicate function declaration
+
+[33mcommit 7e38dea2b05e20502422424b5a9effcf30662395[m
+Author: prasad raut <your-email@example.com>
+Date:   Tue Jul 28 10:00:47 2026 +0530
+
+    Fix Android business backup export
+
+[33mcommit 27fe57d04dab2bf12df0eed8ddc08da81cabf31c[m
+Author: prasad raut <your-email@example.com>
+Date:   Tue Jul 28 09:55:45 2026 +0530
+
+    Debug business backup
+
+[33mcommit 07f22ff64c78e78658f245773b7b7438b31ec646[m
+Author: prasad raut <your-email@example.com>
+Date:   Tue Jul 28 09:49:45 2026 +0530
+
+    Add debug alerts to business backup
+
+[33mcommit c0d68299d7e5b68ce393a59753738626dc6c6faf[m
+Author: prasad raut <your-email@example.com>
+Date:   Tue Jul 28 09:47:28 2026 +0530
+
+    Add debug alerts to business backup
+
+[33mcommit 27590e807c0fe5866ec71e5e363979e7b539be7d[m
+Author: prasad raut <your-email@example.com>
+Date:   Mon Jul 27 19:32:12 2026 +0530
+
+    Deploy latest dashboard with colored stat cards
+
+[33mcommit 370769bc556920680dd4acad8b6cc90c4df4333f[m
+Author: prasad raut <your-email@example.com>
+Date:   Mon Jul 27 16:00:33 2026 +0530
+
+    Improve Excel backup formatting and remove duplicate download button
+
+[33mcommit e7fe52f6d9cb06da6145f22382df1e2655e9e93c[m
+Author: prasad raut <your-email@example.com>
+Date:   Mon Jul 27 15:21:33 2026 +0530
+
+    Improve business backup export with customer phone numbers
+
+[33mcommit 4eea75e649d102815ed65f933577518be1bbddc6[m
+Author: prasad raut <your-email@example.com>
+Date:   Mon Jul 27 15:02:37 2026 +0530
+
+    Add customer phone numbers to business backup export
+
+[33mcommit e88f9917624423635982dfee56b2905f5a50ec23[m
+Author: prasad raut <your-email@example.com>
+Date:   Sun Jul 26 11:17:01 2026 +0530
+
+    Add internal Agent Portal with sharing tools
+
+[33mcommit 6ffc4f94c800e8e178865de4efb945a23414920c[m
+Author: prasad raut <your-email@example.com>
+Date:   Sat Jul 25 17:11:32 2026 +0530
+
+    feat(bookings): protect booking deletion with admin PIN
+
+[33mcommit da92487339e9052725afa71f69f729b78a7244cb[m
+Author: prasad raut <your-email@example.com>
+Date:   Thu Jul 23 15:49:27 2026 +0530
+
+    Refactor guest management by removing Customers module
+
+[33mcommit 3c6a25e90cb8b97a8e9f89c1925f1560bc741998[m
+Author: prasad raut <your-email@example.com>
+Date:   Thu Jul 23 11:14:58 2026 +0530
+
+    Fix booking types
+
+[33mcommit 26c75526dc9b857b13037e44ee5019fab84d8f39[m
+Author: prasad raut <your-email@example.com>
+Date:   Thu Jul 23 11:10:42 2026 +0530
+
+    Fix booking types
+
+[33mcommit 0a64aa27b4bf730e70a0f82c6d7d1ea80c8739e7[m
+Author: prasad raut <your-email@example.com>
+Date:   Thu Jul 23 11:06:42 2026 +0530
+
+    Fix booking types
+
+[33mcommit 8eba3f9f43824488a3905bb09de093d16016b951[m
+Author: prasad raut <your-email@example.com>
+Date:   Thu Jul 23 10:59:54 2026 +0530
+
+    Fix booking type definitions
+
+[33mcommit 9735b844a9672fccb33d7d53dc8c58f1d9ef6d34[m
+Author: prasad raut <your-email@example.com>
+Date:   Thu Jul 23 10:49:22 2026 +0530
+
+    Refactor protected layout and pages
+
+[33mcommit 6e8da307372629f66b62834781ed1fe2b8e9972f[m
+Author: prasad raut <your-email@example.com>
+Date:   Wed Jul 22 20:09:15 2026 +0530
+
+    Add report filtering and Excel export
+
+[33mcommit 33e24bec52522860a44ef27fcf6c398808ed082f[m
+Author: prasad raut <your-email@example.com>
+Date:   Mon Jul 20 10:47:38 2026 +0530
+
+    Add agent villa availability checker
+
+[33mcommit 5d10b35764089122534a48379ef6c679250e163a[m
+Author: prasad raut <your-email@example.com>
+Date:   Thu Jul 16 20:57:43 2026 +0530
+
+    Your message
+
+[33mcommit f7173a50f96bf6dbbbdfd4e29eb8ed765a6f63a7[m
+Author: prasad raut <your-email@example.com>
+Date:   Mon Jul 13 16:39:21 2026 +0530
+
+    Update customers module
+
+[33mcommit cd71250f9e64bcd43c53e473076f1f1ebdbe5a86[m
+Author: prasad raut <your-email@example.com>
+Date:   Mon Jul 13 10:27:11 2026 +0530
+
+    Add Firebase authentication
+
+[33mcommit cccfc8acae14b33efbb5502b23b33cc5c9e99cd6[m
+Author: prasad raut <your-email@example.com>
+Date:   Fri Jul 10 22:56:13 2026 +0530
+
+    Initial PMS
