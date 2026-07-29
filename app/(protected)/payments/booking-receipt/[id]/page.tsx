@@ -35,6 +35,7 @@ const searchParams = useSearchParams();
   const receiptRef = useRef<HTMLDivElement>(null);
   const [booking, setBooking] = useState<Booking | null>(null);
   const [phone, setPhone] = useState("");
+  const [showWhatsAppButton, setShowWhatsAppButton] = useState(false);
 
   async function loadBooking() {
     const bookingSnap = await getDoc(
@@ -120,23 +121,7 @@ const generatePdf = async () => {
   URL.revokeObjectURL(url);
 
   // Open WhatsApp Web with a pre-filled message
-  const message = `Dear Guest,
-
-Thank you for choosing Rain Villa.
-
-Please find your booking receipt attached.
-
-Booking No: ${booking.bookingNumber}
-
-Regards,
-Rain Villa
-📞 9527249988
-🌐 www.rainvilla.in`;
-
-  window.open(
-    `https://wa.me/?text=${encodeURIComponent(message)}`,
-    "_blank"
-  );
+  setShowWhatsAppButton(true);
 }
   } catch (error) {
     console.error("Failed to generate receipt PDF:", error);
@@ -159,6 +144,34 @@ Rain Villa
           </button>
 
         </div>
+           {showWhatsAppButton && booking && (
+  <div className="mb-5 flex justify-end">
+    <button
+      onClick={() => {
+  const message = `Dear Guest,
+
+Thank you for choosing Rain Villa.
+
+Please find your booking receipt attached.
+
+Booking No: ${booking.bookingNumber}
+
+Regards,
+Rain Villa
+📞 9527249988
+🌐 www.rainvilla.in`;
+
+  setShowWhatsAppButton(false);
+
+  window.location.href =
+    `https://wa.me/?text=${encodeURIComponent(message)}`;
+}}
+      className="rounded-lg bg-green-600 px-5 py-2 text-white shadow hover:bg-green-700"
+    >
+      📲 Open WhatsApp
+    </button>
+  </div>
+)}
 
         <div
   ref={receiptRef}
