@@ -77,11 +77,11 @@ export default function BookingReceiptPage() {
   const generatePdf = async () => {
   if (!receiptRef.current || !booking) return;
 
-  const options = {
+  const options: Parameters<ReturnType<typeof html2pdf>["set"]>[0] = {
   margin: 8,
   filename: `Receipt-${booking.bookingNumber}.pdf`,
   image: {
-    type: "jpeg" as const,
+    type: "jpeg",
     quality: 1,
   },
   html2canvas: {
@@ -91,7 +91,7 @@ export default function BookingReceiptPage() {
   jsPDF: {
     unit: "mm",
     format: "a4",
-    orientation: "portrait" as const,
+    orientation: "portrait",
   },
 };
 
