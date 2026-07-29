@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams } from "next/navigation";
+
 import { useEffect, useRef, useState } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import Image from "next/image";
@@ -9,6 +9,7 @@ import { generateReceiptPdfBlob } from "../../../../lib/receiptPdf";
 import { saveReceiptPdf } from "../../../../lib/saveReceiptPdf";
 import "./print.css";
 import { shareReceiptPdf } from "../../../../lib/shareReceiptPdf";
+import { useParams, useSearchParams } from "next/navigation";
 interface Booking {
   id: string;
   bookingNumber: string;
@@ -29,6 +30,7 @@ interface Customer {
 
 export default function BookingReceiptPage() {
   const { id } = useParams();
+const searchParams = useSearchParams();
   const receiptRef = useRef<HTMLDivElement>(null);
   const [booking, setBooking] = useState<Booking | null>(null);
   const [phone, setPhone] = useState("");
@@ -74,6 +76,16 @@ export default function BookingReceiptPage() {
       }
     );
   };
+  useEffect(() => {
+  if (searchParams.get("share") !== "true") return;
+  if (!booking) return;
+
+  const timer = setTimeout(() => {
+    generatePdf();
+  }, 300);
+
+  return () => clearTimeout(timer);
+}, [booking, searchParams]);
 
   const generatePdf = async () => {
   if (!receiptRef.current || !booking) return;

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Booking } from "./paymentTypes";
 import OverflowMenu from "./OverflowMenu";
 
+
 interface PaymentTableProps {
   loading: boolean;
   filteredBookings: Booking[];
@@ -35,33 +36,8 @@ export default function PaymentTable({
 }: PaymentTableProps) {
   
    const sendReceiptWhatsApp = (booking: Booking) => {
-  if (!booking.phone) {
-    alert("Guest phone number is not available.");
-    return;
-  }
-
-  // Remove spaces, dashes, etc.
-  const phone = booking.phone.replace(/\D/g, "");
-
-  const receiptUrl = `${window.location.origin}/payments/booking-receipt/${booking.id}`;
-
-  const message = `🏡 Rain Villa
-
-Hello ${booking.customerName},
-
-Thank you for your payment.
-
-Your booking receipt is ready.
-
-Booking Number: ${booking.bookingNumber}
-
-Receipt:
-${receiptUrl}
-
-Thank you for choosing Rain Villa!`;
-
   window.open(
-    `https://wa.me/91${phone}?text=${encodeURIComponent(message)}`,
+    `/payments/booking-receipt/${booking.id}?share=true`,
     "_blank"
   );
 };
