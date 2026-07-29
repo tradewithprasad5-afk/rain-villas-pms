@@ -224,7 +224,7 @@ Rain Villa
 
             <div className="p-4 sm:p-6 lg:p-10">
 
-              <div className="mb-8 rounded-2xl border border-slate-200 bg-slate-50 p-5 sm:p-8">
+              <div data-receipt-block className="mb-8 rounded-2xl border border-slate-200 bg-slate-50 p-5 sm:p-8">
 
                 <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 
@@ -330,7 +330,7 @@ Rain Villa
 
                 {/* Booking Amount */}
 
-                <div className="rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 p-5 sm:p-8 shadow-md">
+                <div data-receipt-block className="rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 p-5 sm:p-8 shadow-md">
 
                   <div className="mb-4 flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-blue-600 text-2xl sm:text-3xl text-white">
                     🏡
@@ -348,7 +348,7 @@ Rain Villa
 
                 {/* Amount Paid */}
 
-                <div className="rounded-2xl bg-gradient-to-br from-green-50 to-green-100 p-5 sm:p-8 shadow-md">
+                <div data-receipt-block className="rounded-2xl bg-gradient-to-br from-green-50 to-green-100 p-5 sm:p-8 shadow-md">
 
                   <div className="mb-4 flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-green-600 text-2xl sm:text-3xl text-white">
                     💳
@@ -366,7 +366,7 @@ Rain Villa
 
                 {/* Balance */}
 
-                <div className="rounded-2xl bg-gradient-to-br from-red-50 to-red-100 p-5 sm:p-8 shadow-md">
+                <div data-receipt-block className="rounded-2xl bg-gradient-to-br from-red-50 to-red-100 p-5 sm:p-8 shadow-md">
 
                   <div className="mb-4 flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-red-600 text-2xl sm:text-3xl text-white">
                     ₹
@@ -400,7 +400,7 @@ Rain Villa
 
               {/* Thank You */}
 
-              <div className="rounded-3xl bg-gradient-to-r from-green-50 via-white to-green-50 p-5 sm:p-8 lg:p-10">
+              <div data-receipt-block className="rounded-3xl bg-gradient-to-r from-green-50 via-white to-green-50 p-5 sm:p-8 lg:p-10">
 
                 <div className="text-center">
 
@@ -441,7 +441,7 @@ Rain Villa
 
                   {/* Phone */}
 
-                  <div className="rounded-2xl bg-slate-50 p-5 sm:p-6 text-center shadow-sm">
+                  <div data-receipt-block className="rounded-2xl bg-slate-50 p-5 sm:p-6 text-center shadow-sm">
 
                     <div className="mx-auto mb-4 flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-blue-600 text-3xl text-white">
                       📞
@@ -463,7 +463,7 @@ Rain Villa
 
                   {/* Email */}
 
-                  <div className="rounded-2xl bg-slate-50 p-5 sm:p-6 text-center shadow-sm">
+                  <div data-receipt-block className="rounded-2xl bg-slate-50 p-5 sm:p-6 text-center shadow-sm">
 
                     <div className="mx-auto mb-4 flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-green-600 text-3xl text-white">
                       ✉️
@@ -481,7 +481,7 @@ Rain Villa
 
                   {/* Website */}
 
-                  <div className="rounded-2xl bg-slate-50 p-5 sm:p-6 text-center shadow-sm">
+                  <div data-receipt-block className="rounded-2xl bg-slate-50 p-5 sm:p-6 text-center shadow-sm">
 
                     <div className="mx-auto mb-4 flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-purple-600 text-3xl text-white">
                       🌐
@@ -504,7 +504,7 @@ Rain Villa
 
                 </div>
 
-                <div className="mt-12 rounded-2xl bg-blue-50 p-5 sm:p-6">
+                <div data-receipt-block className="mt-12 rounded-2xl bg-blue-50 p-5 sm:p-6">
 
                   <div className="flex flex-col sm:flex-row items-center justify-between gap-5 text-center sm:text-left">
 
