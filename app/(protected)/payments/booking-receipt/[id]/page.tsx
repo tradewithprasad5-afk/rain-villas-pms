@@ -11,6 +11,7 @@ import "./print.css";
 import { shareReceiptPdf } from "../../../../lib/shareReceiptPdf";
 import { useParams, useSearchParams } from "next/navigation";
 import { Capacitor } from "@capacitor/core";
+import { uploadReceiptPdf } from "../../../../lib/uploadReceiptPdf";
 interface Booking {
   id: string;
   bookingNumber: string;
@@ -35,8 +36,7 @@ const searchParams = useSearchParams();
   const receiptRef = useRef<HTMLDivElement>(null);
   const [booking, setBooking] = useState<Booking | null>(null);
   const [phone, setPhone] = useState("");
-  const [showWhatsAppButton, setShowWhatsAppButton] = useState(false);
-  const [pdfUrl, setPdfUrl] = useState("");
+  
   
 async function loadBooking() {
   const bookingSnap = await getDoc(
@@ -105,27 +105,18 @@ const generatePdf = async () => {
         `Receipt-${booking.bookingNumber}.pdf`
       );
    } else {
-  // Download PDF
-  const url = URL.createObjectURL(pdfBlob);
-
-setPdfUrl(url);
-setShowWhatsAppButton(true);
-  } 
-  }
-  catch (error) {
-    console.error("Failed to generate receipt PDF:", error);
-    alert("Failed to generate receipt PDF.");
-  }
-};
-  
-  const openWhatsApp = () => {
-  if (!booking) return;
+  const downloadUrl = await uploadReceiptPdf(
+    pdfBlob,
+    booking.bookingNumber
+  );
 
   const message = `Dear Guest,
 
 Thank you for choosing Rain Villa.
 
-Please find your booking receipt attached.
+Please download your booking receipt:
+
+${downloadUrl}
 
 Booking No: ${booking.bookingNumber}
 
@@ -133,8 +124,6 @@ Regards,
 Rain Villa
 📞 9527249988
 🌐 www.rainvilla.in`;
-
-  setShowWhatsAppButton(false);
 
   const mobile = (phone || booking.phone || "").replace(/\D/g, "");
 
@@ -147,7 +136,15 @@ Rain Villa
     `https://wa.me/91${mobile}?text=${encodeURIComponent(message)}`,
     "_blank"
   );
+}
+  }
+  catch (error) {
+    console.error("Failed to generate receipt PDF:", error);
+    alert("Failed to generate receipt PDF.");
+  }
 };
+  
+  
 
   return (
     <div className="min-h-screen bg-slate-100 py-10 px-4">
@@ -164,35 +161,7 @@ Rain Villa
           </button>
 
         </div>
-           {showWhatsAppButton && booking && (
-  <div className="mb-5 rounded-xl border border-green-200 bg-green-50 p-4">
-    <p className="text-sm text-green-800">
-  ✅ Receipt is ready.
-
-  <br />
-
-  First click <strong>Download Receipt</strong>, then click
-  <strong> Open WhatsApp</strong> and attach the PDF using the 📎 icon.
-</p>
-
-    <div className="mt-4 flex gap-3">
-  <a
-    href={pdfUrl}
-    download={`Receipt-${booking.bookingNumber}.pdf`}
-    className="rounded-lg bg-blue-600 px-5 py-2 text-white shadow hover:bg-blue-700"
-  >
-    ⬇️ Download Receipt
-  </a>
-
-  <button
-    onClick={openWhatsApp}
-    className="rounded-lg bg-green-600 px-5 py-2 text-white shadow hover:bg-green-700"
-  >
-    📲 Open WhatsApp
-  </button>
-</div>
-  </div>
-)}
+           
 
         <div
   ref={receiptRef}
