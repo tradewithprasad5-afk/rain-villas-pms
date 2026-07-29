@@ -17,6 +17,7 @@ import PaymentStats from "./PaymentStats";
 import PaymentSearch from "./PaymentSearch";
 import PaymentTable from "./PaymentTable";
 import PaymentModal from "./PaymentModal";
+import PaymentFilters from "./PaymentFilters";
 import {
   Payment,
   Booking,
@@ -35,8 +36,9 @@ export default function PaymentsPage() {
 const [loading, setLoading] = useState(true);
 const [showForm, setShowForm] = useState(false);
 const [search, setSearch] = useState("");
-const [statusFilter, setStatusFilter] = useState("All");
 
+const [dateFilter, setDateFilter] = useState("all");
+const [paymentStatus, setPaymentStatus] = useState("all");
 const [bookingNumber, setBookingNumber] = useState("");
 const [customerName, setCustomerName] = useState("");
 
@@ -315,6 +317,7 @@ useEffect(() => {
 
 const filteredBookings = bookings
   .filter((booking) => {
+    // Search
     const matchesSearch =
       booking.bookingNumber
         .toLowerCase()
@@ -323,22 +326,105 @@ const filteredBookings = bookings
         .toLowerCase()
         .includes(search.toLowerCase());
 
-    const matchesStatus =
-      statusFilter === "All" ||
-      (statusFilter === "Paid" && booking.balanceAmount === 0) ||
-      (statusFilter === "Partial" && booking.balanceAmount > 0);
+    // Payment Status
+    const matchesPaymentStatus =
+      paymentStatus === "all" ||
+      (paymentStatus === "paid" && booking.balanceAmount === 0) ||
+      (paymentStatus === "partial" &&
+        booking.advancePaid > 0 &&
+        booking.balanceAmount > 0) ||
+      (paymentStatus === "unpaid" &&
+        booking.advancePaid === 0);
 
-    return matchesSearch && matchesStatus;
+    // Date Filter
+    let matchesDate = dateFilter === "all";
+
+    if (booking.checkIn) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const bookingDate = new Date(booking.checkIn);
+      bookingDate.setHours(0, 0, 0, 0);
+
+      switch (dateFilter) {
+        case "today":
+          matchesDate =
+            bookingDate.getTime() === today.getTime();
+          break;
+
+        case "yesterday": {
+          const yesterday = new Date(today);
+          yesterday.setDate(today.getDate() - 1);
+
+          matchesDate =
+            bookingDate.getTime() === yesterday.getTime();
+          break;
+        }
+
+        case "last7": {
+          const last7 = new Date(today);
+          last7.setDate(today.getDate() - 7);
+
+          matchesDate =
+            bookingDate >= last7 &&
+            bookingDate <= today;
+          break;
+        }
+
+        case "last30": {
+          const last30 = new Date(today);
+          last30.setDate(today.getDate() - 30);
+
+          matchesDate =
+            bookingDate >= last30 &&
+            bookingDate <= today;
+          break;
+        }
+
+        case "thisMonth":
+          matchesDate =
+            bookingDate.getMonth() === today.getMonth() &&
+            bookingDate.getFullYear() ===
+              today.getFullYear();
+          break;
+
+        case "lastMonth": {
+          const lastMonth = new Date(today);
+          lastMonth.setMonth(today.getMonth() - 1);
+
+          matchesDate =
+            bookingDate.getMonth() ===
+              lastMonth.getMonth() &&
+            bookingDate.getFullYear() ===
+              lastMonth.getFullYear();
+          break;
+        }
+
+        default:
+          matchesDate = dateFilter === "all";
+      }
+    }
+
+    return (
+      matchesSearch &&
+      matchesPaymentStatus &&
+      matchesDate
+    );
   })
   .sort((a, b) => {
     if (!a.checkIn) return 1;
     if (!b.checkIn) return -1;
 
     return (
-      new Date(a.checkIn).getTime() -
-      new Date(b.checkIn).getTime()
+      new Date(b.checkIn).getTime() -
+      new Date(a.checkIn).getTime()
     );
   });
+
+const displayedBookings =
+  dateFilter === "recent10"
+    ? filteredBookings.slice(0, 10)
+    : filteredBookings;
   return (
   <>
     <PaymentHeader
@@ -354,15 +440,21 @@ const filteredBookings = bookings
     />
 
     <PaymentSearch
-      search={search}
-      statusFilter={statusFilter}
-      onSearchChange={setSearch}
-      onStatusChange={setStatusFilter}
-    />
+  search={search}
+  onSearchChange={setSearch}
+/>
+
+<PaymentFilters
+  dateFilter={dateFilter}
+  paymentStatus={paymentStatus}
+  onDateFilterChange={setDateFilter}
+  onPaymentStatusChange={setPaymentStatus}
+/>
+
 
     <PaymentTable
       loading={loading}
-      filteredBookings={filteredBookings}
+      filteredBookings={displayedBookings}
       setSelectedBooking={setSelectedBooking}
       setBookingNumber={setBookingNumber}
       setCustomerName={setCustomerName}
@@ -377,7 +469,7 @@ const filteredBookings = bookings
     <PaymentModal
       showForm={showForm}
       bookings={bookings}
-      filteredBookings={filteredBookings}
+      filteredBookings={displayedBookings}
       bookingNumber={bookingNumber}
       customerName={customerName}
       amount={amount}
