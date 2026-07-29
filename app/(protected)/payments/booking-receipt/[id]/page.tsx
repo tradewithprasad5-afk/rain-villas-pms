@@ -171,6 +171,8 @@ Rain Villa
         setShowWhatsAppButton(false);
 
         const mobile = (phone || booking.phone || "").replace(/\D/g, "");
+        console.log("phone state:", phone);
+console.log("booking.phone:", booking.phone);
 
 if (mobile) {
   window.open(
