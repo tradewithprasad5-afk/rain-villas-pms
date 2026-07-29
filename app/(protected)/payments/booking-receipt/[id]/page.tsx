@@ -170,10 +170,16 @@ Rain Villa
 
         setShowWhatsAppButton(false);
 
-        window.open(
-          `https://wa.me/?text=${encodeURIComponent(message)}`,
-          "_blank"
-        );
+        const mobile = (phone || booking.phone || "").replace(/\D/g, "");
+
+if (mobile) {
+  window.open(
+    `https://wa.me/91${mobile}?text=${encodeURIComponent(message)}`,
+    "_blank"
+  );
+} else {
+  alert("Customer mobile number not found.");
+}
       }}
       className="mt-4 rounded-lg bg-green-600 px-5 py-2 text-white shadow hover:bg-green-700"
     >
