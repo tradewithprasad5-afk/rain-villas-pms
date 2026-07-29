@@ -5,12 +5,10 @@ import { useEffect, useRef, useState } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import Image from "next/image";
 import { db } from "../../../../lib/firebase";
-import { generateReceiptPdfBlob } from "../../../../lib/receiptPdf";
-import { saveReceiptPdf } from "../../../../lib/saveReceiptPdf";
-import "./print.css";
-import { shareReceiptPdf } from "../../../../lib/shareReceiptPdf";
-import { useParams, useSearchParams } from "next/navigation";
-import { Capacitor } from "@capacitor/core";
+
+
+import { useParams } from "next/navigation";
+
 interface Booking {
   id: string;
   bookingNumber: string;
@@ -31,7 +29,7 @@ interface Customer {
 
 export default function BookingReceiptPage() {
   const { id } = useParams();
-const searchParams = useSearchParams();
+
   const receiptRef = useRef<HTMLDivElement>(null);
   const [booking, setBooking] = useState<Booking | null>(null);
   const [phone, setPhone] = useState("");
@@ -76,87 +74,14 @@ async function loadBooking() {
       }
     );
   };
-  useEffect(() => {
-  if (searchParams.get("share") !== "true") return;
-  if (!booking) return;
-
-  const timer = setTimeout(() => {
-    generatePdf();
-  }, 300);
-
-  return () => clearTimeout(timer);
-}, [booking, searchParams]);
-
-const generatePdf = async () => {
-  if (!receiptRef.current || !booking) return;
-
-  try {
-    const pdfBlob = await generateReceiptPdfBlob(receiptRef.current);
-
-    if (Capacitor.isNativePlatform()) {
-      const fileUri = await saveReceiptPdf(
-        pdfBlob,
-        `Receipt-${booking.bookingNumber}.pdf`
-      );
-
-      await shareReceiptPdf(
-        fileUri,
-        `Receipt-${booking.bookingNumber}.pdf`
-      );
-   } else {
-  const receiptUrl = `${window.location.origin}/receipt/${id}`;
-
-  const message = `Dear Guest,
-
-Thank you for choosing Rain Villa.
-
-View your booking receipt:
-
-${receiptUrl}
-
-Booking No: ${booking.bookingNumber}
-
-Regards,
-Rain Villa
-📞 9527249988
-🌐 www.rainvilla.in`;
-
-  const mobile = (phone || booking.phone || "").replace(/\D/g, "");
-
-  if (!mobile) {
-    alert("Customer mobile number not found.");
-    return;
-  }
-
-  window.open(
-    `https://wa.me/91${mobile}?text=${encodeURIComponent(message)}`,
-    "_blank"
-  );
-}
-  }
-  catch (error) {
-    console.error("Failed to generate receipt PDF:", error);
-    alert("Failed to generate receipt PDF.");
-  }
-};
   
   
-
   return (
     <div className="min-h-screen bg-slate-100 py-10 px-4">
 
       <div className="mx-auto w-full max-w-6xl">
 
-        <div className="flex justify-end mb-5 print:hidden">
-
-          <button
-            onClick={generatePdf}
-            className="rounded-lg bg-blue-600 px-5 py-2 text-white shadow hover:bg-blue-700"
-          >
-            🖨 Print Receipt
-          </button>
-
-        </div>
+        
            
 
         <div
