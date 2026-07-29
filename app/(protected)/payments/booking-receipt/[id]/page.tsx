@@ -47,6 +47,17 @@ async function loadBooking() {
 
   const bookingData = bookingSnap.data() as Booking;
 
+  if (bookingData.customerId) {
+    const customerSnap = await getDoc(
+      doc(db, "customers", bookingData.customerId)
+    );
+
+    if (customerSnap.exists()) {
+      const customer = customerSnap.data() as Customer;
+      bookingData.phone = customer.phone || "";
+    }
+  }
+
   setBooking(bookingData);
   setPhone(bookingData.phone || "");
 }
