@@ -105,20 +105,15 @@ const generatePdf = async () => {
         `Receipt-${booking.bookingNumber}.pdf`
       );
    } else {
-  const downloadUrl = await uploadReceiptPdf(
-    pdfBlob,
-    booking.bookingNumber
-  );
-  console.log("Firebase PDF URL:", downloadUrl);
-alert(downloadUrl);
+  const receiptUrl = `${window.location.origin}/receipt/${id}`;
 
-  const message = `Dear Guest,
+const message = `Dear Guest,
 
 Thank you for choosing Rain Villa.
 
-Please download your booking receipt:
+View your booking receipt:
 
-${downloadUrl}
+${receiptUrl}
 
 Booking No: ${booking.bookingNumber}
 
