@@ -31,7 +31,7 @@ export default function PaymentFilters({
           <option value="last30">Last 30 Days</option>
           <option value="thisMonth">This Month</option>
           <option value="lastMonth">Last Month</option>
-          <option value="recent10">Recent 10 Bookings</option>
+          
         </select>
       </div>
 

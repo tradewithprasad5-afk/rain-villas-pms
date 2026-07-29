@@ -24,10 +24,6 @@ import {
   Customer,
 } from "./paymentTypes";
 
-
-
-
-
 export default function PaymentsPage() {
     
     const [payments, setPayments] = useState<Payment[]>([]);
@@ -421,10 +417,7 @@ const filteredBookings = bookings
     );
   });
 
-const displayedBookings =
-  dateFilter === "recent10"
-    ? filteredBookings.slice(0, 10)
-    : filteredBookings;
+
   return (
   <>
     <PaymentHeader
