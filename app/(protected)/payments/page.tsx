@@ -447,7 +447,7 @@ const filteredBookings = bookings
 
     <PaymentTable
       loading={loading}
-      filteredBookings={displayedBookings}
+  filteredBookings={filteredBookings}
       setSelectedBooking={setSelectedBooking}
       setBookingNumber={setBookingNumber}
       setCustomerName={setCustomerName}
@@ -462,7 +462,7 @@ const filteredBookings = bookings
     <PaymentModal
       showForm={showForm}
       bookings={bookings}
-      filteredBookings={displayedBookings}
+      filteredBookings={filteredBookings}
       bookingNumber={bookingNumber}
       customerName={customerName}
       amount={amount}
