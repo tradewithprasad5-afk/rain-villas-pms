@@ -12,17 +12,17 @@ export default function PaymentFilters({
   onPaymentStatusChange,
 }: PaymentFiltersProps) {
   return (
-    <div className="mb-6 flex flex-col gap-4 rounded-xl bg-white p-4 shadow md:flex-row md:items-end">
+    <div className="mb-4 sm:mb-6 flex flex-col gap-3 sm:gap-4 rounded-xl bg-white p-3 sm:p-4 shadow md:flex-row md:items-end">
       {/* Date Filter */}
       <div className="flex-1">
-        <label className="mb-1 block text-sm font-medium text-gray-600">
+        <label className="mb-1 block text-xs sm:text-sm font-medium text-gray-600">
           Date
         </label>
 
         <select
           value={dateFilter}
           onChange={(e) => onDateFilterChange(e.target.value)}
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm sm:text-base focus:border-blue-500 focus:outline-none"
         >
           <option value="all">All</option>
           <option value="today">Today</option>
@@ -37,14 +37,14 @@ export default function PaymentFilters({
 
       {/* Payment Status */}
       <div className="flex-1">
-        <label className="mb-1 block text-sm font-medium text-gray-600">
+        <label className="mb-1 block text-xs sm:text-sm font-medium text-gray-600">
           Payment Status
         </label>
 
         <select
           value={paymentStatus}
           onChange={(e) => onPaymentStatusChange(e.target.value)}
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm sm:text-base focus:border-blue-500 focus:outline-none"
         >
           <option value="all">All</option>
           <option value="paid">Paid</option>

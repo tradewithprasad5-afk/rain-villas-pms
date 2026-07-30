@@ -65,17 +65,17 @@ export default function PaymentModal({
   return (
   <>
     {showForm && (
-  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-    <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl p-8">
+  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 sm:p-4">
+    <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-8">
 
-      <h2 className="text-2xl font-bold mb-6">
+      <h2 className="text-lg sm:text-2xl font-bold mb-4 sm:mb-6">
         Receive Payment
       </h2>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
 
         <div>
-          <label className="block mb-2">Booking Number</label>
+          <label className="block mb-1.5 sm:mb-2 text-sm sm:text-base">Booking Number</label>
 
           <select
   value={bookingNumber}
@@ -103,7 +103,7 @@ if (paymentType === "Balance") {
   setAmount("");
 }
   }}
-  className="w-full border rounded-lg p-3"
+  className="w-full border rounded-lg p-2.5 sm:p-3 text-sm sm:text-base"
 >
  <option value="">Select Booking</option>
 
@@ -122,45 +122,45 @@ if (paymentType === "Balance") {
         </div>
 
         <div>
-          <label className="block mb-2">Guest Name</label>
+          <label className="block mb-1.5 sm:mb-2 text-sm sm:text-base">Guest Name</label>
 
           <input
   value={customerName}
   readOnly
-  className="w-full border rounded-lg p-3 bg-gray-100"
+  className="w-full border rounded-lg p-2.5 sm:p-3 text-sm sm:text-base bg-gray-100"
  />
         </div>
         {selectedBooking && (
-  <div className="col-span-2 bg-blue-50 rounded-lg p-4">
+  <div className="col-span-1 sm:col-span-2 bg-blue-50 rounded-lg p-3 sm:p-4">
 
-    <div className="grid grid-cols-3 gap-4">
+    <div className="grid grid-cols-3 gap-2 sm:gap-4">
 
       <div>
-        <p className="text-gray-500 text-sm">
+        <p className="text-gray-500 text-[11px] sm:text-sm">
           Total Amount
         </p>
 
-        <p className="font-bold text-lg">
+        <p className="font-bold text-sm sm:text-lg">
           ₹{totalAmount}
         </p>
       </div>
 
       <div>
-        <p className="text-gray-500 text-sm">
+        <p className="text-gray-500 text-[11px] sm:text-sm">
           Advance Paid
         </p>
 
-        <p className="font-bold text-lg text-green-600">
+        <p className="font-bold text-sm sm:text-lg text-green-600">
           ₹{advancePaid}
         </p>
       </div>
 
       <div>
-        <p className="text-gray-500 text-sm">
+        <p className="text-gray-500 text-[11px] sm:text-sm">
           Balance Due
         </p>
 
-        <p className="font-bold text-lg text-red-600">
+        <p className="font-bold text-sm sm:text-lg text-red-600">
           ₹{balanceAmount}
         </p>
       </div>
@@ -170,24 +170,24 @@ if (paymentType === "Balance") {
   </div>
 )}
 <div>
-  <label className="block mb-2">Amount</label>
+  <label className="block mb-1.5 sm:mb-2 text-sm sm:text-base">Amount</label>
 
   <input
     type="number"
     value={amount}
     onChange={(e) => setAmount(e.target.value)}
-    className="w-full border rounded-lg p-3"
+    className="w-full border rounded-lg p-2.5 sm:p-3 text-sm sm:text-base"
   />
 </div>
 
 
 <div>
-  <label className="block mb-2">Payment Method</label>
+  <label className="block mb-1.5 sm:mb-2 text-sm sm:text-base">Payment Method</label>
 
   <select
     value={paymentMethod}
     onChange={(e) => setPaymentMethod(e.target.value)}
-    className="w-full border rounded-lg p-3"
+    className="w-full border rounded-lg p-2.5 sm:p-3 text-sm sm:text-base"
   >
     <option>Cash</option>
     <option>UPI</option>
@@ -197,7 +197,7 @@ if (paymentType === "Balance") {
 </div>
 
 <div>
-  <label className="block mb-2">Payment Type</label>
+  <label className="block mb-1.5 sm:mb-2 text-sm sm:text-base">Payment Type</label>
 
 <select
   value={paymentType}
@@ -218,7 +218,7 @@ if (paymentType === "Balance") {
   setAdvancePaid(selectedBooking.advancePaid);
   setBalanceAmount(selectedBooking.balanceAmount);
 }}
-  className="w-full border rounded-lg p-3"
+  className="w-full border rounded-lg p-2.5 sm:p-3 text-sm sm:text-base"
 >
   <option value="Advance">Advance</option>
   <option value="Balance">Balance</option>
@@ -229,31 +229,31 @@ if (paymentType === "Balance") {
 
         
 
-        <div className="col-span-2">
-          <label className="block mb-2">Notes</label>
+        <div className="col-span-1 sm:col-span-2">
+          <label className="block mb-1.5 sm:mb-2 text-sm sm:text-base">Notes</label>
 
           <textarea
             rows={3}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            className="w-full border rounded-lg p-3"
+            className="w-full border rounded-lg p-2.5 sm:p-3 text-sm sm:text-base"
           />
         </div>
 
       </div>
 
-      <div className="flex justify-end gap-4 mt-8">
+      <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 sm:gap-4 mt-6 sm:mt-8">
 
         <button
           onClick={() => setShowForm(false)}
-          className="px-6 py-3 rounded-lg bg-gray-300"
+          className="px-5 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg bg-gray-300"
         >
           Cancel
         </button>
 
         <button
   onClick={savePayment}
-  className="px-6 py-3 rounded-lg bg-green-600 text-white hover:bg-green-700"
+  className="px-5 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg bg-green-600 text-white hover:bg-green-700"
 >
   Save Payment
 </button>

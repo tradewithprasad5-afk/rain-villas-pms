@@ -10,13 +10,13 @@ export default function PaymentHeader({
   onFilterChange,
 }: PaymentHeaderProps) {
   return (
-    <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+    <div className="mb-5 sm:mb-8 flex flex-col gap-3 sm:gap-4 md:flex-row md:items-center md:justify-between">
       <div>
-        <h1 className="text-3xl font-bold">
+        <h1 className="text-xl sm:text-3xl font-bold">
           Payments
         </h1>
 
-        <p className="text-gray-500 mt-1">
+        <p className="mt-1 text-xs sm:text-base text-gray-500">
           Receive and manage booking payments.
         </p>
       </div>
@@ -28,7 +28,7 @@ export default function PaymentHeader({
             e.target.value as "month" | "year" | "all"
           )
         }
-        className="border rounded-lg px-3 py-2"
+        className="w-full md:w-auto border rounded-lg px-3 py-2 text-sm sm:text-base"
       >
         <option value="month">This Month</option>
         <option value="year">This Year</option>
