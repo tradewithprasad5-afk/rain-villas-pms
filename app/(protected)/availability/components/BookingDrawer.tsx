@@ -1,6 +1,6 @@
 "use client";
 import { sendReceiptWhatsApp } from "@/app/lib/sendReceiptWhatsApp";
-
+import { useRouter } from "next/navigation";
 interface Props {
   selectedDate?: Date | null;
   paradiseBooking?: any;
@@ -13,6 +13,7 @@ export default function BookingDrawer({
   heavenBooking,
 }: Props) {
   
+  const router = useRouter();
   const formatDate = (date: string) =>
   new Date(date).toLocaleDateString("en-GB", {
     day: "numeric",
@@ -94,11 +95,11 @@ export default function BookingDrawer({
   </button>
 
   <button
-    onClick={() => sendReceiptWhatsApp(paradiseBooking)}
-    className="flex-1 rounded-lg bg-blue-600 py-1.5 text-xs sm:text-sm font-medium text-white hover:bg-blue-700"
-  >
-    📲 WhatsApp
-  </button>
+  onClick={() => sendReceiptWhatsApp(paradiseBooking)}
+  className="flex-1 rounded-lg bg-blue-600 py-1.5 text-xs sm:text-sm font-medium text-white hover:bg-blue-700"
+>
+  📲 WhatsApp
+</button>
 </div>
 </>
           ) : (
@@ -167,11 +168,11 @@ export default function BookingDrawer({
   </button>
 
   <button
-    onClick={() => sendReceiptWhatsApp(heavenBooking)}
-    className="flex-1 rounded-lg bg-blue-600 py-1.5 text-xs sm:text-sm font-medium text-white hover:bg-blue-700"
-  >
-    📲 WhatsApp
-  </button>
+  onClick={() => sendReceiptWhatsApp(heavenBooking)}
+  className="flex-1 rounded-lg bg-blue-600 py-1.5 text-xs sm:text-sm font-medium text-white hover:bg-blue-700"
+>
+  📲 WhatsApp
+</button>
 </div>
 </>
           ) : (
