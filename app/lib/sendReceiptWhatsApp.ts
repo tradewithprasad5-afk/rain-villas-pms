@@ -41,10 +41,8 @@ ${receiptUrl}
 Regards,
 Rain Villa`;
 
-    window.open(
-      `https://wa.me/91${phone}?text=${encodeURIComponent(message)}`,
-      "_blank"
-    );
+    window.location.href =
+  `https://wa.me/91${phone}?text=${encodeURIComponent(message)}`;
   } catch (error) {
     console.error(error);
     alert("Unable to send WhatsApp.");
