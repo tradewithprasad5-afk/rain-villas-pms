@@ -291,17 +291,7 @@ Rain Villa
                 <td className="px-4 py-4">
                   <div className="flex justify-center gap-2">
 
-                    <button
-                      onClick={() =>
-                        window.open(
-                          `/payments/booking-receipt/${booking.id}`,
-                          "_blank"
-                        )
-                      }
-                      className="rounded-lg bg-blue-600 px-3 py-2 text-sm text-white hover:bg-blue-700"
-                    >
-                      📄 Receipt
-                    </button>
+                    
                     <button
   onClick={() => sendReceiptWhatsApp(booking)}
   className="rounded-lg bg-green-600 px-3 py-2 text-sm text-white hover:bg-green-700"
