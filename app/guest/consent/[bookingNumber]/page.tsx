@@ -56,7 +56,10 @@ const [guestDeclaration, setGuestDeclaration] = useState(false);
 
       const snapshot = await getDocs(q);
 
-      if (snapshot.empty) return;
+      if (snapshot.empty) {
+  alert(`Booking '${bookingNumber}' not found.`);
+  return;
+}
 
       const bookingData: any = {
   id: snapshot.docs[0].id,
@@ -74,24 +77,18 @@ const [guestDeclaration, setGuestDeclaration] = useState(false);
         return;
       }
 
-      const customerSnapshot = await getDocs(
-        collection(db, "customers")
-      );
+      if (bookingData.customerId) {
+  const customerDoc = await getDoc(
+    doc(db, "customers", bookingData.customerId)
+  );
 
-      const customerData = customerSnapshot.docs
-        .map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }))
-        .find(
-          (c: any) =>
-            c.name?.toLowerCase() ===
-            bookingData.customerName?.toLowerCase()
-        );
-
-      if (customerData) {
-        setCustomer(customerData);
-      }
+  if (customerDoc.exists()) {
+    setCustomer({
+      id: customerDoc.id,
+      ...customerDoc.data(),
+    });
+  }
+}
     }
 
     loadBooking();
@@ -149,8 +146,17 @@ createdAt: serverTimestamp(),
       });
 
       await updateDoc(doc(db, "bookings", booking.id), {
-        consentStatus: "Completed",
-      });
+  consentStatus: "Completed",
+
+  adults,
+  children,
+
+  vehicleNumber,
+
+  emergencyContact,
+
+  consentSubmittedAt: serverTimestamp(),
+});
 
       router.push("/guest/thank-you");
     } finally {
