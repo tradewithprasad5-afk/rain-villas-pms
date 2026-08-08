@@ -76,9 +76,9 @@ export default function BookingModal({
   if (!show) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto p-8">
-        <h2 className="text-2xl font-bold mb-6">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 sm:p-4">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto p-4 sm:p-8">
+        <h2 className="text-lg sm:text-2xl font-bold mb-4 sm:mb-6">
           {editingId ? "Edit Booking" : "New Booking"}
         </h2>
 
@@ -86,17 +86,17 @@ export default function BookingModal({
             Customer Information
         =============================== */}
 
-        <div className="mb-8">
-          <h3 className="text-lg font-semibold border-b pb-2 mb-4">
+        <div className="mb-6 sm:mb-8">
+          <h3 className="text-sm sm:text-lg font-semibold border-b pb-2 mb-3 sm:mb-4">
             Customer Information
           </h3>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
 
             {/* Customer Name */}
 
             <div>
-              <label className="block mb-1 font-medium">
+              <label className="block mb-1 text-sm sm:text-base font-medium">
                 Customer Name
               </label>
 
@@ -104,7 +104,7 @@ export default function BookingModal({
                 type="text"
                 value={customerName}
                 onChange={(e) => setCustomerName(e.target.value)}
-                className="w-full border rounded-lg p-3"
+                className="w-full border rounded-lg p-2.5 sm:p-3 text-sm sm:text-base"
                 placeholder="Customer Name"
               />
             </div>
@@ -112,7 +112,7 @@ export default function BookingModal({
             {/* Phone */}
 
             <div>
-              <label className="block mb-1 font-medium">
+              <label className="block mb-1 text-sm sm:text-base font-medium">
                 Phone Number
               </label>
 
@@ -120,7 +120,7 @@ export default function BookingModal({
                 type="text"
                 value={phone}
                onChange={(e) => onPhoneChange(e.target.value)}
-                className="w-full border rounded-lg p-3"
+                className="w-full border rounded-lg p-2.5 sm:p-3 text-sm sm:text-base"
                 placeholder="9876543210"
               />
             </div>
@@ -128,7 +128,7 @@ export default function BookingModal({
             {/* Email */}
 
             <div>
-              <label className="block mb-1 font-medium">
+              <label className="block mb-1 text-sm sm:text-base font-medium">
                 Email
               </label>
 
@@ -136,15 +136,15 @@ export default function BookingModal({
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full border rounded-lg p-3"
+                className="w-full border rounded-lg p-2.5 sm:p-3 text-sm sm:text-base"
                 placeholder="example@email.com"
               />
             </div>
 
             {/* Address */}
 
-            <div className="col-span-2">
-              <label className="block mb-1 font-medium">
+            <div className="col-span-1 sm:col-span-2">
+              <label className="block mb-1 text-sm sm:text-base font-medium">
                 Address
               </label>
 
@@ -152,7 +152,7 @@ export default function BookingModal({
                 rows={3}
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-                className="w-full border rounded-lg p-3"
+                className="w-full border rounded-lg p-2.5 sm:p-3 text-sm sm:text-base"
                 placeholder="Customer Address"
               />
             </div>
@@ -163,24 +163,24 @@ export default function BookingModal({
             Booking Information
         =============================== */}
 
-        <div className="mb-8">
-          <h3 className="text-lg font-semibold border-b pb-2 mb-4">
+        <div className="mb-6 sm:mb-8">
+          <h3 className="text-sm sm:text-lg font-semibold border-b pb-2 mb-3 sm:mb-4">
             Booking Information
           </h3>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
 
             {/* Villa */}
 
             <div>
-              <label className="block mb-1 font-medium">
+              <label className="block mb-1 text-sm sm:text-base font-medium">
                 Villa
               </label>
 
               <select
                 value={villa}
                 onChange={(e) => setVilla(e.target.value)}
-                className="w-full border rounded-lg p-3"
+                className="w-full border rounded-lg p-2.5 sm:p-3 text-sm sm:text-base"
               >
                 <option>Rain Paradise</option>
                 <option>Rain Heaven</option>
@@ -190,7 +190,7 @@ export default function BookingModal({
             {/* Guests */}
 
             <div>
-              <label className="block mb-1 font-medium">
+              <label className="block mb-1 text-sm sm:text-base font-medium">
                 Guests
               </label>
 
@@ -199,14 +199,14 @@ export default function BookingModal({
                 min={1}
                 value={guests}
                 onChange={(e) => setGuests(Number(e.target.value))}
-                className="w-full border rounded-lg p-3"
+                className="w-full border rounded-lg p-2.5 sm:p-3 text-sm sm:text-base"
               />
             </div>
 
             {/* Check In */}
 
             <div>
-              <label className="block mb-1 font-medium">
+              <label className="block mb-1 text-sm sm:text-base font-medium">
                 Check In
               </label>
 
@@ -214,14 +214,14 @@ export default function BookingModal({
                 type="date"
                 value={checkIn}
                 onChange={(e) => setCheckIn(e.target.value)}
-                className="w-full border rounded-lg p-3"
+                className="w-full border rounded-lg p-2.5 sm:p-3 text-sm sm:text-base"
               />
             </div>
 
             {/* Check Out */}
 
             <div>
-              <label className="block mb-1 font-medium">
+              <label className="block mb-1 text-sm sm:text-base font-medium">
                 Check Out
               </label>
 
@@ -229,7 +229,7 @@ export default function BookingModal({
                 type="date"
                 value={checkOut}
                 onChange={(e) => setCheckOut(e.target.value)}
-                className="w-full border rounded-lg p-3"
+                className="w-full border rounded-lg p-2.5 sm:p-3 text-sm sm:text-base"
               />
             </div>
 
@@ -240,17 +240,17 @@ export default function BookingModal({
             Payment Information
         =============================== */}
 
-        <div className="mb-8">
-          <h3 className="text-lg font-semibold border-b pb-2 mb-4">
+        <div className="mb-6 sm:mb-8">
+          <h3 className="text-sm sm:text-lg font-semibold border-b pb-2 mb-3 sm:mb-4">
             Payment Information
           </h3>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
 
             {/* Total Amount */}
 
             <div>
-              <label className="block mb-1 font-medium">
+              <label className="block mb-1 text-sm sm:text-base font-medium">
                 Total Amount
               </label>
 
@@ -258,7 +258,7 @@ export default function BookingModal({
                 type="number"
                 value={totalAmount}
                 onChange={(e) => setTotalAmount(e.target.value)}
-                className="w-full border rounded-lg p-3"
+                className="w-full border rounded-lg p-2.5 sm:p-3 text-sm sm:text-base"
                 placeholder="Total Amount"
               />
             </div>
@@ -266,7 +266,7 @@ export default function BookingModal({
             {/* Advance */}
 
             <div>
-              <label className="block mb-1 font-medium">
+              <label className="block mb-1 text-sm sm:text-base font-medium">
                 Advance Paid
               </label>
 
@@ -274,7 +274,7 @@ export default function BookingModal({
                 type="number"
                 value={advancePaid}
                 onChange={(e) => setAdvancePaid(e.target.value)}
-                className="w-full border rounded-lg p-3"
+                className="w-full border rounded-lg p-2.5 sm:p-3 text-sm sm:text-base"
                 placeholder="Advance Paid"
               />
             </div>
@@ -282,7 +282,7 @@ export default function BookingModal({
             {/* Balance */}
 
             <div>
-              <label className="block mb-1 font-medium">
+              <label className="block mb-1 text-sm sm:text-base font-medium">
                 Balance Amount
               </label>
 
@@ -290,21 +290,21 @@ export default function BookingModal({
                 type="number"
                 value={balanceAmount}
                 readOnly
-                className="w-full border rounded-lg p-3 bg-gray-100"
+                className="w-full border rounded-lg p-2.5 sm:p-3 text-sm sm:text-base bg-gray-100"
               />
             </div>
 
             {/* Status */}
 
             <div>
-              <label className="block mb-1 font-medium">
+              <label className="block mb-1 text-sm sm:text-base font-medium">
                 Status
               </label>
 
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
-                className="w-full border rounded-lg p-3"
+                className="w-full border rounded-lg p-2.5 sm:p-3 text-sm sm:text-base"
               >
                 <option>Confirmed</option>
                 <option>Pending</option>
@@ -319,18 +319,18 @@ export default function BookingModal({
             Buttons
         =============================== */}
 
-        <div className="flex justify-end gap-4">
+        <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 sm:gap-4">
 
           <button
             onClick={onCancel}
-            className="px-6 py-3 rounded-lg bg-gray-300 hover:bg-gray-400"
+            className="px-5 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg bg-gray-300 hover:bg-gray-400"
           >
             Cancel
           </button>
 
           <button
             onClick={onSave}
-            className="px-6 py-3 rounded-lg bg-green-600 text-white hover:bg-green-700"
+            className="px-5 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg bg-green-600 text-white hover:bg-green-700"
           >
             {editingId ? "Update Booking" : "Save Booking"}
           </button>

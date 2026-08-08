@@ -20,6 +20,32 @@ interface BookingTableProps {
   onCompleteConsent: (id: string) => void;
 }
 
+function getInitials(name: string) {
+  const parts = name.trim().split(/\s+/);
+  const first = parts[0]?.[0] || "";
+  const second = parts.length > 1 ? parts[parts.length - 1][0] : "";
+  return (first + second).toUpperCase();
+}
+
+// Deterministic color per guest, purely cosmetic, so avatars aren't
+// all the same color — hashed from the name so it stays stable
+// across renders.
+const AVATAR_COLORS = [
+  { bg: "bg-blue-100", text: "text-blue-700" },
+  { bg: "bg-purple-100", text: "text-purple-700" },
+  { bg: "bg-teal-100", text: "text-teal-700" },
+  { bg: "bg-amber-100", text: "text-amber-700" },
+  { bg: "bg-pink-100", text: "text-pink-700" },
+];
+
+function avatarColor(name: string) {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+}
+
 export default function BookingTable({
   bookings,
   customers,
@@ -70,15 +96,24 @@ export default function BookingTable({
           const consentCompleted =
             booking.consentStatus === "Completed";
 
+          const avatar = avatarColor(booking.customerName);
+
           return (
             <div
               key={booking.id}
               className="relative flex flex-col rounded-2xl border bg-white p-3 shadow overflow-visible"
             >
               <div className="flex items-start justify-between gap-1">
-                <h3 className="text-sm font-semibold leading-tight line-clamp-2">
-                  {booking.customerName}
-                </h3>
+                <div className="flex items-center gap-2 min-w-0">
+                  <div
+                    className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold ${avatar.bg} ${avatar.text}`}
+                  >
+                    {getInitials(booking.customerName)}
+                  </div>
+                  <h3 className="text-sm font-semibold leading-tight line-clamp-2">
+                    {booking.customerName}
+                  </h3>
+                </div>
 
                 <DropdownMenu>
                   <DropdownMenuTrigger className="-m-0.5 shrink-0 rounded-md p-1 hover:bg-gray-100">
@@ -181,153 +216,140 @@ export default function BookingTable({
       </div>
 
       {/* ================= DESKTOP VIEW ================= */}
+      {/* Row-list style instead of a wide fixed-column table —
+          scales better and reads more like a modern SaaS app. */}
 
-      <div className="hidden md:block w-full overflow-x-auto rounded-xl bg-white shadow">
-        <table className="min-w-[1200px] w-full">
-  <thead className="bg-gray-100">
-    <tr>
-      <th className="px-2 py-3 text-left text-sm md:px-4 md:py-4">Customer</th>
-      <th className="px-2 py-3 text-left text-sm md:px-4 md:py-4">Phone</th>
-      <th className="px-2 py-3 text-left text-sm md:px-4 md:py-4">Villa</th>
-      <th className="px-2 py-3 text-left text-sm md:px-4 md:py-4">Check In</th>
-      <th className="px-2 py-3 text-left text-sm md:px-4 md:py-4">Check Out</th>
-      <th className="px-2 py-3 text-left text-sm md:px-4 md:py-4">Guests</th>
-      <th className="px-2 py-3 text-left text-sm md:px-4 md:py-4">Amount</th>
-      <th className="px-2 py-3 text-left text-sm md:px-4 md:py-4">Status</th>
-      <th className="px-2 py-3 text-center text-sm md:px-4 md:py-4">
-        Consent Status
-      </th>
-      <th className="px-2 py-3 text-center text-sm md:px-4 md:py-4">
-        Actions
-      </th>
-    </tr>
-  </thead>
+      <div className="hidden md:block rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+        {bookings.map((booking, index) => {
+          const customer = customers.find(
+            (c) => c.id === booking.customerId
+          );
 
-  <tbody>
-    {bookings.map((booking) => {
-      const customer = customers.find(
-        (c) => c.id === booking.customerId
-      );
+          const consentCompleted =
+            booking.consentStatus === "Completed";
 
-      return (
-        <tr
-          key={booking.id}
-          className="border-t hover:bg-gray-50"
-        >
-          <td className="px-2 py-3 text-sm md:px-4 md:py-4">
-            {booking.customerName}
-          </td>
+          const avatar = avatarColor(booking.customerName);
 
-          <td className="px-2 py-3 text-sm md:px-4 md:py-4">
-            {customer?.phone || "-"}
-          </td>
-
-          <td className="px-2 py-3 text-sm md:px-4 md:py-4">
-            {booking.villa}
-          </td>
-
-          <td className="px-2 py-3 text-sm md:px-4 md:py-4">
-            {booking.checkIn}
-          </td>
-
-          <td className="px-2 py-3 text-sm md:px-4 md:py-4">
-            {booking.checkOut}
-          </td>
-
-          <td className="px-2 py-3 text-sm md:px-4 md:py-4">
-            {booking.guests}
-          </td>
-
-          <td className="px-2 py-3 text-sm font-semibold md:px-4 md:py-4">
-            ₹{booking.totalAmount}
-          </td>
-
-          <td className="px-2 py-3 text-sm md:px-4 md:py-4">
-            <span
-              className={`rounded-full px-3 py-1 text-xs font-medium ${
-                booking.status === "Confirmed"
-                  ? "bg-green-100 text-green-700"
-                  : booking.status === "Pending"
-                  ? "bg-yellow-100 text-yellow-700"
-                  : "bg-red-100 text-red-700"
+          return (
+            <div
+              key={booking.id}
+              className={`flex items-center justify-between gap-4 px-5 py-3.5 hover:bg-slate-50 transition ${
+                index !== 0 ? "border-t border-slate-100" : ""
               }`}
             >
-              {booking.status}
-            </span>
-          </td>
-
-          <td className="px-2 py-3 text-sm md:px-4 md:py-4">
-            <div className="flex flex-col items-center gap-2 lg:flex-row lg:justify-center">
-              <span
-                className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
-                  booking.consentStatus === "Completed"
-                    ? "bg-green-100 text-green-700"
-                    : "bg-yellow-100 text-yellow-700"
-                }`}
-              >
-                {booking.consentStatus || "Pending"}
-              </span>
-
-              {booking.consentStatus !== "Completed" && (
-                <button
-                  onClick={() => onCompleteConsent(booking.id)}
-                  className="rounded-lg bg-green-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-green-700"
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <div
+                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${avatar.bg} ${avatar.text}`}
                 >
-                  ✓ Complete
-                </button>
-              )}
-            </div>
-          </td>
+                  {getInitials(booking.customerName)}
+                </div>
 
-          <td className="px-2 py-3 text-center md:px-4 md:py-4">
-            <DropdownMenu>
-              <DropdownMenuTrigger className="inline-flex items-center gap-1 rounded-md border px-2 py-2 text-xs hover:bg-gray-100 md:gap-2 md:px-3 md:text-sm">
-                <MoreVertical className="h-4 w-4" />
-                Actions
-              </DropdownMenuTrigger>
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-slate-900 truncate">
+                    {booking.customerName}
+                  </p>
+                  <p className="mt-0.5 text-xs text-slate-500 truncate">
+                    {customer?.phone || "-"} · {booking.villa} ·{" "}
+                    {formatDateRange(booking.checkIn, booking.checkOut)}
+                  </p>
+                </div>
+              </div>
 
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuItem
-                  onClick={() => onEdit(booking)}
-                >
-                  ✏️ Edit Booking
-                </DropdownMenuItem>
-
-                <DropdownMenuItem
-                  onClick={() => onSendConsent(booking)}
-                >
-                  📲 Send Consent
-                </DropdownMenuItem>
-
-                {booking.consentStatus === "Completed" ? (
-                  <DropdownMenuItem
-                    onClick={() => {
-                      window.location.href = `/admin/consents/${booking.bookingNumber}`;
-                    }}
+              <div className="flex items-center gap-4 shrink-0">
+                <div className="text-right">
+                  <p className="text-sm font-medium text-slate-900">
+                    ₹{booking.totalAmount.toLocaleString("en-IN")}
+                  </p>
+                  <p
+                    className={`mt-0.5 text-[11px] ${
+                      booking.balanceAmount > 0
+                        ? "text-red-600"
+                        : "text-green-600"
+                    }`}
                   >
-                    👁 View Consent
-                  </DropdownMenuItem>
-                ) : (
-                  <DropdownMenuItem disabled>
-                    👁 View Consent
-                  </DropdownMenuItem>
-                )}
+                    {booking.balanceAmount > 0
+                      ? `₹${booking.balanceAmount.toLocaleString(
+                          "en-IN"
+                        )} due`
+                      : "Fully paid"}
+                  </p>
+                </div>
 
-                <DropdownMenuItem
-                  onClick={() => onDelete(booking)}
-                  className="text-red-600"
+                <span
+                  className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${
+                    booking.status === "Confirmed"
+                      ? "bg-green-100 text-green-700"
+                      : booking.status === "Pending"
+                      ? "bg-yellow-100 text-yellow-700"
+                      : "bg-red-100 text-red-700"
+                  }`}
                 >
-                  🗑 Delete Booking
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </td>
-        </tr>
-      );
-    })}
-  </tbody>
-</table>
-</div>
-</>
-);
+                  {booking.status}
+                </span>
+
+                <span
+                  className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${
+                    consentCompleted
+                      ? "bg-green-100 text-green-700"
+                      : "bg-amber-100 text-amber-700"
+                  }`}
+                >
+                  {consentCompleted ? "Consent done" : "Consent pending"}
+                </span>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="rounded-md p-1.5 hover:bg-slate-100">
+                    <MoreVertical className="h-4 w-4 text-slate-500" />
+                  </DropdownMenuTrigger>
+
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuItem
+                      onClick={() => onEdit(booking)}
+                    >
+                      ✏️ Edit Booking
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem
+                      onClick={() => onSendConsent(booking)}
+                    >
+                      📲 Send Consent
+                    </DropdownMenuItem>
+
+                    {consentCompleted ? (
+                      <DropdownMenuItem
+                        onClick={() => {
+                          window.location.href = `/admin/consents/${booking.bookingNumber}`;
+                        }}
+                      >
+                        👁 View Consent
+                      </DropdownMenuItem>
+                    ) : (
+                      <DropdownMenuItem disabled>
+                        👁 View Consent
+                      </DropdownMenuItem>
+                    )}
+
+                    {!consentCompleted && (
+                      <DropdownMenuItem
+                        onClick={() => onCompleteConsent(booking.id)}
+                      >
+                        ✓ Mark Consent Complete
+                      </DropdownMenuItem>
+                    )}
+
+                    <DropdownMenuItem
+                      onClick={() => onDelete(booking)}
+                      className="text-red-600"
+                    >
+                      🗑 Delete Booking
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </>
+  );
 }
