@@ -87,11 +87,14 @@ export default function RevenueChart({
             />
 
             <YAxis
-              tick={{ fontSize: 11 }}
-              tickLine={false}
-              axisLine={false}
-              width={50}
-            />
+  tick={{ fontSize: 11 }}
+  tickLine={false}
+  axisLine={false}
+  width={55}
+  tickFormatter={(value) =>
+    `₹${(Number(value) / 100000).toFixed(0)}L`
+  }
+/>
 
             <Tooltip
               formatter={(value) => [
