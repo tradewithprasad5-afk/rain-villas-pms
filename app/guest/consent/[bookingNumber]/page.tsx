@@ -360,10 +360,12 @@ createdAt: serverTimestamp(),
                 </label>
 
                 <input
-                  readOnly
-                  value={customer?.phone || ""}
-                  className="w-full rounded-lg border bg-gray-100 p-3"
-                />
+  type="tel"
+  inputMode="tel"
+  readOnly
+  value={customer?.phone || ""}
+  className="w-full rounded-lg border bg-gray-100 p-3"
+/>
 
               </div>
 
@@ -374,10 +376,12 @@ createdAt: serverTimestamp(),
                 </label>
 
                 <input
-                  readOnly
-                  value={customer?.email || ""}
-                  className="w-full rounded-lg border bg-gray-100 p-3"
-                />
+  type="email"
+  inputMode="email"
+  readOnly
+  value={customer?.email || ""}
+  className="w-full rounded-lg border bg-gray-100 p-3"
+/>
 
               </div>
 
