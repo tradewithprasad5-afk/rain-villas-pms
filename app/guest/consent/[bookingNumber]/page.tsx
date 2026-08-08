@@ -361,10 +361,16 @@ createdAt: serverTimestamp(),
 
                 <input
   type="tel"
-  inputMode="tel"
-  readOnly
+  inputMode="numeric"
   value={customer?.phone || ""}
-  className="w-full rounded-lg border bg-gray-100 p-3"
+  onChange={(e) =>
+    setCustomer((prev: any) => ({
+      ...prev,
+      phone: e.target.value,
+    }))
+  }
+  placeholder="Enter mobile number"
+  className="w-full rounded-lg border p-3"
 />
 
               </div>
@@ -378,9 +384,15 @@ createdAt: serverTimestamp(),
                 <input
   type="email"
   inputMode="email"
-  readOnly
   value={customer?.email || ""}
-  className="w-full rounded-lg border bg-gray-100 p-3"
+  onChange={(e) =>
+    setCustomer((prev: any) => ({
+      ...prev,
+      email: e.target.value,
+    }))
+  }
+  placeholder="Enter email address"
+  className="w-full rounded-lg border p-3"
 />
 
               </div>
