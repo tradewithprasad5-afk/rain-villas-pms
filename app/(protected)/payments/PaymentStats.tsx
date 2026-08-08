@@ -19,7 +19,7 @@ export default function PaymentStats({
         </p>
 
         <p className="mt-1.5 sm:mt-2 break-words text-lg sm:text-2xl font-bold">
-          ₹{totalRevenue.toLocaleString()}
+          ₹{totalRevenue.toLocaleString("en-IN")}
         </p>
       </div>
 
@@ -29,7 +29,7 @@ export default function PaymentStats({
         </p>
 
         <p className="mt-1.5 sm:mt-2 break-words text-lg sm:text-2xl font-bold text-green-600">
-          ₹{totalReceived.toLocaleString()}
+          ₹{totalReceived.toLocaleString("en-IN")}
         </p>
       </div>
 
@@ -39,7 +39,7 @@ export default function PaymentStats({
         </p>
 
         <p className="mt-1.5 sm:mt-2 break-words text-lg sm:text-2xl font-bold text-red-600">
-          ₹{totalOutstanding.toLocaleString()}
+          ₹{totalOutstanding.toLocaleString("en-IN")}
         </p>
       </div>
 
