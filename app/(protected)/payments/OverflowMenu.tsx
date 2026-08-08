@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { MoreVertical } from "lucide-react";
 
 type MenuItem = {
   label: string;
-  icon?: string;
+  icon?: React.ReactNode;
   onClick: () => void;
 };
 
@@ -12,18 +13,13 @@ interface OverflowMenuProps {
   items: MenuItem[];
 }
 
-export default function OverflowMenu({
-  items,
-}: OverflowMenuProps) {
+export default function OverflowMenu({ items }: OverflowMenuProps) {
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (
-        menuRef.current &&
-        !menuRef.current.contains(event.target as Node)
-      ) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setOpen(false);
       }
     }
@@ -31,10 +27,7 @@ export default function OverflowMenu({
     document.addEventListener("click", handleClickOutside);
 
     return () => {
-      document.removeEventListener(
-        "click",
-        handleClickOutside
-      );
+      document.removeEventListener("click", handleClickOutside);
     };
   }, []);
 
@@ -46,14 +39,15 @@ export default function OverflowMenu({
           e.stopPropagation();
           setOpen((prev) => !prev);
         }}
-        className="rounded-md p-1 hover:bg-gray-100"
+        aria-label="More options"
+        className="rounded-lg p-1.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
       >
-        ⋮
+        <MoreVertical size={18} />
       </button>
 
       {open && (
         <div
-          className="absolute right-0 top-full mt-1 w-44 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-xl z-50"
+          className="absolute right-0 top-full z-50 mt-1 w-48 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg"
           onClick={(e) => e.stopPropagation()}
         >
           {items.map((item, index) => (
@@ -64,9 +58,11 @@ export default function OverflowMenu({
                 item.onClick();
                 setOpen(false);
               }}
-              className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm hover:bg-gray-100"
+              className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-sm text-slate-700 transition hover:bg-slate-50"
             >
-              {item.icon && <span>{item.icon}</span>}
+              {item.icon && (
+                <span className="text-slate-500">{item.icon}</span>
+              )}
               <span>{item.label}</span>
             </button>
           ))}
