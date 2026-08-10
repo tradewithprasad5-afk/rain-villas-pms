@@ -326,27 +326,6 @@ www.rainvilla.in`;
         onClick: () => openReceivePayment(sourceBooking),
       }));
 
-  const sendCombinedReceiptWhatsApp = (booking: CombinedBooking) => {
-    const mobile = (booking.phone || booking.sourceBookings[0]?.phone || "")
-      .replace(/\D/g, "");
-
-    if (!mobile) {
-      alert("Customer mobile number not found.");
-      return;
-    }
-
-    const receiptLines = booking.sourceBookings.map((sourceBooking) => {
-      const receiptUrl = `${window.location.origin}/receipt/${sourceBooking.id}`;
-      return `Booking No: ${sourceBooking.bookingNumber}\n${receiptUrl}`;
-    });
-
-    const message = `Dear ${booking.customerName},\n\nThank you for choosing Rain Villa.\n\nYour booking receipts:\n\n${receiptLines.join("\n\n")}\n\nRegards,\nRain Villa\n9527249988\nwww.rainvilla.in`;
-
-    window.open(
-      `https://wa.me/91${mobile}?text=${encodeURIComponent(message)}`,
-      "_blank"
-    );
-  };
 
   return (
     <>
