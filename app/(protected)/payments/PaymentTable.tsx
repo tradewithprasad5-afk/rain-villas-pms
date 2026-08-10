@@ -213,6 +213,46 @@ www.rainvilla.in`;
   };
 
   /*
+   * Send all receipts belonging to a combined customer entry.
+   *
+   * This keeps the payment row combined while still linking each
+   * original booking separately.
+   */
+  const sendCombinedReceiptWhatsApp = (booking: CombinedBooking) => {
+    const mobile = (booking.phone || "").replace(/\D/g, "");
+
+    if (!mobile) {
+      alert("Customer mobile number not found.");
+      return;
+    }
+
+    const receiptLinks = booking.sourceBookings
+      .map(
+        (sourceBooking) =>
+          `Booking No: ${sourceBooking.bookingNumber}\n${window.location.origin}/receipt/${sourceBooking.id}`
+      )
+      .join("\n\n");
+
+    const message = `Dear Guest,
+
+Thank you for choosing Rain Villa.
+
+Your bookings are:
+
+${receiptLinks}
+
+Regards,
+Rain Villa
+9527249988
+www.rainvilla.in`;
+
+    window.open(
+      `https://wa.me/91${mobile}?text=${encodeURIComponent(message)}`,
+      "_blank"
+    );
+  };
+
+  /*
    * Open payment modal for ONE actual booking.
    *
    * This is intentionally not passed the combined booking.
@@ -589,13 +629,64 @@ www.rainvilla.in`;
                       /*
                        * Multiple bookings for the same customer.
                        *
-                       * We use a menu so each payment can still
-                       * be assigned to the correct villa/booking.
+                       * Keep the row visually consistent with normal
+                       * payment rows: WhatsApp + Receive.
+                       *
+                       * WhatsApp sends one message containing all
+                       * individual receipt links.
+                       *
+                       * Receive opens a small menu so the payment is
+                       * still applied to the correct original booking.
                        */
-                      <div className="flex justify-center">
-                        <OverflowMenu
-                          items={getMobileMenuItems(booking)}
-                        />
+                      <div className="flex justify-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => sendCombinedReceiptWhatsApp(booking)}
+                          className="flex items-center gap-1.5 rounded-lg bg-green-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-green-700"
+                        >
+                          <MessageCircle size={15} />
+                          WhatsApp
+                        </button>
+
+                        {booking.sourceBookings.some(
+                          (sourceBooking) => sourceBooking.balanceAmount > 0
+                        ) && (
+                          <details className="relative">
+                            <summary className="flex cursor-pointer list-none items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-blue-700">
+                              <Wallet size={15} />
+                              Receive
+                            </summary>
+
+                            <div className="absolute right-0 z-50 mt-2 min-w-[220px] overflow-hidden rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl">
+                              {booking.sourceBookings
+                                .filter(
+                                  (sourceBooking) =>
+                                    sourceBooking.balanceAmount > 0
+                                )
+                                .map((sourceBooking) => (
+                                  <button
+                                    key={sourceBooking.id}
+                                    type="button"
+                                    onClick={(event) => {
+                                      const details =
+                                        event.currentTarget.closest("details");
+                                      if (details) {
+                                        details.removeAttribute("open");
+                                      }
+
+                                      openReceivePayment(sourceBooking);
+                                    }}
+                                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm text-slate-700 transition hover:bg-slate-50"
+                                  >
+                                    <Wallet size={15} />
+                                    <span className="min-w-0 flex-1 truncate">
+                                      Receive {sourceBooking.villa}
+                                    </span>
+                                  </button>
+                                ))}
+                            </div>
+                          </details>
+                        )}
                       </div>
                     )}
                   </td>
