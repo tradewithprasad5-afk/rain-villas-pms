@@ -317,32 +317,35 @@ www.rainvilla.in`;
    *   Receive Rain Paradise
    *   Receive Rain Heaven
    */
-  const getMobileMenuItems = (booking: CombinedBooking) => {
-    const items: {
-      label: string;
-      icon?: React.ReactNode;
-      onClick: () => void;
-    }[] = [];
+  const getReceiveMenuItems = (booking: CombinedBooking) =>
+    booking.sourceBookings
+      .filter((sourceBooking) => Number(sourceBooking.balanceAmount || 0) > 0)
+      .map((sourceBooking) => ({
+        label: `Receive ${sourceBooking.villa}`,
+        icon: <Wallet size={16} />,
+        onClick: () => openReceivePayment(sourceBooking),
+      }));
 
-    booking.sourceBookings.forEach((sourceBooking) => {
-      items.push({
-        label: `Send ${sourceBooking.bookingNumber}`,
-        icon: <MessageCircle size={16} />,
-        onClick: () => sendReceiptWhatsApp(sourceBooking),
-      });
+  const sendCombinedReceiptWhatsApp = (booking: CombinedBooking) => {
+    const mobile = (booking.phone || booking.sourceBookings[0]?.phone || "")
+      .replace(/\D/g, "");
+
+    if (!mobile) {
+      alert("Customer mobile number not found.");
+      return;
+    }
+
+    const receiptLines = booking.sourceBookings.map((sourceBooking) => {
+      const receiptUrl = `${window.location.origin}/receipt/${sourceBooking.id}`;
+      return `Booking No: ${sourceBooking.bookingNumber}\n${receiptUrl}`;
     });
 
-    booking.sourceBookings
-      .filter((sourceBooking) => sourceBooking.balanceAmount > 0)
-      .forEach((sourceBooking) => {
-        items.push({
-          label: `Receive ${sourceBooking.villa}`,
-          icon: <Wallet size={16} />,
-          onClick: () => openReceivePayment(sourceBooking),
-        });
-      });
+    const message = `Dear ${booking.customerName},\n\nThank you for choosing Rain Villa.\n\nYour booking receipts:\n\n${receiptLines.join("\n\n")}\n\nRegards,\nRain Villa\n9527249988\nwww.rainvilla.in`;
 
-    return items;
+    window.open(
+      `https://wa.me/91${mobile}?text=${encodeURIComponent(message)}`,
+      "_blank"
+    );
   };
 
   return (
@@ -382,16 +385,33 @@ www.rainvilla.in`;
                 key={booking.id}
                 className="relative flex flex-col overflow-visible rounded-2xl border border-slate-200 bg-white p-3 shadow-sm transition hover:shadow-md"
               >
-                {/* Customer + menu */}
-                <div className="flex items-start justify-between gap-1">
-                  <h2 className="line-clamp-2 text-sm font-semibold leading-tight text-slate-900">
+                {/* Customer + actions */}
+                <div className="flex items-start justify-between gap-2">
+                  <h2 className="line-clamp-2 min-w-0 text-sm font-semibold leading-tight text-slate-900">
                     {booking.customerName}
                   </h2>
 
-                  <div className="-m-0.5 shrink-0">
-                    <OverflowMenu
-                      items={getMobileMenuItems(booking)}
-                    />
+                  <div className="flex shrink-0 items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        booking.sourceBookings.length === 1
+                          ? sendReceiptWhatsApp(booking.sourceBookings[0])
+                          : sendCombinedReceiptWhatsApp(booking)
+                      }
+                      aria-label={`Send WhatsApp receipt for ${booking.customerName}`}
+                      className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-600 text-white shadow-sm transition active:scale-95 hover:bg-green-700"
+                    >
+                      <MessageCircle size={16} />
+                    </button>
+
+                    {booking.sourceBookings.some(
+                      (sourceBooking) => Number(sourceBooking.balanceAmount || 0) > 0
+                    ) && (
+                      <OverflowMenu
+                        items={getReceiveMenuItems(booking)}
+                      />
+                    )}
                   </div>
                 </div>
 
