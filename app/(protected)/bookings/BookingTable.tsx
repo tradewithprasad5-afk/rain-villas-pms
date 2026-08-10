@@ -394,19 +394,7 @@ export default function BookingTable({
                 {/* Keep the old inline Complete button for
                     single bookings. For combined bookings,
                     completion is available per booking in ⋮. */}
-                {!consentCompleted &&
-                  booking.sourceBookings.length === 1 && (
-                    <button
-                      onClick={() =>
-                        onCompleteConsent(
-                          booking.sourceBookings[0].id
-                        )
-                      }
-                      className="rounded-md bg-green-600 px-2 py-0.5 text-[10px] font-semibold text-white hover:bg-green-700"
-                    >
-                      ✓ Complete
-                    </button>
-                  )}
+                
 
                 {booking.balanceAmount > 0 && (
                   <span className="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-semibold text-red-700">
