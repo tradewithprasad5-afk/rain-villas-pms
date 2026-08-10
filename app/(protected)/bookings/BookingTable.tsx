@@ -20,16 +20,20 @@ interface BookingTableProps {
   onCompleteConsent: (id: string) => void;
 }
 
+interface CombinedBooking extends Booking {
+  sourceBookings: Booking[];
+}
+
 function getInitials(name: string) {
   const parts = name.trim().split(/\s+/);
+
   const first = parts[0]?.[0] || "";
-  const second = parts.length > 1 ? parts[parts.length - 1][0] : "";
+  const second =
+    parts.length > 1 ? parts[parts.length - 1]?.[0] || "" : "";
+
   return (first + second).toUpperCase();
 }
 
-// Deterministic color per guest, purely cosmetic, so avatars aren't
-// all the same color — hashed from the name so it stays stable
-// across renders.
 const AVATAR_COLORS = [
   { bg: "bg-blue-100", text: "text-blue-700" },
   { bg: "bg-purple-100", text: "text-purple-700" },
@@ -40,10 +44,131 @@ const AVATAR_COLORS = [
 
 function avatarColor(name: string) {
   let hash = 0;
+
   for (let i = 0; i < name.length; i++) {
     hash = name.charCodeAt(i) + ((hash << 5) - hash);
   }
+
   return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+}
+
+/*
+ * IMPORTANT:
+ * This only combines bookings for DISPLAY.
+ *
+ * Firestore bookings remain separate.
+ *
+ * Example:
+ *
+ * Pradip Jain
+ * RV-0005 - Rain Paradise
+ * RV-0015 - Rain Heaven
+ *
+ * will display as one customer card/row,
+ * while Edit/Delete/Consent still work
+ * on the original individual booking.
+ */
+function groupBookings(bookings: Booking[]): CombinedBooking[] {
+  const groups = new Map<string, Booking[]>();
+
+  bookings.forEach((booking) => {
+    const customerName =
+      booking.customerName?.trim().toLowerCase() || "";
+
+    const groupKey = booking.customerId
+      ? `customer:${booking.customerId}`
+      : `customer-name:${customerName}`;
+
+    const existing = groups.get(groupKey);
+
+    if (existing) {
+      existing.push(booking);
+    } else {
+      groups.set(groupKey, [booking]);
+    }
+  });
+
+  return Array.from(groups.values()).map((sourceBookings) => {
+    const first = sourceBookings[0];
+
+    const bookingNumbers = Array.from(
+      new Set(
+        sourceBookings
+          .map((booking) => booking.bookingNumber)
+          .filter(Boolean)
+      )
+    );
+
+    const villas = Array.from(
+      new Set(
+        sourceBookings
+          .map((booking) => booking.villa)
+          .filter(Boolean)
+      )
+    );
+
+    const checkIns = sourceBookings
+      .map((booking) => booking.checkIn)
+      .filter(Boolean)
+      .sort(
+        (a, b) =>
+          new Date(a).getTime() -
+          new Date(b).getTime()
+      );
+
+    const checkOuts = sourceBookings
+      .map((booking) => booking.checkOut)
+      .filter(Boolean)
+      .sort(
+        (a, b) =>
+          new Date(b).getTime() -
+          new Date(a).getTime()
+      );
+
+    const totalAmount = sourceBookings.reduce(
+      (sum, booking) =>
+        sum + Number(booking.totalAmount || 0),
+      0
+    );
+
+    const advancePaid = sourceBookings.reduce(
+      (sum, booking) =>
+        sum + Number(booking.advancePaid || 0),
+      0
+    );
+
+    const balanceAmount = sourceBookings.reduce(
+      (sum, booking) =>
+        sum + Number(booking.balanceAmount || 0),
+      0
+    );
+
+    return {
+      ...first,
+
+      bookingNumber:
+        bookingNumbers.join(" + ") ||
+        first.bookingNumber,
+
+      villa:
+        villas.join(" + ") ||
+        first.villa,
+
+      checkIn:
+        checkIns[0] ||
+        first.checkIn,
+
+      checkOut:
+        checkOuts[0] ||
+        first.checkOut,
+
+      totalAmount,
+      advancePaid,
+      balanceAmount,
+
+      sourceBookings,
+    };
+  });
 }
 
 export default function BookingTable({
@@ -57,298 +182,479 @@ export default function BookingTable({
 }: BookingTableProps) {
   if (loading) {
     return (
-      <div className="rounded-xl bg-white p-10 text-center shadow">
-        Loading bookings...
+      <div className="rounded-2xl bg-white p-8 text-center shadow-sm sm:p-10">
+        <p className="text-sm text-slate-500">
+          Loading bookings...
+        </p>
       </div>
     );
   }
 
   if (bookings.length === 0) {
     return (
-      <div className="rounded-xl bg-white p-10 text-center shadow">
-        No bookings found.
+      <div className="rounded-2xl bg-white p-8 text-center shadow-sm sm:p-10">
+        <p className="text-sm text-slate-500">
+          No bookings found.
+        </p>
       </div>
     );
   }
-  const formatDateRange = (checkIn: string, checkOut: string) => {
-  const inDate = new Date(checkIn);
-  const outDate = new Date(checkOut);
 
-  return `${inDate.toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "short",
-  })} → ${outDate.toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "short",
-  })}`;
-};
+  const groupedBookings = groupBookings(bookings);
+
+  const formatDate = (date: string) => {
+    if (!date) return "-";
+
+    return new Date(date).toLocaleDateString(
+      "en-GB",
+      {
+        day: "numeric",
+        month: "short",
+      }
+    );
+  };
+
+  const formatDateRange = (
+    checkIn: string,
+    checkOut: string
+  ) => {
+    return `${formatDate(checkIn)} → ${formatDate(
+      checkOut
+    )}`;
+  };
+
+  const getStatus = (
+    booking: CombinedBooking
+  ) => {
+    const statuses = Array.from(
+      new Set(
+        booking.sourceBookings.map(
+          (item) => item.status
+        )
+      )
+    );
+
+    if (statuses.length === 1) {
+      return statuses[0];
+    }
+
+    return "Multiple";
+  };
+
+  const getStatusClasses = (
+    status: string
+  ) => {
+    switch (status) {
+      case "Confirmed":
+        return "bg-green-100 text-green-700";
+
+      case "Pending":
+        return "bg-yellow-100 text-yellow-700";
+
+      case "Cancelled":
+        return "bg-red-100 text-red-700";
+
+      default:
+        return "bg-slate-100 text-slate-700";
+    }
+  };
+
+  const isConsentCompleted = (
+    booking: CombinedBooking
+  ) => {
+    return booking.sourceBookings.every(
+      (sourceBooking) =>
+        sourceBooking.consentStatus ===
+        "Completed"
+    );
+  };
+
+  /*
+   * Every action still operates on the
+   * ORIGINAL booking.
+   */
+  const getMenuItems = (
+    booking: CombinedBooking
+  ) => {
+    return booking.sourceBookings.flatMap(
+      (sourceBooking) => {
+        const items: {
+          label: string;
+          onClick: () => void;
+        }[] = [
+          {
+            label: `✏️ Edit ${
+              sourceBooking.bookingNumber ||
+              "Booking"
+            }`,
+            onClick: () =>
+              onEdit(sourceBooking),
+          },
+
+          {
+            label: `📲 Send Consent ${
+              sourceBooking.bookingNumber || ""
+            }`.trim(),
+
+            onClick: () =>
+              onSendConsent(sourceBooking),
+          },
+        ];
+
+        if (
+          sourceBooking.consentStatus ===
+          "Completed"
+        ) {
+          items.push({
+            label: `👁 View Consent ${
+              sourceBooking.bookingNumber || ""
+            }`.trim(),
+
+            onClick: () => {
+              window.location.href =
+                `/admin/consents/${sourceBooking.bookingNumber}`;
+            },
+          });
+        } else {
+          items.push({
+            label: `✓ Mark Consent Complete ${
+              sourceBooking.bookingNumber || ""
+            }`.trim(),
+
+            onClick: () =>
+              onCompleteConsent(
+                sourceBooking.id
+              ),
+          });
+        }
+
+        items.push({
+          label: `🗑 Delete ${
+            sourceBooking.bookingNumber ||
+            "Booking"
+          }`,
+
+          onClick: () =>
+            onDelete(sourceBooking),
+        });
+
+        return items;
+      }
+    );
+  };
 
   return (
     <>
-      {/* ================= MOBILE VIEW ================= */}
+      {/* =====================================================
+          MOBILE + TABLET CARD VIEW
+          Phones: 1 column
+          Tablets: 2 columns
+          Desktop: hidden
+      ===================================================== */}
 
-      <div className="grid grid-cols-2 gap-2.5 md:hidden">
-        {bookings.map((booking) => {
-          const customer = customers.find(
-            (c) => c.id === booking.customerId
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:hidden">
+        {groupedBookings.map((booking) => {
+          const status = getStatus(booking);
+          const consentCompleted =
+            isConsentCompleted(booking);
+
+          const avatar = avatarColor(
+            booking.customerName
           );
 
-          const consentCompleted =
-            booking.consentStatus === "Completed";
-
-          const avatar = avatarColor(booking.customerName);
+          const customer = customers.find(
+            (customer) =>
+              customer.id ===
+              booking.customerId
+          );
 
           return (
             <div
               key={booking.id}
-              className="relative flex flex-col rounded-2xl border bg-white p-3 shadow overflow-visible"
+              className="relative flex min-w-0 flex-col overflow-visible rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm transition hover:shadow-md sm:p-4"
             >
-              <div className="flex items-start justify-between gap-1">
-                <div className="flex items-center gap-2 min-w-0">
+              {/* HEADER */}
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex min-w-0 items-center gap-2.5">
                   <div
-                    className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold ${avatar.bg} ${avatar.text}`}
+                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold ${avatar.bg} ${avatar.text}`}
                   >
-                    {getInitials(booking.customerName)}
+                    {getInitials(
+                      booking.customerName
+                    )}
                   </div>
-                  <h3 className="text-sm font-semibold leading-tight line-clamp-2">
-                    {booking.customerName}
-                  </h3>
+
+                  <div className="min-w-0">
+                    <h3 className="line-clamp-2 text-sm font-semibold leading-tight text-slate-900 sm:text-[15px]">
+                      {booking.customerName}
+                    </h3>
+
+                    {customer?.phone && (
+                      <p className="mt-0.5 truncate text-[11px] text-slate-500">
+                        {customer.phone}
+                      </p>
+                    )}
+                  </div>
                 </div>
 
+                {/* ACTION MENU */}
                 <DropdownMenu>
-                  <DropdownMenuTrigger className="-m-0.5 shrink-0 rounded-md p-1 hover:bg-gray-100">
+                  <DropdownMenuTrigger
+                    className="shrink-0 rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 active:bg-slate-200"
+                    aria-label="Booking actions"
+                  >
                     <MoreVertical className="h-4 w-4" />
                   </DropdownMenuTrigger>
 
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem
-                      onClick={() => onEdit(booking)}
-                    >
-                      ✏️ Edit Booking
-                    </DropdownMenuItem>
-
-                    <DropdownMenuItem
-                      onClick={() => onSendConsent(booking)}
-                    >
-                      📲 Send Consent
-                    </DropdownMenuItem>
-
-                    {consentCompleted ? (
-                      <DropdownMenuItem
-                        onClick={() => {
-                          window.location.href = `/admin/consents/${booking.bookingNumber}`;
-                        }}
-                      >
-                        👁 View Consent
-                      </DropdownMenuItem>
-                    ) : (
-                      <DropdownMenuItem disabled>
-                        👁 View Consent
-                      </DropdownMenuItem>
+                  <DropdownMenuContent
+                    align="end"
+                    sideOffset={6}
+                    className="max-h-[70vh] w-[min(18rem,calc(100vw-2rem))] overflow-y-auto"
+                  >
+                    {getMenuItems(booking).map(
+                      (item, index) => (
+                        <DropdownMenuItem
+                          key={index}
+                          onClick={
+                            item.onClick
+                          }
+                          className="min-h-10 cursor-pointer text-sm"
+                        >
+                          {item.label}
+                        </DropdownMenuItem>
+                      )
                     )}
-
-                    <DropdownMenuItem
-                      className="text-red-600"
-                      onClick={() => onDelete(booking)}
-                    >
-                      🗑 Delete Booking
-                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
 
-              <p className="mt-0.5 text-[11px] text-gray-500">
+              {/* VILLA */}
+              <p className="mt-2 line-clamp-2 text-xs font-medium text-slate-500">
                 {booking.villa}
               </p>
 
-              <p className="mt-2 text-[22px] font-bold leading-none text-gray-900">
-                ₹{booking.totalAmount}
+              {/* BOOKING NUMBER */}
+              <p className="mt-2 line-clamp-2 text-[11px] text-slate-400">
+                Booking:{" "}
+                {booking.bookingNumber || "-"}
               </p>
 
-              <div className="mt-1.5 flex items-center gap-1 text-[11px] text-gray-500">
-                <span>📅</span>
-                {formatDateRange(booking.checkIn, booking.checkOut)}
+              {/* AMOUNT */}
+              <p className="mt-3 text-[22px] font-bold leading-none text-slate-900 sm:text-2xl">
+                ₹
+                {Number(
+                  booking.totalAmount || 0
+                ).toLocaleString("en-IN")}
+              </p>
+
+              {/* DATES */}
+              <div className="mt-2 flex min-w-0 items-center gap-1.5 text-[11px] text-slate-500">
+                <span className="shrink-0">
+                  📅
+                </span>
+
+                <span className="truncate">
+                  {formatDateRange(
+                    booking.checkIn,
+                    booking.checkOut
+                  )}
+                </span>
               </div>
 
-              <div className="mt-auto flex flex-wrap items-center gap-1.5 border-t pt-2 mt-2">
-
+              {/* STATUS */}
+              <div className="mt-3 flex flex-wrap items-center gap-1.5 border-t border-slate-100 pt-2.5">
                 <span
-                  className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                    booking.status === "Confirmed"
-                      ? "bg-green-100 text-green-700"
-                      : booking.status === "Pending"
-                      ? "bg-yellow-100 text-yellow-700"
-                      : "bg-red-100 text-red-700"
-                  }`}
+                  className={`rounded-full px-2 py-1 text-[10px] font-semibold ${getStatusClasses(
+                    status
+                  )}`}
                 >
-                  {booking.status}
+                  {status}
                 </span>
 
                 <span
-                  className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                  className={`rounded-full px-2 py-1 text-[10px] font-semibold ${
                     consentCompleted
                       ? "bg-green-100 text-green-700"
                       : "bg-amber-100 text-amber-700"
                   }`}
                 >
-                  {consentCompleted ? "Completed" : "Pending"}
+                  {consentCompleted
+                    ? "Consent done"
+                    : "Consent pending"}
                 </span>
 
-                {!consentCompleted && (
-                  <button
-                    onClick={() => onCompleteConsent(booking.id)}
-                    className="rounded-md bg-green-600 px-2 py-0.5 text-[10px] font-semibold text-white hover:bg-green-700"
-                  >
-                    ✓ Complete
-                  </button>
-                )}
-
-                {booking.balanceAmount > 0 && (
-                  <span className="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-semibold text-red-700">
-                    Balance ₹{booking.balanceAmount}
+                {booking.balanceAmount >
+                  0 && (
+                  <span className="rounded-full bg-red-100 px-2 py-1 text-[10px] font-semibold text-red-700">
+                    Balance ₹
+                    {Number(
+                      booking.balanceAmount
+                    ).toLocaleString(
+                      "en-IN"
+                    )}
                   </span>
                 )}
-
               </div>
             </div>
           );
         })}
       </div>
 
-      {/* ================= DESKTOP VIEW ================= */}
-      {/* Row-list style instead of a wide fixed-column table —
-          scales better and reads more like a modern SaaS app. */}
+      {/* =====================================================
+          DESKTOP VIEW
+          md and above
+      ===================================================== */}
 
-      <div className="hidden md:block rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-        {bookings.map((booking, index) => {
-          const customer = customers.find(
-            (c) => c.id === booking.customerId
-          );
+      <div className="hidden overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm md:block">
+        {groupedBookings.map(
+          (booking, index) => {
+            const customer =
+              customers.find(
+                (customer) =>
+                  customer.id ===
+                  booking.customerId
+              );
 
-          const consentCompleted =
-            booking.consentStatus === "Completed";
+            const consentCompleted =
+              isConsentCompleted(
+                booking
+              );
 
-          const avatar = avatarColor(booking.customerName);
+            const status =
+              getStatus(booking);
 
-          return (
-            <div
-              key={booking.id}
-              className={`flex items-center justify-between gap-4 px-5 py-3.5 hover:bg-slate-50 transition ${
-                index !== 0 ? "border-t border-slate-100" : ""
-              }`}
-            >
-              <div className="flex items-center gap-3 min-w-0 flex-1">
-                <div
-                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${avatar.bg} ${avatar.text}`}
-                >
-                  {getInitials(booking.customerName)}
+            const avatar = avatarColor(
+              booking.customerName
+            );
+
+            return (
+              <div
+                key={booking.id}
+                className={`flex items-center justify-between gap-4 px-4 py-3.5 transition hover:bg-slate-50 lg:px-5 ${
+                  index !== 0
+                    ? "border-t border-slate-100"
+                    : ""
+                }`}
+              >
+                {/* CUSTOMER */}
+                <div className="flex min-w-0 flex-1 items-center gap-3">
+                  <div
+                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${avatar.bg} ${avatar.text}`}
+                  >
+                    {getInitials(
+                      booking.customerName
+                    )}
+                  </div>
+
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-slate-900">
+                      {booking.customerName}
+                    </p>
+
+                    <p className="mt-0.5 truncate text-xs text-slate-500">
+                      {customer?.phone ||
+                        "-"}{" "}
+                      · {booking.villa}
+                    </p>
+
+                    <p className="mt-0.5 truncate text-[11px] text-slate-400">
+                      {booking.bookingNumber ||
+                        "-"}{" "}
+                      ·{" "}
+                      {formatDateRange(
+                        booking.checkIn,
+                        booking.checkOut
+                      )}
+                    </p>
+                  </div>
                 </div>
 
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-slate-900 truncate">
-                    {booking.customerName}
+                {/* AMOUNT */}
+                <div className="w-28 shrink-0 text-right">
+                  <p className="text-sm font-semibold text-slate-900">
+                    ₹
+                    {Number(
+                      booking.totalAmount ||
+                        0
+                    ).toLocaleString(
+                      "en-IN"
+                    )}
                   </p>
-                  <p className="mt-0.5 text-xs text-slate-500 truncate">
-                    {customer?.phone || "-"} · {booking.villa} ·{" "}
-                    {formatDateRange(booking.checkIn, booking.checkOut)}
-                  </p>
-                </div>
-              </div>
 
-              <div className="flex items-center gap-4 shrink-0">
-                <div className="text-right">
-                  <p className="text-sm font-medium text-slate-900">
-                    ₹{booking.totalAmount.toLocaleString("en-IN")}
-                  </p>
                   <p
                     className={`mt-0.5 text-[11px] ${
-                      booking.balanceAmount > 0
+                      booking.balanceAmount >
+                      0
                         ? "text-red-600"
                         : "text-green-600"
                     }`}
                   >
-                    {booking.balanceAmount > 0
-                      ? `₹${booking.balanceAmount.toLocaleString(
+                    {booking.balanceAmount >
+                    0
+                      ? `₹${Number(
+                          booking.balanceAmount
+                        ).toLocaleString(
                           "en-IN"
                         )} due`
                       : "Fully paid"}
                   </p>
                 </div>
 
+                {/* STATUS */}
                 <span
-                  className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${
-                    booking.status === "Confirmed"
-                      ? "bg-green-100 text-green-700"
-                      : booking.status === "Pending"
-                      ? "bg-yellow-100 text-yellow-700"
-                      : "bg-red-100 text-red-700"
-                  }`}
+                  className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium ${getStatusClasses(
+                    status
+                  )}`}
                 >
-                  {booking.status}
+                  {status}
                 </span>
 
+                {/* CONSENT */}
                 <span
-                  className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${
+                  className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium ${
                     consentCompleted
                       ? "bg-green-100 text-green-700"
                       : "bg-amber-100 text-amber-700"
                   }`}
                 >
-                  {consentCompleted ? "Consent done" : "Consent pending"}
+                  {consentCompleted
+                    ? "Consent done"
+                    : "Consent pending"}
                 </span>
 
+                {/* ACTIONS */}
                 <DropdownMenu>
-                  <DropdownMenuTrigger className="rounded-md p-1.5 hover:bg-slate-100">
-                    <MoreVertical className="h-4 w-4 text-slate-500" />
+                  <DropdownMenuTrigger
+                    className="shrink-0 rounded-lg p-2 text-slate-500 hover:bg-slate-100"
+                    aria-label="Booking actions"
+                  >
+                    <MoreVertical className="h-4 w-4" />
                   </DropdownMenuTrigger>
 
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuItem
-                      onClick={() => onEdit(booking)}
-                    >
-                      ✏️ Edit Booking
-                    </DropdownMenuItem>
-
-                    <DropdownMenuItem
-                      onClick={() => onSendConsent(booking)}
-                    >
-                      📲 Send Consent
-                    </DropdownMenuItem>
-
-                    {consentCompleted ? (
-                      <DropdownMenuItem
-                        onClick={() => {
-                          window.location.href = `/admin/consents/${booking.bookingNumber}`;
-                        }}
-                      >
-                        👁 View Consent
-                      </DropdownMenuItem>
-                    ) : (
-                      <DropdownMenuItem disabled>
-                        👁 View Consent
-                      </DropdownMenuItem>
+                  <DropdownMenuContent
+                    align="end"
+                    sideOffset={6}
+                    className="w-64"
+                  >
+                    {getMenuItems(booking).map(
+                      (item, itemIndex) => (
+                        <DropdownMenuItem
+                          key={itemIndex}
+                          onClick={
+                            item.onClick
+                          }
+                          className="min-h-10 cursor-pointer text-sm"
+                        >
+                          {item.label}
+                        </DropdownMenuItem>
+                      )
                     )}
-
-                    {!consentCompleted && (
-                      <DropdownMenuItem
-                        onClick={() => onCompleteConsent(booking.id)}
-                      >
-                        ✓ Mark Consent Complete
-                      </DropdownMenuItem>
-                    )}
-
-                    <DropdownMenuItem
-                      onClick={() => onDelete(booking)}
-                      className="text-red-600"
-                    >
-                      🗑 Delete Booking
-                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
-            </div>
-          );
-        })}
+            );
+          }
+        )}
       </div>
     </>
   );
