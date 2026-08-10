@@ -28,6 +28,7 @@ export default function ConsentPage() {
 
   const [adults, setAdults] = useState(1);
   const [children, setChildren] = useState(0);
+  const [guestName, setGuestName] = useState("");
 
   const [vehicleNumber, setVehicleNumber] = useState("");
   const [emergencyContact, setEmergencyContact] = useState("");
@@ -67,6 +68,7 @@ const [guestDeclaration, setGuestDeclaration] = useState(false);
 };
 
       setBooking(bookingData);
+      setGuestName(bookingData.customerName || "");
 
       const consentDoc = await getDoc(
         doc(db, "consents", bookingNumber)
@@ -121,7 +123,7 @@ const [guestDeclaration, setGuestDeclaration] = useState(false);
 
       await setDoc(doc(db, "consents", booking.bookingNumber), {
         bookingNumber: booking.bookingNumber,
-        customerName: booking.customerName,
+        customerName: guestName.trim(),
         villa: booking.villa,
 
         phone: customer?.phone ?? "",
@@ -147,7 +149,7 @@ createdAt: serverTimestamp(),
 
       await updateDoc(doc(db, "bookings", booking.id), {
   consentStatus: "Completed",
-
+  customerName: guestName.trim(),
   adults,
   children,
 
@@ -346,9 +348,11 @@ createdAt: serverTimestamp(),
                 </label>
 
                 <input
-                  readOnly
-                  value={booking.customerName}
-                  className="w-full rounded-lg border bg-gray-100 p-3"
+                  type="text"
+                  value={guestName}
+                  onChange={(e) => setGuestName(e.target.value)}
+                  placeholder="Enter guest full name"
+                  className="w-full rounded-lg border p-3"
                 />
 
               </div>
