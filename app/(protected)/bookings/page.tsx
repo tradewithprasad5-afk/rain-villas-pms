@@ -96,7 +96,7 @@ const [bookingToDelete, setBookingToDelete] = useState<Booking | null>(null);
   const [search, setSearch] =
     useState("");
     const [filter, setFilter] = useState<
-  "all" | "consent"
+  "all" | "consent" | "pending"
 >("all");
     
 
@@ -659,7 +659,9 @@ async function confirmDeleteBooking() {
     const matchesFilter =
   filter === "all"
     ? true
-    : booking.consentStatus !== "Completed";
+    : filter === "consent"
+      ? booking.consentStatus !== "Completed"
+      : booking.status === "Pending";
 
     return matchesSearch && matchesFilter;
   })
