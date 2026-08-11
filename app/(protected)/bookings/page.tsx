@@ -656,12 +656,18 @@ async function confirmDeleteBooking() {
       booking.villa.toLowerCase().includes(keyword) ||
       booking.status.toLowerCase().includes(keyword);
 
-    const matchesFilter =
+    const today = new Date();
+today.setHours(0, 0, 0, 0);
+
+const checkInDate = new Date(booking.checkIn);
+checkInDate.setHours(0, 0, 0, 0);
+
+const matchesFilter =
   filter === "all"
     ? true
     : filter === "consent"
       ? booking.consentStatus !== "Completed"
-      : booking.status === "Pending";
+      : checkInDate >= today;
 
     return matchesSearch && matchesFilter;
   })
