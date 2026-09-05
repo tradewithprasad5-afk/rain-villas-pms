@@ -52,7 +52,8 @@ function normalizeDate(value?: string) {
 }
 
 function normalizePhone(value?: string) {
-  return (value || "").replace(/\D/g, "");
+  const digits = (value || "").replace(/\D/g, "");
+  return digits.length > 10 ? digits.slice(-10) : digits;
 }
 
 function getStayGroupKey(booking: Booking) {
