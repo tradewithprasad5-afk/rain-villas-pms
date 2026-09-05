@@ -1,9 +1,13 @@
- "use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/app/lib/firebase";
+import { Capacitor } from "@capacitor/core";
+import { Filesystem, Directory } from "@capacitor/filesystem";
+import { Share } from "@capacitor/share";
+import jsPDF from "jspdf";
 
 type Consent = {
   bookingNumber?: string;
@@ -42,12 +46,8 @@ function formatTimestamp(value: any) {
   }
 }
 
-function YesNo({ value }: { value?: boolean }) {
-  return (
-    <span className={value ? "text-green-700 font-semibold" : "text-red-600"}>
-      {value ? "Accepted" : "Not accepted"}
-    </span>
-  );
+function safeFileName(value: string) {
+  return value.replace(/[^a-z0-9-_]/gi, "-");
 }
 
 export default function AdminConsentPage() {
@@ -58,6 +58,7 @@ export default function AdminConsentPage() {
 
   const [consent, setConsent] = useState<Consent | null>(null);
   const [loading, setLoading] = useState(true);
+  const [printing, setPrinting] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -91,6 +92,378 @@ export default function AdminConsentPage() {
     loadConsent();
   }, [bookingNumber]);
 
+  async function handlePrintConsent() {
+    if (!consent || printing) return;
+
+    setPrinting(true);
+
+    try {
+      if (!Capacitor.isNativePlatform()) {
+        window.print();
+        return;
+      }
+
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+
+      const pageWidth = 210;
+      const pageHeight = 297;
+      const margin = 15;
+      const contentWidth = pageWidth - margin * 2;
+
+      let y = margin;
+
+      const ensureSpace = (height: number) => {
+        if (y + height > pageHeight - margin) {
+          pdf.addPage();
+          y = margin;
+        }
+      };
+
+      const addSectionTitle = (title: string) => {
+        ensureSpace(14);
+
+        pdf.setFillColor(31, 43, 61);
+        pdf.roundedRect(
+          margin,
+          y,
+          contentWidth,
+          10,
+          2,
+          2,
+          "F"
+        );
+
+        pdf.setTextColor(255, 255, 255);
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(12);
+        pdf.text(title, margin + 5, y + 6.7);
+
+        pdf.setTextColor(0, 0, 0);
+        y += 16;
+      };
+
+      const addField = (
+        label: string,
+        value: string,
+        x: number,
+        width: number
+      ) => {
+        ensureSpace(15);
+
+        pdf.setFont("helvetica", "normal");
+        pdf.setFontSize(8.5);
+        pdf.setTextColor(100, 100, 100);
+        pdf.text(label, x, y);
+
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(10.5);
+        pdf.setTextColor(25, 25, 25);
+
+        const lines = pdf.splitTextToSize(value || "-", width);
+        pdf.text(lines, x, y + 5);
+
+        return Math.max(12, lines.length * 5 + 5);
+      };
+
+      const addConsentRow = (
+        label: string,
+        accepted: boolean | undefined
+      ) => {
+        ensureSpace(9);
+
+        pdf.setDrawColor(220, 220, 220);
+        pdf.line(
+          margin,
+          y - 4,
+          pageWidth - margin,
+          y - 4
+        );
+
+        pdf.setFont("helvetica", "normal");
+        pdf.setFontSize(9.5);
+        pdf.setTextColor(35, 35, 35);
+        pdf.text(label, margin + 3, y + 1);
+
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(9.5);
+
+        if (accepted) {
+          pdf.setTextColor(22, 120, 70);
+          pdf.text(
+            "Accepted",
+            pageWidth - margin - 32,
+            y + 1
+          );
+        } else {
+          pdf.setTextColor(190, 55, 55);
+          pdf.text(
+            "Not accepted",
+            pageWidth - margin - 32,
+            y + 1
+          );
+        }
+
+        y += 8;
+      };
+
+      // Header
+      pdf.setFillColor(31, 43, 61);
+      pdf.rect(0, 0, pageWidth, 40, "F");
+
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(22);
+      pdf.text("THE RAIN VILLA", margin, 16);
+
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(11);
+      pdf.text(
+        "Guest Check-in Consent & Liability Agreement",
+        margin,
+        24
+      );
+
+      pdf.setFontSize(10);
+      pdf.text(
+        `Booking: ${consent.bookingNumber || bookingNumber}`,
+        margin,
+        32
+      );
+
+      pdf.setTextColor(0, 0, 0);
+      y = 50;
+
+      // Guest details
+      addSectionTitle("GUEST DETAILS");
+
+      const columnWidth = (contentWidth - 10) / 2;
+      const leftX = margin;
+      const rightX = margin + columnWidth + 10;
+
+      let leftHeight = addField(
+        "Guest Name",
+        consent.customerName || "-",
+        leftX,
+        columnWidth
+      );
+
+      let rightHeight = addField(
+        "Villa",
+        consent.villa || "-",
+        rightX,
+        columnWidth
+      );
+
+      y += Math.max(leftHeight, rightHeight);
+
+      leftHeight = addField(
+        "Mobile Number",
+        consent.phone || "-",
+        leftX,
+        columnWidth
+      );
+
+      rightHeight = addField(
+        "Email",
+        consent.email || "-",
+        rightX,
+        columnWidth
+      );
+
+      y += Math.max(leftHeight, rightHeight);
+
+      leftHeight = addField(
+        "Adults",
+        String(consent.adults ?? "-"),
+        leftX,
+        columnWidth
+      );
+
+      rightHeight = addField(
+        "Children",
+        String(consent.children ?? "-"),
+        rightX,
+        columnWidth
+      );
+
+      y += Math.max(leftHeight, rightHeight);
+
+      leftHeight = addField(
+        "Vehicle Number",
+        consent.vehicleNumber || "-",
+        leftX,
+        columnWidth
+      );
+
+      rightHeight = addField(
+        "Emergency Contact",
+        consent.emergencyContact || "-",
+        rightX,
+        columnWidth
+      );
+
+      y += Math.max(leftHeight, rightHeight);
+
+      // Consent confirmation
+      addSectionTitle("CONSENT CONFIRMATION");
+
+      addConsentRow("House Rules", consent.houseRules);
+      addConsentRow(
+        "Swimming Pool Liability Rules",
+        consent.poolRules
+      );
+      addConsentRow(
+        "Financial Liability Policy",
+        consent.damageRules
+      );
+      addConsentRow(
+        "Zero Tolerance Policy",
+        consent.zeroTolerance
+      );
+      addConsentRow(
+        "General Liability Waiver",
+        consent.liabilityWaiver
+      );
+      addConsentRow(
+        "Guest Declaration",
+        consent.guestDeclaration
+      );
+
+      y += 8;
+
+      // Digital signature
+      ensureSpace(40);
+
+      pdf.setFillColor(245, 248, 250);
+      pdf.setDrawColor(210, 215, 220);
+      pdf.roundedRect(
+        margin,
+        y,
+        contentWidth,
+        31,
+        2,
+        2,
+        "FD"
+      );
+
+      pdf.setTextColor(35, 35, 35);
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(11);
+      pdf.text("DIGITAL SIGNATURE", margin + 5, y + 7);
+
+      pdf.setFontSize(14);
+      pdf.text(
+        consent.signature || consent.customerName || "-",
+        margin + 5,
+        y + 16
+      );
+
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(9);
+      pdf.setTextColor(90, 90, 90);
+      pdf.text(
+        `Submitted: ${formatTimestamp(consent.createdAt)}`,
+        margin + 5,
+        y + 25
+      );
+
+      y += 40;
+
+      // Footer
+      ensureSpace(25);
+
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(8.5);
+      pdf.setTextColor(90, 90, 90);
+
+      const footerText =
+        "The guest confirmed the terms and submitted this electronic consent and digital signature.";
+
+      const footerLines = pdf.splitTextToSize(
+        footerText,
+        contentWidth
+      );
+
+      pdf.text(footerLines, margin, y);
+      y += footerLines.length * 4 + 7;
+
+      pdf.setDrawColor(200, 200, 200);
+      pdf.line(
+        margin,
+        y,
+        pageWidth - margin,
+        y
+      );
+
+      pdf.text(
+        "The Rain Villa — Guest Consent Record",
+        margin,
+        y + 5
+      );
+
+      pdf.text(
+        `Booking: ${consent.bookingNumber || bookingNumber}`,
+        pageWidth - margin,
+        y + 5,
+        { align: "right" }
+      );
+
+      // Page numbers
+      const totalPages = pdf.getNumberOfPages();
+
+      for (let page = 1; page <= totalPages; page++) {
+        pdf.setPage(page);
+        pdf.setFont("helvetica", "normal");
+        pdf.setFontSize(8);
+        pdf.setTextColor(120, 120, 120);
+        pdf.text(
+          `Page ${page} of ${totalPages}`,
+          pageWidth / 2,
+          pageHeight - 6,
+          { align: "center" }
+        );
+      }
+
+      // Convert to base64 and save to Android cache.
+      const pdfBase64 = pdf
+        .output("datauristring")
+        .split(",")[1];
+
+      const fileName =
+        `Rain-Villa-Consent-${safeFileName(
+          consent.bookingNumber || bookingNumber
+        )}.pdf`;
+
+      const file = await Filesystem.writeFile({
+        path: fileName,
+        data: pdfBase64,
+        directory: Directory.Cache,
+        recursive: true,
+      });
+
+      // Open Android share / print chooser.
+      await Share.share({
+        title: `Rain Villa Consent - ${
+          consent.bookingNumber || bookingNumber
+        }`,
+        text: `Guest Consent Form - ${
+          consent.bookingNumber || bookingNumber
+        }`,
+        url: file.uri,
+        dialogTitle: "Print or Share Consent PDF",
+      });
+    } catch (err) {
+      console.error("PDF print error:", err);
+      alert("Unable to create the PDF. Please try again.");
+    } finally {
+      setPrinting(false);
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-100">
@@ -116,7 +489,7 @@ export default function AdminConsentPage() {
           <button
             type="button"
             onClick={() => router.back()}
-            className="no-print mt-6 rounded-lg bg-slate-800 px-5 py-2.5 font-semibold text-white"
+            className="mt-6 rounded-lg bg-slate-800 px-5 py-2.5 font-semibold text-white"
           >
             Go Back
           </button>
@@ -163,10 +536,11 @@ export default function AdminConsentPage() {
 
           <button
             type="button"
-            onClick={() => window.print()}
-            className="rounded-lg bg-slate-800 px-5 py-2.5 font-semibold text-white hover:bg-slate-700"
+            onClick={handlePrintConsent}
+            disabled={printing}
+            className="rounded-lg bg-slate-800 px-5 py-2.5 font-semibold text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            🖨 Print Consent
+            {printing ? "Creating PDF..." : "🖨 Print Consent"}
           </button>
         </div>
 
@@ -178,7 +552,7 @@ export default function AdminConsentPage() {
             </p>
 
             <div className="mt-4 text-sm text-slate-300">
-              Booking:{" "}
+              Booking: {" "}
               <span className="font-semibold text-white">
                 {consent.bookingNumber || bookingNumber}
               </span>
@@ -256,35 +630,47 @@ export default function AdminConsentPage() {
               </h2>
 
               <div className="overflow-hidden rounded-lg border">
-                <div className="grid grid-cols-2 border-b p-4">
-                  <span>House Rules</span>
-                  <YesNo value={consent.houseRules} />
-                </div>
-
-                <div className="grid grid-cols-2 border-b p-4">
-                  <span>Swimming Pool Liability Rules</span>
-                  <YesNo value={consent.poolRules} />
-                </div>
-
-                <div className="grid grid-cols-2 border-b p-4">
-                  <span>Financial Liability Policy</span>
-                  <YesNo value={consent.damageRules} />
-                </div>
-
-                <div className="grid grid-cols-2 border-b p-4">
-                  <span>Zero Tolerance Policy</span>
-                  <YesNo value={consent.zeroTolerance} />
-                </div>
-
-                <div className="grid grid-cols-2 border-b p-4">
-                  <span>General Liability Waiver</span>
-                  <YesNo value={consent.liabilityWaiver} />
-                </div>
-
-                <div className="grid grid-cols-2 p-4">
-                  <span>Guest Declaration</span>
-                  <YesNo value={consent.guestDeclaration} />
-                </div>
+                {[
+                  ["House Rules", consent.houseRules],
+                  [
+                    "Swimming Pool Liability Rules",
+                    consent.poolRules,
+                  ],
+                  [
+                    "Financial Liability Policy",
+                    consent.damageRules,
+                  ],
+                  [
+                    "Zero Tolerance Policy",
+                    consent.zeroTolerance,
+                  ],
+                  [
+                    "General Liability Waiver",
+                    consent.liabilityWaiver,
+                  ],
+                  [
+                    "Guest Declaration",
+                    consent.guestDeclaration,
+                  ],
+                ].map(([label, value], index) => (
+                  <div
+                    key={String(label)}
+                    className={`grid grid-cols-2 p-4 ${
+                      index !== 5 ? "border-b" : ""
+                    }`}
+                  >
+                    <span>{String(label)}</span>
+                    <span
+                      className={
+                        value
+                          ? "font-semibold text-green-700"
+                          : "text-red-600"
+                      }
+                    >
+                      {value ? "Accepted" : "Not accepted"}
+                    </span>
+                  </div>
+                ))}
               </div>
             </section>
 
@@ -298,7 +684,6 @@ export default function AdminConsentPage() {
                   <p className="text-sm text-gray-500">
                     Guest Full Name
                   </p>
-
                   <p className="mt-2 text-xl font-semibold">
                     {consent.signature || consent.customerName || "-"}
                   </p>
@@ -308,7 +693,6 @@ export default function AdminConsentPage() {
                   <p className="text-sm text-gray-500">
                     Submitted On
                   </p>
-
                   <p className="mt-2 font-semibold">
                     {formatTimestamp(consent.createdAt)}
                   </p>
@@ -322,9 +706,7 @@ export default function AdminConsentPage() {
             </section>
 
             <footer className="border-t pt-6 text-sm text-gray-500">
-              <p>
-                The Rain Villa — Guest Consent Record
-              </p>
+              <p>The Rain Villa — Guest Consent Record</p>
               <p className="mt-1">
                 Booking: {consent.bookingNumber || bookingNumber}
               </p>
