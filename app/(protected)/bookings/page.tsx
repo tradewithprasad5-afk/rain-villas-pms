@@ -581,27 +581,36 @@ else {
       Delete Booking
   ========================================== */
   
-  async function markConsentCompleted(id: string) {
-  try {
-    await updateDoc(doc(db, "bookings", id), {
-      consentStatus: "Completed",
-    });
+  async function markConsentCompleted(
+    id: string,
+    relatedBookings: Booking[] = []
+  ) {
+    try {
+      const ids = Array.from(
+        new Set([id, ...relatedBookings.map((booking) => booking.id)])
+      );
 
-    setBookings((prev) =>
-      prev.map((booking) =>
-        booking.id === id
-          ? {
-              ...booking,
-              consentStatus: "Completed",
-            }
-          : booking
-      )
-    );
-  } catch (error) {
-    console.error(error);
-    alert("Unable to update consent status.");
+      await Promise.all(
+        ids.map((bookingId) =>
+          updateDoc(doc(db, "bookings", bookingId), {
+            consentStatus: "Completed",
+          })
+        )
+      );
+
+      setBookings((prev) =>
+        prev.map((booking) =>
+          ids.includes(booking.id)
+            ? { ...booking, consentStatus: "Completed" }
+            : booking
+        )
+      );
+    } catch (error) {
+      console.error(error);
+      alert("Unable to update consent status.");
+    }
   }
-}
+
   async function deleteBooking(booking: Booking) {
   setBookingToDelete(booking);
   setShowDeleteDialog(true);
@@ -680,42 +689,53 @@ const matchesFilter =
   /* ==========================================
       Open New Booking
   ========================================== */
-  function sendConsent(booking: Booking) {
+  function sendConsent(
+    booking: Booking,
+    relatedBookings: Booking[] = []
+  ) {
+    const allBookings = [booking, ...relatedBookings];
+    const uniqueBookings = Array.from(
+      new Map(allBookings.map((item) => [item.id, item])).values()
+    );
 
-  const customer = customers.find(
-    (c) => c.id === booking.customerId
-  );
+    const customer = customers.find((c) => c.id === booking.customerId);
 
-  if (!customer?.phone) {
-    alert("Customer phone number not found.");
-    return;
-  }
-  console.log("APP URL:", process.env.NEXT_PUBLIC_APP_URL);
-console.log("Booking:", booking.bookingNumber);
+    if (!customer?.phone) {
+      alert("Customer phone number not found.");
+      return;
+    }
 
-  const consentLink =
-  `${process.env.NEXT_PUBLIC_APP_URL}/guest/consent/${booking.bookingNumber}`;
+    const primaryBookingNumber = booking.bookingNumber || "";
+    const bookingNumbers = uniqueBookings
+      .map((item) => item.bookingNumber)
+      .filter(Boolean);
+    const villas = Array.from(
+      new Set(uniqueBookings.map((item) => item.villa).filter(Boolean))
+    );
 
-  const message = `Hello ${booking.customerName},
+    const consentLink = `${window.location.origin}/guest/consent/${primaryBookingNumber}`;
+
+    const message = `Hello ${booking.customerName},
 
 Welcome to The Rain Villa 🌿
 
 Please complete your Guest Consent before your arrival.
 
-Booking No: ${booking.bookingNumber}
+Booking No: ${bookingNumbers.join(" + ")}
+Villa: ${villas.join(" + ")}
+Stay: ${booking.checkIn} → ${booking.checkOut}
 
-Please click the link below to complete your consent form:
+Please click the link below to complete ONE consent form for your complete stay:
 
 ${consentLink}
 
 Thank you,
 The Rain Villa Team`;
 
-  window.open(
-    `https://wa.me/91${customer.phone}?text=${encodeURIComponent(message)}`,
-    "_blank"
-  );
-}
+    window.location.href =
+      `https://wa.me/91${customer.phone.replace(/\D/g, "")}?text=${encodeURIComponent(message)}`;
+  }
+
   function openNewBooking() {
     
 

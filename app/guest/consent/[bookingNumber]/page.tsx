@@ -58,14 +58,48 @@ const [guestDeclaration, setGuestDeclaration] = useState(false);
       const snapshot = await getDocs(q);
 
       if (snapshot.empty) {
-  alert(`Booking '${bookingNumber}' not found.`);
-  return;
-}
+        alert(`Booking '${bookingNumber}' not found.`);
+        return;
+      }
+
+      const primaryDoc = snapshot.docs[0];
+      const primaryBooking: any = {
+        id: primaryDoc.id,
+        ...primaryDoc.data(),
+      };
+
+      // One consent represents every villa booked by this guest for the
+      // exact same stay. Firestore bookings remain separate documents.
+      const allBookingsSnapshot = await getDocs(
+        collection(db, "bookings")
+      );
+
+      const relatedBookings = allBookingsSnapshot.docs
+        .map((docSnap) => ({
+          id: docSnap.id,
+          ...docSnap.data(),
+        }))
+        .filter(
+          (item: any) =>
+            item.customerId === primaryBooking.customerId &&
+            item.checkIn === primaryBooking.checkIn &&
+            item.checkOut === primaryBooking.checkOut
+        );
+
+      const sourceBookings = relatedBookings.length
+        ? relatedBookings
+        : [primaryBooking];
 
       const bookingData: any = {
-  id: snapshot.docs[0].id,
-  ...snapshot.docs[0].data(),
-};
+        ...primaryBooking,
+        bookingNumbers: Array.from(
+          new Set(sourceBookings.map((item: any) => item.bookingNumber).filter(Boolean))
+        ),
+        villas: Array.from(
+          new Set(sourceBookings.map((item: any) => item.villa).filter(Boolean))
+        ),
+        sourceBookingIds: sourceBookings.map((item: any) => item.id),
+      };
 
       setBooking(bookingData);
       setGuestName(bookingData.customerName || "");
@@ -121,44 +155,52 @@ const [guestDeclaration, setGuestDeclaration] = useState(false);
         return;
       }
 
+      const sourceBookingIds: string[] = booking.sourceBookingIds || [booking.id];
+      const bookingNumbers: string[] = booking.bookingNumbers || [booking.bookingNumber];
+      const villas: string[] = booking.villas || [booking.villa];
+
       await setDoc(doc(db, "consents", booking.bookingNumber), {
         bookingNumber: booking.bookingNumber,
+        bookingNumbers,
         customerName: guestName.trim(),
-        villa: booking.villa,
+        villa: villas.join(" + "),
+        villas,
+        checkIn: booking.checkIn,
+        checkOut: booking.checkOut,
+        sourceBookingIds,
 
         phone: customer?.phone ?? "",
-email: customer?.email ?? "",
+        email: customer?.email ?? "",
 
-adults,
-children,
-
+        adults,
+        children,
         vehicleNumber,
         emergencyContact,
-
-        signature,
+        signature: signature.trim(),
 
         houseRules,
-poolRules,
-damageRules,
-zeroTolerance,
-liabilityWaiver,
-guestDeclaration,
+        poolRules,
+        damageRules,
+        zeroTolerance,
+        liabilityWaiver,
+        guestDeclaration,
 
-createdAt: serverTimestamp(),
+        createdAt: serverTimestamp(),
       });
 
-      await updateDoc(doc(db, "bookings", booking.id), {
-  consentStatus: "Completed",
-  customerName: guestName.trim(),
-  adults,
-  children,
-
-  vehicleNumber,
-
-  emergencyContact,
-
-  consentSubmittedAt: serverTimestamp(),
-});
+      await Promise.all(
+        sourceBookingIds.map((bookingId) =>
+          updateDoc(doc(db, "bookings", bookingId), {
+            consentStatus: "Completed",
+            customerName: guestName.trim(),
+            adults,
+            children,
+            vehicleNumber,
+            emergencyContact,
+            consentSubmittedAt: serverTimestamp(),
+          })
+        )
+      );
 
       router.push("/guest/thank-you");
     } finally {
@@ -272,7 +314,7 @@ createdAt: serverTimestamp(),
 
                 <input
                   readOnly
-                  value={booking.bookingNumber}
+                  value={(booking.bookingNumbers || [booking.bookingNumber]).join(" + ")}
                   className="w-full rounded-lg border bg-gray-100 p-3"
                 />
 
@@ -286,7 +328,7 @@ createdAt: serverTimestamp(),
 
                 <input
                   readOnly
-                  value={booking.villa}
+                  value={(booking.villas || [booking.villa]).join(" + ")}
                   className="w-full rounded-lg border bg-gray-100 p-3"
                 />
 

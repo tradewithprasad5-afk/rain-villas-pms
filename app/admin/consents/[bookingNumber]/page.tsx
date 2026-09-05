@@ -11,8 +11,12 @@ import jsPDF from "jspdf";
 
 type Consent = {
   bookingNumber?: string;
+  bookingNumbers?: string[];
   customerName?: string;
   villa?: string;
+  villas?: string[];
+  checkIn?: string;
+  checkOut?: string;
   phone?: string;
   email?: string;
   adults?: number;
@@ -229,7 +233,7 @@ export default function AdminConsentPage() {
 
       pdf.setFontSize(10);
       pdf.text(
-        `Booking: ${consent.bookingNumber || bookingNumber}`,
+        `Booking: ${(consent.bookingNumbers || [consent.bookingNumber || bookingNumber]).join(" + ")}`,
         margin,
         32
       );
@@ -253,7 +257,7 @@ export default function AdminConsentPage() {
 
       let rightHeight = addField(
         "Villa",
-        consent.villa || "-",
+        (consent.villas || [consent.villa || "-"]).join(" + "),
         rightX,
         columnWidth
       );
@@ -286,6 +290,22 @@ export default function AdminConsentPage() {
       rightHeight = addField(
         "Children",
         String(consent.children ?? "-"),
+        rightX,
+        columnWidth
+      );
+
+      y += Math.max(leftHeight, rightHeight);
+
+      leftHeight = addField(
+        "Check-In",
+        consent.checkIn || "-",
+        leftX,
+        columnWidth
+      );
+
+      rightHeight = addField(
+        "Check-Out",
+        consent.checkOut || "-",
         rightX,
         columnWidth
       );
@@ -406,7 +426,7 @@ export default function AdminConsentPage() {
       );
 
       pdf.text(
-        `Booking: ${consent.bookingNumber || bookingNumber}`,
+        `Booking: ${(consent.bookingNumbers || [consent.bookingNumber || bookingNumber]).join(" + ")}`,
         pageWidth - margin,
         y + 5,
         { align: "right" }
@@ -554,7 +574,7 @@ export default function AdminConsentPage() {
             <div className="mt-4 text-sm text-slate-300">
               Booking: {" "}
               <span className="font-semibold text-white">
-                {consent.bookingNumber || bookingNumber}
+                {(consent.bookingNumbers || [consent.bookingNumber || bookingNumber]).join(" + ")}
               </span>
             </div>
           </header>
@@ -576,7 +596,7 @@ export default function AdminConsentPage() {
                 <div>
                   <p className="text-sm text-gray-500">Villa</p>
                   <p className="mt-1 font-semibold">
-                    {consent.villa || "-"}
+                    {(consent.villas || [consent.villa || "-"]).join(" + ")}
                   </p>
                 </div>
 
@@ -708,7 +728,7 @@ export default function AdminConsentPage() {
             <footer className="border-t pt-6 text-sm text-gray-500">
               <p>The Rain Villa — Guest Consent Record</p>
               <p className="mt-1">
-                Booking: {consent.bookingNumber || bookingNumber}
+                Booking: {(consent.bookingNumbers || [consent.bookingNumber || bookingNumber]).join(" + ")}
               </p>
             </footer>
           </div>

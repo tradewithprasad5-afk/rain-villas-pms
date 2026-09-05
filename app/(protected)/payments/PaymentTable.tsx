@@ -44,91 +44,61 @@ interface CombinedBooking extends Booking {
  * customerId is preferred because names can be duplicated.
  * customerName + phone is used as a fallback for older records.
  */
+function normalizeDate(value?: string) {
+  if (!value) return "";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return value;
+  return d.toISOString().slice(0, 10);
+}
+
+function getStayGroupKey(booking: Booking) {
+  const customerKey = booking.customerId
+    ? `customer:${booking.customerId}`
+    : `name:${booking.customerName.trim().toLowerCase()}|phone:${(
+        booking.phone || ""
+      ).replace(/\D/g, "")}`;
+
+  return `${customerKey}|${normalizeDate(booking.checkIn)}|${normalizeDate(
+    booking.checkOut
+  )}`;
+}
+
+/*
+ * Group only bookings belonging to the same guest/stay.
+ * Same customer + same check-in + same check-out = one payment row.
+ * Different stays remain separate rows.
+ * Firestore booking documents are never merged.
+ */
 function groupBookings(bookings: Booking[]): CombinedBooking[] {
   const groups = new Map<string, Booking[]>();
 
-  bookings.forEach((booking) => {
-    const groupKey = booking.customerId
-      ? `customer:${booking.customerId}`
-      : `customer:${booking.customerName
-          .trim()
-          .toLowerCase()}|${(booking.phone || "").replace(/\D/g, "")}`;
-
-    const existing = groups.get(groupKey);
-
-    if (existing) {
-      existing.push(booking);
-    } else {
-      groups.set(groupKey, [booking]);
-    }
-  });
+  for (const booking of bookings) {
+    const key = getStayGroupKey(booking);
+    const existing = groups.get(key);
+    if (existing) existing.push(booking);
+    else groups.set(key, [booking]);
+  }
 
   return Array.from(groups.values()).map((sourceBookings) => {
-    /*
-     * Keep the first booking as the representative booking.
-     * We still retain every original booking inside sourceBookings.
-     */
     const first = sourceBookings[0];
 
     const totalAmount = sourceBookings.reduce(
       (sum, booking) => sum + Number(booking.totalAmount || 0),
       0
     );
-
     const advancePaid = sourceBookings.reduce(
       (sum, booking) => sum + Number(booking.advancePaid || 0),
       0
     );
-
     const balanceAmount = sourceBookings.reduce(
       (sum, booking) => sum + Number(booking.balanceAmount || 0),
       0
     );
 
-    /*
-     * Combine unique villa names.
-     *
-     * Example:
-     * Rain Paradise + Rain Heaven
-     */
     const villas = Array.from(
-      new Set(
-        sourceBookings
-          .map((booking) => booking.villa)
-          .filter(Boolean)
-      )
+      new Set(sourceBookings.map((booking) => booking.villa).filter(Boolean))
     );
 
-    /*
-     * Earliest check-in.
-     */
-    const checkIns = sourceBookings
-      .map((booking) => booking.checkIn)
-      .filter(Boolean)
-      .sort(
-        (a, b) =>
-          new Date(a as string).getTime() -
-          new Date(b as string).getTime()
-      );
-
-    /*
-     * Latest check-out.
-     */
-    const checkOuts = sourceBookings
-      .map((booking) => booking.checkOut)
-      .filter(Boolean)
-      .sort(
-        (a, b) =>
-          new Date(b as string).getTime() -
-          new Date(a as string).getTime()
-      );
-
-    /*
-     * Combine booking numbers.
-     *
-     * Example:
-     * RV-0043 + RV-0044
-     */
     const bookingNumbers = Array.from(
       new Set(
         sourceBookings
@@ -139,20 +109,11 @@ function groupBookings(bookings: Booking[]): CombinedBooking[] {
 
     return {
       ...first,
-
-      /*
-       * Display values.
-       */
       bookingNumber: bookingNumbers.join(" + "),
       villa: villas.join(" + "),
-
-      checkIn: checkIns[0] || first.checkIn,
-      checkOut: checkOuts[0] || first.checkOut,
-
       totalAmount,
       advancePaid,
       balanceAmount,
-
       sourceBookings,
     };
   });
