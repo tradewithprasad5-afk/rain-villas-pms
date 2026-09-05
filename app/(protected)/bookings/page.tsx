@@ -698,7 +698,11 @@ const matchesFilter =
       new Map(allBookings.map((item) => [item.id, item])).values()
     );
 
-    const customer = customers.find((c) => c.id === booking.customerId);
+    const customer =
+      customers.find((c) => c.id === booking.customerId) ||
+      uniqueBookings
+        .map((item) => customers.find((c) => c.id === item.customerId))
+        .find(Boolean);
 
     if (!customer?.phone) {
       alert("Customer phone number not found.");

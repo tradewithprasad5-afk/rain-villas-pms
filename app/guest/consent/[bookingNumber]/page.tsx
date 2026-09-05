@@ -50,81 +50,112 @@ const [guestDeclaration, setGuestDeclaration] = useState(false);
     async function loadBooking() {
       if (!bookingNumber) return;
 
-      const q = query(
-        collection(db, "bookings"),
-        where("bookingNumber", "==", bookingNumber)
-      );
-
-      const snapshot = await getDocs(q);
-
-      if (snapshot.empty) {
-        alert(`Booking '${bookingNumber}' not found.`);
-        return;
-      }
-
-      const primaryDoc = snapshot.docs[0];
-      const primaryBooking: any = {
-        id: primaryDoc.id,
-        ...primaryDoc.data(),
-      };
-
-      // One consent represents every villa booked by this guest for the
-      // exact same stay. Firestore bookings remain separate documents.
-      const allBookingsSnapshot = await getDocs(
-        collection(db, "bookings")
-      );
-
-      const relatedBookings = allBookingsSnapshot.docs
-        .map((docSnap) => ({
+      try {
+        const bookingsSnapshot = await getDocs(collection(db, "bookings"));
+        const allBookings = bookingsSnapshot.docs.map((docSnap) => ({
           id: docSnap.id,
           ...docSnap.data(),
-        }))
-        .filter(
-          (item: any) =>
-            item.customerId === primaryBooking.customerId &&
-            item.checkIn === primaryBooking.checkIn &&
-            item.checkOut === primaryBooking.checkOut
+        })) as any[];
+
+        const primaryBooking = allBookings.find(
+          (item) => item.bookingNumber === bookingNumber
         );
 
-      const sourceBookings = relatedBookings.length
-        ? relatedBookings
-        : [primaryBooking];
+        if (!primaryBooking) {
+          alert(`Booking '${bookingNumber}' not found.`);
+          return;
+        }
 
-      const bookingData: any = {
-        ...primaryBooking,
-        bookingNumbers: Array.from(
-          new Set(sourceBookings.map((item: any) => item.bookingNumber).filter(Boolean))
-        ),
-        villas: Array.from(
-          new Set(sourceBookings.map((item: any) => item.villa).filter(Boolean))
-        ),
-        sourceBookingIds: sourceBookings.map((item: any) => item.id),
-      };
+        const customersSnapshot = await getDocs(collection(db, "customers"));
+        const customers = customersSnapshot.docs.map((docSnap) => ({
+          id: docSnap.id,
+          ...docSnap.data(),
+        })) as any[];
 
-      setBooking(bookingData);
-      setGuestName(bookingData.customerName || "");
+        const normalizePhone = (value: string) =>
+          (value || "").replace(/\D/g, "");
 
-      const consentDoc = await getDoc(
-        doc(db, "consents", bookingNumber)
-      );
+        const primaryCustomer = customers.find(
+          (item) => item.id === primaryBooking.customerId
+        );
+        const primaryPhone = normalizePhone(primaryCustomer?.phone || "");
+        const primaryName = (primaryBooking.customerName || "")
+          .trim()
+          .toLowerCase();
 
-      if (consentDoc.exists()) {
-        router.replace("/guest/consent/consent-already-submitted");
-        return;
+        // ONE consent = same guest + same check-in + same check-out.
+        // Phone is the primary guest identity; name is the fallback for
+        // older records that do not have a usable phone number.
+        const relatedBookings = allBookings.filter((item) => {
+          if (item.checkIn !== primaryBooking.checkIn) return false;
+          if (item.checkOut !== primaryBooking.checkOut) return false;
+
+          const itemCustomer = customers.find(
+            (customer) => customer.id === item.customerId
+          );
+          const itemPhone = normalizePhone(itemCustomer?.phone || "");
+          const itemName = (item.customerName || "").trim().toLowerCase();
+
+          if (primaryPhone && itemPhone) {
+            return primaryPhone === itemPhone;
+          }
+
+          return primaryName === itemName;
+        });
+
+        const sourceBookings = relatedBookings.length
+          ? relatedBookings
+          : [primaryBooking];
+
+        const bookingNumbers = Array.from(
+          new Set(
+            sourceBookings
+              .map((item) => item.bookingNumber)
+              .filter(Boolean)
+          )
+        );
+
+        const villas = Array.from(
+          new Set(
+            sourceBookings.map((item) => item.villa).filter(Boolean)
+          )
+        );
+
+        const sourceBookingIds = sourceBookings.map((item) => item.id);
+
+        // If consent was already submitted from any booking in this same
+        // stay, do not allow another consent to be created.
+        for (const number of bookingNumbers) {
+          const existingConsent = await getDoc(
+            doc(db, "consents", number)
+          );
+
+          if (existingConsent.exists()) {
+            router.replace("/guest/consent/consent-already-submitted");
+            return;
+          }
+        }
+
+        const bookingData: any = {
+          ...primaryBooking,
+          bookingNumbers,
+          villas,
+          sourceBookingIds,
+        };
+
+        setBooking(bookingData);
+        setGuestName(bookingData.customerName || "");
+
+        if (primaryCustomer) {
+          setCustomer({
+            id: primaryCustomer.id,
+            ...primaryCustomer,
+          });
+        }
+      } catch (error) {
+        console.error("Failed to load guest consent booking:", error);
+        alert("Unable to load booking. Please try again.");
       }
-
-      if (bookingData.customerId) {
-  const customerDoc = await getDoc(
-    doc(db, "customers", bookingData.customerId)
-  );
-
-  if (customerDoc.exists()) {
-    setCustomer({
-      id: customerDoc.id,
-      ...customerDoc.data(),
-    });
-  }
-}
     }
 
     loadBooking();

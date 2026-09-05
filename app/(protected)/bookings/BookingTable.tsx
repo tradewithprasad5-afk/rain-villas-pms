@@ -67,27 +67,39 @@ function normalizeDate(value: string) {
   return d.toISOString().slice(0, 10);
 }
 
-function getStayGroupKey(booking: Booking) {
-  const customerKey = booking.customerId
-    ? `customer:${booking.customerId}`
-    : `name:${booking.customerName.trim().toLowerCase()}`;
+function normalizePhone(value?: string) {
+  return (value || "").replace(/\D/g, "");
+}
 
-  return `${customerKey}|${normalizeDate(booking.checkIn)}|${normalizeDate(
+function getBookingPhone(booking: Booking, customers: Customer[]) {
+  const customer = customers.find((item) => item.id === booking.customerId);
+  return normalizePhone(customer?.phone);
+}
+
+function getStayGroupKey(booking: Booking, customers: Customer[]) {
+  const phone = getBookingPhone(booking, customers);
+  const name = booking.customerName.trim().toLowerCase();
+
+  // Phone is the primary identity for grouping. Customer IDs are deliberately
+  // NOT used because old bookings can have duplicate customer documents.
+  const guestKey = phone ? `phone:${phone}` : `name:${name}`;
+
+  return `${guestKey}|${normalizeDate(booking.checkIn)}|${normalizeDate(
     booking.checkOut
   )}`;
 }
 
 /*
  * Groups ONLY bookings that belong to the same guest/stay.
- * Same customer + same check-in + same check-out = one display card.
+ * Same guest phone + same check-in + same check-out = one display card.
  * Different dates remain separate cards.
  * Firestore documents are never merged.
  */
-function groupBookings(bookings: Booking[]): CombinedBooking[] {
+function groupBookings(bookings: Booking[], customers: Customer[]): CombinedBooking[] {
   const groups = new Map<string, Booking[]>();
 
   for (const booking of bookings) {
-    const key = getStayGroupKey(booking);
+    const key = getStayGroupKey(booking, customers);
     const existing = groups.get(key);
     if (existing) existing.push(booking);
     else groups.set(key, [booking]);
@@ -152,7 +164,7 @@ export default function BookingTable({
     );
   }
 
-  const groupedBookings = groupBookings(bookings);
+  const groupedBookings = groupBookings(bookings, customers);
 
   const formatDateRange = (checkIn: string, checkOut: string) => {
     const inDate = new Date(checkIn);

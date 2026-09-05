@@ -51,14 +51,19 @@ function normalizeDate(value?: string) {
   return d.toISOString().slice(0, 10);
 }
 
-function getStayGroupKey(booking: Booking) {
-  const customerKey = booking.customerId
-    ? `customer:${booking.customerId}`
-    : `name:${booking.customerName.trim().toLowerCase()}|phone:${(
-        booking.phone || ""
-      ).replace(/\D/g, "")}`;
+function normalizePhone(value?: string) {
+  return (value || "").replace(/\D/g, "");
+}
 
-  return `${customerKey}|${normalizeDate(booking.checkIn)}|${normalizeDate(
+function getStayGroupKey(booking: Booking) {
+  const phone = normalizePhone(booking.phone);
+  const name = booking.customerName.trim().toLowerCase();
+
+  // Phone is the primary identity. Do not use customerId here because
+  // older data can contain duplicate customer documents for one guest.
+  const guestKey = phone ? `phone:${phone}` : `name:${name}`;
+
+  return `${guestKey}|${normalizeDate(booking.checkIn)}|${normalizeDate(
     booking.checkOut
   )}`;
 }
