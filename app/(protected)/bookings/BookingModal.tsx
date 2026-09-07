@@ -84,10 +84,12 @@ export default function BookingModal({
   if (!show) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 sm:p-4">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto p-4 sm:p-8">
-        <h2 className="text-lg sm:text-2xl font-bold mb-4 sm:mb-6">
-          {editingId ? "Edit Booking" : "New Booking"}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-3 sm:p-4">
+      <div className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-xl bg-white p-4 shadow-xl sm:p-8">
+        <h2 className="mb-4 text-lg font-bold sm:mb-6 sm:text-2xl">
+          {editingId
+            ? "Edit Booking"
+            : "New Booking"}
         </h2>
 
         {/* ===============================
@@ -95,104 +97,127 @@ export default function BookingModal({
         =============================== */}
 
         <div className="mb-6 sm:mb-8">
-          <h3 className="text-sm sm:text-lg font-semibold border-b pb-2 mb-3 sm:mb-4">
+          <h3 className="mb-3 border-b pb-2 text-sm font-semibold sm:mb-4 sm:text-lg">
             Customer Information
           </h3>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-
-            {/* Customer Name */}
-
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
             <div>
-              <label className="block mb-1 text-sm sm:text-base font-medium">
+              <label className="mb-1 block text-sm font-medium sm:text-base">
                 Customer Name
               </label>
 
               <input
                 type="text"
                 value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
-                className="w-full border rounded-lg p-2.5 sm:p-3 text-sm sm:text-base"
+                onChange={(e) =>
+                  setCustomerName(
+                    e.target.value
+                  )
+                }
+                className="w-full rounded-lg border p-2.5 text-sm sm:p-3 sm:text-base"
                 placeholder="Customer Name"
               />
             </div>
 
-            {/* Phone */}
-
             <div>
-              <label className="block mb-1 text-sm sm:text-base font-medium">
+              <label className="mb-1 block text-sm font-medium sm:text-base">
                 Phone Number
               </label>
 
               <input
                 type="text"
                 value={phone}
-               onChange={(e) => onPhoneChange(e.target.value)}
-                className="w-full border rounded-lg p-2.5 sm:p-3 text-sm sm:text-base"
+                onChange={(e) =>
+                  onPhoneChange(
+                    e.target.value
+                  )
+                }
+                className="w-full rounded-lg border p-2.5 text-sm sm:p-3 sm:text-base"
                 placeholder="9876543210"
               />
             </div>
 
-            {/* Email */}
-
             <div>
-              <label className="block mb-1 text-sm sm:text-base font-medium">
+              <label className="mb-1 block text-sm font-medium sm:text-base">
                 Email
               </label>
 
               <input
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full border rounded-lg p-2.5 sm:p-3 text-sm sm:text-base"
+                onChange={(e) =>
+                  setEmail(
+                    e.target.value
+                  )
+                }
+                className="w-full rounded-lg border p-2.5 text-sm sm:p-3 sm:text-base"
                 placeholder="example@email.com"
               />
             </div>
 
-            {/* Address */}
-
             <div className="col-span-1 sm:col-span-2">
-              <label className="block mb-1 text-sm sm:text-base font-medium">
+              <label className="mb-1 block text-sm font-medium sm:text-base">
                 Address
               </label>
 
               <textarea
                 rows={3}
                 value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                className="w-full border rounded-lg p-2.5 sm:p-3 text-sm sm:text-base"
+                onChange={(e) =>
+                  setAddress(
+                    e.target.value
+                  )
+                }
+                className="w-full rounded-lg border p-2.5 text-sm sm:p-3 sm:text-base"
                 placeholder="Customer Address"
               />
             </div>
-
           </div>
         </div>
-                {/* ===============================
+
+        {/* ===============================
             Booking Information
         =============================== */}
 
         <div className="mb-6 sm:mb-8">
-          <h3 className="text-sm sm:text-lg font-semibold border-b pb-2 mb-3 sm:mb-4">
+          <h3 className="mb-3 border-b pb-2 text-sm font-semibold sm:mb-4 sm:text-lg">
             Booking Information
           </h3>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
             {/* Villa */}
 
             <div>
-              <label className="block mb-1 text-sm sm:text-base font-medium">
+              <label className="mb-1 block text-sm font-medium sm:text-base">
                 Villa
               </label>
 
               <select
                 value={villa}
-                onChange={(e) => setVilla(e.target.value)}
-                className="w-full border rounded-lg p-2.5 sm:p-3 text-sm sm:text-base"
+                onChange={(e) =>
+                  setVilla(
+                    e.target.value
+                  )
+                }
+                className="w-full rounded-lg border p-2.5 text-sm sm:p-3 sm:text-base"
               >
-                <option>Rain Paradise</option>
-                <option>Rain Heaven</option>
-                {!editingId && <option>Both Villas</option>}
+                <option>
+                  Rain Paradise
+                </option>
+
+                <option>
+                  Rain Heaven
+                </option>
+
+                {/* 
+                 * IMPORTANT:
+                 * Both Villas is available for
+                 * NEW and EDIT bookings.
+                 */}
+                <option>
+                  Both Villas
+                </option>
               </select>
             </div>
 
@@ -201,33 +226,53 @@ export default function BookingModal({
             {villa === "Both Villas" && (
               <>
                 <div>
-                  <label className="block mb-1 text-sm sm:text-base font-medium">
+                  <label className="mb-1 block text-sm font-medium sm:text-base">
                     Rain Paradise Amount
                   </label>
+
                   <input
-  type="number"
-  min={0}
-  step="1"
-  value={rainParadiseAmount === "" ? "0" : rainParadiseAmount}
-  onChange={(e) => setRainParadiseAmount(e.target.value)}
-  className="w-full border rounded-lg p-2.5 sm:p-3 text-sm sm:text-base"
-  placeholder="0"
-/>
+                    type="number"
+                    min={0}
+                    step="1"
+                    value={
+                      rainParadiseAmount ===
+                      ""
+                        ? "0"
+                        : rainParadiseAmount
+                    }
+                    onChange={(e) =>
+                      setRainParadiseAmount(
+                        e.target.value
+                      )
+                    }
+                    className="w-full rounded-lg border p-2.5 text-sm sm:p-3 sm:text-base"
+                    placeholder="0"
+                  />
                 </div>
 
                 <div>
-                  <label className="block mb-1 text-sm sm:text-base font-medium">
+                  <label className="mb-1 block text-sm font-medium sm:text-base">
                     Rain Heaven Amount
                   </label>
+
                   <input
-  type="number"
-  min={0}
-  step="1"
-  value={rainHeavenAmount === "" ? "0" : rainHeavenAmount}
-  onChange={(e) => setRainHeavenAmount(e.target.value)}
-  className="w-full border rounded-lg p-2.5 sm:p-3 text-sm sm:text-base"
-  placeholder="0"
-/>
+                    type="number"
+                    min={0}
+                    step="1"
+                    value={
+                      rainHeavenAmount ===
+                      ""
+                        ? "0"
+                        : rainHeavenAmount
+                    }
+                    onChange={(e) =>
+                      setRainHeavenAmount(
+                        e.target.value
+                      )
+                    }
+                    className="w-full rounded-lg border p-2.5 text-sm sm:p-3 sm:text-base"
+                    placeholder="0"
+                  />
                 </div>
               </>
             )}
@@ -235,7 +280,7 @@ export default function BookingModal({
             {/* Guests */}
 
             <div>
-              <label className="block mb-1 text-sm sm:text-base font-medium">
+              <label className="mb-1 block text-sm font-medium sm:text-base">
                 Guests
               </label>
 
@@ -243,152 +288,194 @@ export default function BookingModal({
                 type="number"
                 min={1}
                 value={guests}
-                onChange={(e) => setGuests(Number(e.target.value))}
-                className="w-full border rounded-lg p-2.5 sm:p-3 text-sm sm:text-base"
+                onChange={(e) =>
+                  setGuests(
+                    Number(
+                      e.target.value
+                    )
+                  )
+                }
+                className="w-full rounded-lg border p-2.5 text-sm sm:p-3 sm:text-base"
               />
             </div>
 
             {/* Check In */}
 
             <div>
-              <label className="block mb-1 text-sm sm:text-base font-medium">
+              <label className="mb-1 block text-sm font-medium sm:text-base">
                 Check In
               </label>
 
               <input
                 type="date"
                 value={checkIn}
-                onChange={(e) => setCheckIn(e.target.value)}
-                className="w-full border rounded-lg p-2.5 sm:p-3 text-sm sm:text-base"
+                onChange={(e) =>
+                  setCheckIn(
+                    e.target.value
+                  )
+                }
+                className="w-full rounded-lg border p-2.5 text-sm sm:p-3 sm:text-base"
               />
             </div>
 
             {/* Check Out */}
 
             <div>
-              <label className="block mb-1 text-sm sm:text-base font-medium">
+              <label className="mb-1 block text-sm font-medium sm:text-base">
                 Check Out
               </label>
 
               <input
                 type="date"
                 value={checkOut}
-                onChange={(e) => setCheckOut(e.target.value)}
-                className="w-full border rounded-lg p-2.5 sm:p-3 text-sm sm:text-base"
+                onChange={(e) =>
+                  setCheckOut(
+                    e.target.value
+                  )
+                }
+                className="w-full rounded-lg border p-2.5 text-sm sm:p-3 sm:text-base"
               />
             </div>
-
           </div>
         </div>
 
         {/* ===============================
-    Payment Information
-=============================== */}
+            Payment Information
+        =============================== */}
 
-<div className="mb-6 sm:mb-8">
-  <h3 className="text-sm sm:text-lg font-semibold border-b pb-2 mb-3 sm:mb-4">
-    Payment Information
-  </h3>
+        <div className="mb-6 sm:mb-8">
+          <h3 className="mb-3 border-b pb-2 text-sm font-semibold sm:mb-4 sm:text-lg">
+            Payment Information
+          </h3>
 
-  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+            {/* Total Amount */}
 
-    {/* Total Amount */}
+            <div>
+              <label className="mb-1 block text-sm font-medium sm:text-base">
+                Total Amount
+              </label>
 
-    <div>
-      <label className="block mb-1 text-sm sm:text-base font-medium">
-        Total Amount
-      </label>
+              <input
+                type="number"
+                min={0}
+                step="1"
+                value={
+                  totalAmount === ""
+                    ? "0"
+                    : totalAmount
+                }
+                onChange={(e) =>
+                  setTotalAmount(
+                    e.target.value
+                  )
+                }
+                readOnly={
+                  villa === "Both Villas"
+                }
+                className={`w-full rounded-lg border p-2.5 text-sm sm:p-3 sm:text-base ${
+                  villa === "Both Villas"
+                    ? "bg-gray-100"
+                    : ""
+                }`}
+                placeholder="0"
+              />
+            </div>
 
-      <input
-        type="number"
-        min={0}
-        step="1"
-        value={totalAmount === "" ? "0" : totalAmount}
-        onChange={(e) => setTotalAmount(e.target.value)}
-        readOnly={villa === "Both Villas"}
-        className={`w-full border rounded-lg p-2.5 sm:p-3 text-sm sm:text-base ${
-          villa === "Both Villas" ? "bg-gray-100" : ""
-        }`}
-        placeholder="0"
-      />
-    </div>
+            {/* Advance */}
 
-    {/* Advance */}
+            <div>
+              <label className="mb-1 block text-sm font-medium sm:text-base">
+                Advance Paid
+              </label>
 
-    <div>
-      <label className="block mb-1 text-sm sm:text-base font-medium">
-        Advance Paid
-      </label>
+              <input
+                type="number"
+                min={0}
+                step="1"
+                value={
+                  advancePaid === ""
+                    ? "0"
+                    : advancePaid
+                }
+                onChange={(e) =>
+                  setAdvancePaid(
+                    e.target.value
+                  )
+                }
+                className="w-full rounded-lg border p-2.5 text-sm sm:p-3 sm:text-base"
+                placeholder="0"
+              />
+            </div>
 
-      <input
-        type="number"
-        min={0}
-        step="1"
-        value={advancePaid === "" ? "0" : advancePaid}
-        onChange={(e) => setAdvancePaid(e.target.value)}
-        className="w-full border rounded-lg p-2.5 sm:p-3 text-sm sm:text-base"
-        placeholder="0"
-      />
-    </div>
+            {/* Balance */}
 
-    {/* Balance */}
+            <div>
+              <label className="mb-1 block text-sm font-medium sm:text-base">
+                Balance Amount
+              </label>
 
-    <div>
-      <label className="block mb-1 text-sm sm:text-base font-medium">
-        Balance Amount
-      </label>
+              <input
+                type="number"
+                value={balanceAmount}
+                readOnly
+                className="w-full rounded-lg border bg-gray-100 p-2.5 text-sm sm:p-3 sm:text-base"
+              />
+            </div>
 
-      <input
-        type="number"
-        value={balanceAmount}
-        readOnly
-        className="w-full border rounded-lg p-2.5 sm:p-3 text-sm sm:text-base bg-gray-100"
-      />
-    </div>
+            {/* Status */}
 
-    {/* Status */}
+            <div>
+              <label className="mb-1 block text-sm font-medium sm:text-base">
+                Status
+              </label>
 
-    <div>
-      <label className="block mb-1 text-sm sm:text-base font-medium">
-        Status
-      </label>
+              <select
+                value={status}
+                onChange={(e) =>
+                  setStatus(
+                    e.target.value
+                  )
+                }
+                className="w-full rounded-lg border p-2.5 text-sm sm:p-3 sm:text-base"
+              >
+                <option>
+                  Confirmed
+                </option>
 
-      <select
-        value={status}
-        onChange={(e) => setStatus(e.target.value)}
-        className="w-full border rounded-lg p-2.5 sm:p-3 text-sm sm:text-base"
-      >
-        <option>Confirmed</option>
-        <option>Pending</option>
-        <option>Cancelled</option>
-      </select>
-    </div>
+                <option>
+                  Pending
+                </option>
 
-  </div>
-</div>
+                <option>
+                  Cancelled
+                </option>
+              </select>
+            </div>
+          </div>
+        </div>
 
         {/* ===============================
             Buttons
         =============================== */}
 
-        <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 sm:gap-4">
-
+        <div className="flex flex-col-reverse justify-end gap-3 sm:flex-row sm:gap-4">
           <button
             onClick={onCancel}
-            className="px-5 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg bg-gray-300 hover:bg-gray-400"
+            className="rounded-lg bg-gray-300 px-5 py-2.5 text-sm hover:bg-gray-400 sm:px-6 sm:py-3 sm:text-base"
           >
             Cancel
           </button>
 
           <button
             onClick={onSave}
-            className="px-5 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg bg-green-600 text-white hover:bg-green-700"
+            className="rounded-lg bg-green-600 px-5 py-2.5 text-sm text-white hover:bg-green-700 sm:px-6 sm:py-3 sm:text-base"
           >
-            {editingId ? "Update Booking" : "Save Booking"}
+            {editingId
+              ? "Update Booking"
+              : "Save Booking"}
           </button>
-
         </div>
-
       </div>
     </div>
   );
