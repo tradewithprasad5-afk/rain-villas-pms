@@ -16,8 +16,8 @@ interface BookingTableProps {
 
   onEdit: (booking: Booking) => void;
   onDelete: (booking: Booking) => void;
-  onSendConsent: (booking: Booking, relatedBookings?: Booking[]) => void;
-  onCompleteConsent: (id: string, relatedBookings?: Booking[]) => void;
+  onSendConsent: (booking: Booking) => void;
+  onCompleteConsent: (id: string) => void;
 }
 
 interface CombinedBooking extends Booking {
@@ -60,71 +60,155 @@ function avatarColor(name: string) {
  * Edit / Delete / Consent actions always receive
  * the original booking object.
  */
-function normalizeDate(value: string) {
-  if (!value) return "";
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return value;
-  return d.toISOString().slice(0, 10);
-}
-
 function normalizePhone(value?: string) {
   const digits = (value || "").replace(/\D/g, "");
   return digits.length > 10 ? digits.slice(-10) : digits;
 }
 
+function normalizeDate(value?: string) {
+  if (!value) return "";
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return value.trim();
+  return parsed.toISOString().slice(0, 10);
+}
+
 function getBookingPhone(booking: Booking, customers: Customer[]) {
   const customer = customers.find((item) => item.id === booking.customerId);
-  return normalizePhone(customer?.phone);
+  return normalizePhone(booking.phone || customer?.phone || "");
 }
 
-function getStayGroupKey(booking: Booking, customers: Customer[]) {
+function getGuestIdentity(booking: Booking, customers: Customer[]) {
   const phone = getBookingPhone(booking, customers);
-  const name = booking.customerName.trim().toLowerCase();
+  const customerId = booking.customerId?.trim() || "";
+  const name = (booking.customerName || "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .toLowerCase();
 
-  // Phone is the primary identity for grouping. Customer IDs are deliberately
-  // NOT used because old bookings can have duplicate customer documents.
-  const guestKey = phone ? `phone:${phone}` : `name:${name}`;
-
-  return `${guestKey}|${normalizeDate(booking.checkIn)}|${normalizeDate(
-    booking.checkOut
-  )}`;
+  return { phone, customerId, name };
 }
 
-/*
- * Groups ONLY bookings that belong to the same guest/stay.
- * Same guest phone + same check-in + same check-out = one display card.
- * Different dates remain separate cards.
- * Firestore documents are never merged.
- */
-function groupBookings(bookings: Booking[], customers: Customer[]): CombinedBooking[] {
-  const groups = new Map<string, Booking[]>();
+function sameGuest(
+  a: Booking,
+  b: Booking,
+  customers: Customer[]
+) {
+  const left = getGuestIdentity(a, customers);
+  const right = getGuestIdentity(b, customers);
 
-  for (const booking of bookings) {
-    const key = getStayGroupKey(booking, customers);
-    const existing = groups.get(key);
-    if (existing) existing.push(booking);
-    else groups.set(key, [booking]);
+  if (left.phone && right.phone && left.phone === right.phone) {
+    return true;
   }
 
-  return Array.from(groups.values()).map((sourceBookings) => {
+  if (
+    left.customerId &&
+    right.customerId &&
+    left.customerId === right.customerId
+  ) {
+    return true;
+  }
+
+  if (left.name && right.name && left.name === right.name) {
+    return true;
+  }
+
+  return false;
+}
+
+function groupBookings(
+  bookings: Booking[],
+  customers: Customer[]
+): CombinedBooking[] {
+  // Build groups by stay date first, then merge records that belong to
+  // the same guest. This deliberately ignores status and bookingGroupId.
+  const dateBuckets = new Map<string, Booking[]>();
+
+  for (const booking of bookings) {
+    const dateKey = `${normalizeDate(booking.checkIn)}|${normalizeDate(
+      booking.checkOut
+    )}`;
+
+    const bucket = dateBuckets.get(dateKey);
+    if (bucket) {
+      bucket.push(booking);
+    } else {
+      dateBuckets.set(dateKey, [booking]);
+    }
+  }
+
+  const result: Booking[][] = [];
+
+  for (const bucket of dateBuckets.values()) {
+    const groups: Booking[][] = [];
+
+    for (const booking of bucket) {
+      const matchingGroups = groups.filter((group) =>
+        group.some((existing) => sameGuest(booking, existing, customers))
+      );
+
+      if (matchingGroups.length === 0) {
+        groups.push([booking]);
+        continue;
+      }
+
+      // Merge all matching groups so identity stays transitive.
+      const merged = [booking];
+      for (const group of matchingGroups) {
+        merged.push(...group);
+      }
+
+      for (const group of matchingGroups) {
+        const index = groups.indexOf(group);
+        if (index !== -1) groups.splice(index, 1);
+      }
+
+      groups.push(merged);
+    }
+
+    result.push(...groups);
+  }
+
+  return result.map((sourceBookings) => {
     const first = sourceBookings[0];
+
     const bookingNumbers = Array.from(
-      new Set(sourceBookings.map((b) => b.bookingNumber).filter(Boolean))
-    );
-    const villas = Array.from(
-      new Set(sourceBookings.map((b) => b.villa).filter(Boolean))
+      new Set(
+        sourceBookings
+          .map((booking) => booking.bookingNumber)
+          .filter(Boolean)
+      )
     );
 
+    const villas = Array.from(
+      new Set(
+        sourceBookings
+          .map((booking) => booking.villa)
+          .filter(Boolean)
+      )
+    );
+
+    const checkIns = sourceBookings
+      .map((booking) => booking.checkIn)
+      .filter(Boolean)
+      .sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+
+    const checkOuts = sourceBookings
+      .map((booking) => booking.checkOut)
+      .filter(Boolean)
+      .sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+
     const totalAmount = sourceBookings.reduce(
-      (sum, b) => sum + Number(b.totalAmount || 0),
+      (sum, booking) => sum + Number(booking.totalAmount || 0),
       0
     );
+
     const advancePaid = sourceBookings.reduce(
-      (sum, b) => sum + Number(b.advancePaid || 0),
+      (sum, booking) => sum + Number(booking.advancePaid || 0),
       0
     );
+
     const balanceAmount = sourceBookings.reduce(
-      (sum, b) => sum + Number(b.balanceAmount || 0),
+      (sum, booking) => sum + Number(booking.balanceAmount || 0),
       0
     );
 
@@ -132,6 +216,8 @@ function groupBookings(bookings: Booking[], customers: Customer[]): CombinedBook
       ...first,
       bookingNumber: bookingNumbers.join(" + ") || first.bookingNumber,
       villa: villas.join(" + ") || first.villa,
+      checkIn: checkIns[0] || first.checkIn,
+      checkOut: checkOuts[0] || first.checkOut,
       totalAmount,
       advancePaid,
       balanceAmount,
@@ -205,11 +291,19 @@ export default function BookingTable({
       )
     );
 
-    if (statuses.length === 1) {
-      return statuses[0];
+    if (statuses.includes("Confirmed")) {
+      return "Confirmed";
     }
 
-    return "Multiple";
+    if (statuses.includes("Pending")) {
+      return "Pending";
+    }
+
+    if (statuses.includes("Cancelled")) {
+      return "Cancelled";
+    }
+
+    return statuses[0] || "Pending";
   };
 
   const isCombined = (booking: CombinedBooking) =>
@@ -221,69 +315,72 @@ export default function BookingTable({
     );
 
   const renderActions = (booking: CombinedBooking) => {
-    const primaryBooking = booking.sourceBookings[0];
-    const consentCompleted = booking.sourceBookings.every(
-      (item) => item.consentStatus === "Completed"
-    );
-
-    const items: React.ReactNode[] = [];
-
-    booking.sourceBookings.forEach((sourceBooking) => {
-      items.push(
+    return booking.sourceBookings.flatMap((sourceBooking) => {
+      const items: React.ReactNode[] = [
         <DropdownMenuItem
           key={`${sourceBooking.id}-edit`}
           onClick={() => onEdit(sourceBooking)}
         >
-          ✏️ Edit {isCombined(booking) ? sourceBooking.bookingNumber : "Booking"}
-        </DropdownMenuItem>
-      );
-    });
+          ✏️ Edit{" "}
+          {isCombined(booking)
+            ? sourceBooking.bookingNumber
+            : "Booking"}
+        </DropdownMenuItem>,
 
-    items.push(
-      <DropdownMenuItem
-        key={`${booking.id}-consent-send`}
-        disabled={consentCompleted}
-        onClick={() => onSendConsent(primaryBooking, booking.sourceBookings)}
-      >
-        📲 {consentCompleted ? "Consent Completed" : "Send Consent"}
-      </DropdownMenuItem>
-    );
-
-    if (consentCompleted) {
-      items.push(
         <DropdownMenuItem
-          key={`${booking.id}-view-consent`}
-          onClick={() => {
-            window.location.href = `/admin/consents/${primaryBooking.bookingNumber}`;
-          }}
+          key={`${sourceBooking.id}-consent`}
+          onClick={() => onSendConsent(sourceBooking)}
         >
-          👁 View Consent
-        </DropdownMenuItem>
-      );
-    } else {
-      items.push(
-        <DropdownMenuItem
-          key={`${booking.id}-complete-consent`}
-          onClick={() => onCompleteConsent(primaryBooking.id, booking.sourceBookings)}
-        >
-          ✓ Mark Consent Complete
-        </DropdownMenuItem>
-      );
-    }
+          📲 Send Consent{" "}
+          {isCombined(booking)
+            ? sourceBooking.bookingNumber
+            : ""}
+        </DropdownMenuItem>,
+      ];
 
-    booking.sourceBookings.forEach((sourceBooking) => {
+      if (sourceBooking.consentStatus === "Completed") {
+        items.push(
+          <DropdownMenuItem
+            key={`${sourceBooking.id}-view`}
+            onClick={() => {
+              window.location.href = `/admin/consents/${sourceBooking.bookingNumber}`;
+            }}
+          >
+            👁 View Consent{" "}
+            {isCombined(booking)
+              ? sourceBooking.bookingNumber
+              : ""}
+          </DropdownMenuItem>
+        );
+      } else {
+        items.push(
+          <DropdownMenuItem
+            key={`${sourceBooking.id}-complete`}
+            onClick={() => onCompleteConsent(sourceBooking.id)}
+          >
+            ✓ Mark Consent Complete{" "}
+            {isCombined(booking)
+              ? sourceBooking.bookingNumber
+              : ""}
+          </DropdownMenuItem>
+        );
+      }
+
       items.push(
         <DropdownMenuItem
           key={`${sourceBooking.id}-delete`}
           onClick={() => onDelete(sourceBooking)}
           className="text-red-600"
         >
-          🗑 Delete {isCombined(booking) ? sourceBooking.bookingNumber : "Booking"}
+          🗑 Delete{" "}
+          {isCombined(booking)
+            ? sourceBooking.bookingNumber
+            : "Booking"}
         </DropdownMenuItem>
       );
-    });
 
-    return items;
+      return items;
+    });
   };
 
   return (
@@ -292,6 +389,10 @@ export default function BookingTable({
       {/* Same compact 2-column UI as the old version. */}
       <div className="grid grid-cols-2 gap-2.5 md:hidden">
         {groupedBookings.map((booking) => {
+          const customer = customers.find(
+            (c) => c.id === booking.customerId
+          );
+
           const consentCompleted =
             isConsentCompleted(booking);
 
@@ -397,6 +498,10 @@ export default function BookingTable({
       {/* Same row-list style as the old version. */}
       <div className="hidden overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm md:block">
         {groupedBookings.map((booking, index) => {
+          const customer = customers.find(
+            (c) => c.id === booking.customerId
+          );
+
           const consentCompleted =
             isConsentCompleted(booking);
 
@@ -425,7 +530,7 @@ export default function BookingTable({
                   </p>
 
                   <p className="mt-0.5 truncate text-xs text-slate-500">
-                    {customers.find((c) => c.id === booking.customerId)?.phone || "-"} ·{" "}
+                    {customer?.phone || "-"} ·{" "}
                     {booking.villa} ·{" "}
                     {formatDateRange(
                       booking.checkIn,

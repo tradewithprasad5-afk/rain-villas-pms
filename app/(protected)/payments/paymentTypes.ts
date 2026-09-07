@@ -15,6 +15,7 @@ export interface Booking {
   id: string;
 
   bookingNumber: string;
+  bookingGroupId?: string;
   customerId: string;
   customerName: string;
 

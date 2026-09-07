@@ -46,24 +46,32 @@ const [guestDeclaration, setGuestDeclaration] = useState(false);
 
   const today = new Date().toISOString().split("T")[0];
 
-  function normalizePhone(value: string) {
-    const digits = value.replace(/\D/g, "");
+  function normalizePhone(value?: string) {
+    const digits = (value || "").replace(/\D/g, "");
     return digits.length > 10 ? digits.slice(-10) : digits;
   }
 
   function normalizeDate(value?: string) {
     if (!value) return "";
     const d = new Date(value);
-    return Number.isNaN(d.getTime()) ? value : d.toISOString().slice(0, 10);
+    if (Number.isNaN(d.getTime())) return value;
+    return d.toISOString().slice(0, 10);
   }
 
-  function getConsentId(phone: string, checkIn: string, checkOut: string) {
-    const normalizedPhone = normalizePhone(phone);
-    const guestKey = normalizedPhone
-      ? `phone-${normalizedPhone}`
-      : `guest-${bookingNumber}`;
+  function getConsentId(primaryBooking: any) {
+    // One consent belongs to one guest stay, not to one Firestore booking.
+    // This also handles older records where Paradise and Heaven were booked
+    // separately and therefore have different bookingGroupId values.
+    const phone = normalizePhone(primaryBooking.phone || "");
+    if (phone) {
+      return `stay-${phone}-${normalizeDate(primaryBooking.checkIn)}-${normalizeDate(primaryBooking.checkOut)}`;
+    }
 
-    return `${guestKey}-${normalizeDate(checkIn)}-${normalizeDate(checkOut)}`;
+    if (primaryBooking.customerId) {
+      return `stay-customer-${primaryBooking.customerId}-${normalizeDate(primaryBooking.checkIn)}-${normalizeDate(primaryBooking.checkOut)}`;
+    }
+
+    return `legacy-booking-${primaryBooking.bookingNumber}`;
   }
 
   useEffect(() => {
@@ -89,122 +97,96 @@ const [guestDeclaration, setGuestDeclaration] = useState(false);
           ...primaryDoc.data(),
         };
 
-        // Load customers once. Phone is the identity for a stay because old
-        // records may have different customerIds for the same guest.
-        const customersSnapshot = await getDocs(collection(db, "customers"));
-        const customersById = new Map<string, any>();
-
-        customersSnapshot.docs.forEach((customerDoc) => {
-          customersById.set(customerDoc.id, {
-            id: customerDoc.id,
-            ...customerDoc.data(),
-          });
-        });
-
-        const primaryCustomer = customersById.get(primaryBooking.customerId);
-        const primaryPhone = normalizePhone(
-          primaryBooking.phone || primaryCustomer?.phone || ""
-        );
-
-        const allBookingsSnapshot = await getDocs(collection(db, "bookings"));
-
-        const allBookings = allBookingsSnapshot.docs.map((docSnap) => ({
+        const allSnapshot = await getDocs(collection(db, "bookings"));
+        const allBookings = allSnapshot.docs.map((docSnap) => ({
           id: docSnap.id,
           ...docSnap.data(),
         })) as any[];
 
-        const relatedBookings = allBookings.filter((item: any) => {
-          if (normalizeDate(item.checkIn) !== normalizeDate(primaryBooking.checkIn)) {
-            return false;
+        const primaryPhone = normalizePhone(primaryBooking.phone || "");
+
+        const relatedBookings = allBookings.filter((item) => {
+          const sameDates =
+            normalizeDate(item.checkIn) === normalizeDate(primaryBooking.checkIn) &&
+            normalizeDate(item.checkOut) === normalizeDate(primaryBooking.checkOut);
+
+          const itemPhone = normalizePhone(item.phone || "");
+
+          if (primaryPhone) {
+            return sameDates && itemPhone === primaryPhone;
           }
 
-          if (normalizeDate(item.checkOut) !== normalizeDate(primaryBooking.checkOut)) {
-            return false;
-          }
-
-          const itemCustomer = customersById.get(item.customerId);
-          const itemPhone = normalizePhone(
-            item.phone || itemCustomer?.phone || ""
-          );
-
-          // PRIMARY RULE: same normalized phone + same dates.
-          if (primaryPhone && itemPhone) {
-            return primaryPhone === itemPhone;
-          }
-
-          // Legacy fallback when no phone exists.
-          return (
-            !primaryPhone &&
-            item.customerId === primaryBooking.customerId
-          );
+          return sameDates && item.customerId === primaryBooking.customerId;
         });
 
         const sourceBookings = relatedBookings.length
           ? relatedBookings
           : [primaryBooking];
 
-        const sourceCustomer = customersById.get(primaryBooking.customerId);
-        const resolvedPhone = normalizePhone(
-          primaryBooking.phone || sourceCustomer?.phone || ""
-        );
-
         const bookingData: any = {
           ...primaryBooking,
-          phone: resolvedPhone,
-          email: sourceCustomer?.email || "",
           bookingNumbers: Array.from(
-            new Set(
-              sourceBookings
-                .map((item: any) => item.bookingNumber)
-                .filter(Boolean)
-            )
+            new Set(sourceBookings.map((item) => item.bookingNumber).filter(Boolean))
           ),
           villas: Array.from(
-            new Set(
-              sourceBookings
-                .map((item: any) => item.villa)
-                .filter(Boolean)
-            )
+            new Set(sourceBookings.map((item) => item.villa).filter(Boolean))
           ),
-          sourceBookingIds: sourceBookings.map((item: any) => item.id),
+          sourceBookingIds: sourceBookings.map((item) => item.id),
+          bookingGroupId: primaryBooking.bookingGroupId || "",
+          consentId: getConsentId(primaryBooking),
+          phone: primaryBooking.phone || "",
         };
-
-        const consentId = getConsentId(
-          resolvedPhone,
-          primaryBooking.checkIn,
-          primaryBooking.checkOut
-        );
-
-        bookingData.consentId = consentId;
-
-        // One consent record per PHONE + CHECK-IN + CHECK-OUT.
-        const groupConsent = await getDoc(doc(db, "consents", consentId));
-
-        if (groupConsent.exists()) {
-          router.replace("/guest/consent/consent-already-submitted");
-          return;
-        }
-
-        // Also recognize older consent documents that were keyed by a
-        // booking number. This prevents an old consent from being submitted
-        // again for the same stay.
-        const legacyConsentChecks = await Promise.all(
-          bookingData.bookingNumbers.map((number: string) =>
-            getDoc(doc(db, "consents", number))
-          )
-        );
-
-        if (legacyConsentChecks.some((item) => item.exists())) {
-          router.replace("/guest/consent/consent-already-submitted");
-          return;
-        }
 
         setBooking(bookingData);
         setGuestName(bookingData.customerName || "");
-        setCustomer(sourceCustomer || null);
+
+        if (bookingData.customerId) {
+          const customerDoc = await getDoc(
+            doc(db, "customers", bookingData.customerId)
+          );
+
+          if (customerDoc.exists()) {
+            setCustomer({
+              id: customerDoc.id,
+              ...customerDoc.data(),
+            });
+          }
+        }
+
+        const consentId = getConsentId(primaryBooking);
+        const consentDoc = await getDoc(doc(db, "consents", consentId));
+
+        if (consentDoc.exists()) {
+          router.replace("/guest/consent/consent-already-submitted");
+          return;
+        }
+
+        // Compatibility with consents created by the previous grouped-booking version.
+        if (primaryBooking.bookingGroupId) {
+          const legacyGroupConsent = await getDoc(
+            doc(db, "consents", `group-${primaryBooking.bookingGroupId}`)
+          );
+          if (legacyGroupConsent.exists()) {
+            router.replace("/guest/consent/consent-already-submitted");
+            return;
+          }
+        }
+
+        // Compatibility check for old consent documents created before
+        // bookingGroupId existed.
+        for (const sourceBooking of sourceBookings) {
+          if (!sourceBooking.bookingNumber) continue;
+          const legacyConsent = await getDoc(
+            doc(db, "consents", sourceBooking.bookingNumber)
+          );
+          if (legacyConsent.exists()) {
+            router.replace("/guest/consent/consent-already-submitted");
+            return;
+          }
+        }
       } catch (error) {
-        console.error("Unable to load consent booking:", error);
-        alert("Unable to load booking details. Please try again.");
+        console.error("Failed to load booking for consent:", error);
+        alert("Unable to load the booking. Please try again.");
       }
     }
 
@@ -212,43 +194,47 @@ const [guestDeclaration, setGuestDeclaration] = useState(false);
   }, [bookingNumber, router]);
 
   async function saveConsent() {
-    if (saving || !booking) return;
+    if (saving) return;
 
-    if (
-      !houseRules ||
-      !poolRules ||
-      !damageRules ||
-      !zeroTolerance ||
-      !liabilityWaiver ||
-      !guestDeclaration
-    ) {
-      alert("Please accept all sections before submitting.");
-      return;
-    }
-
-    if (!guestName.trim()) {
-      alert("Please enter the guest full name.");
-      return;
-    }
-
-    if (!signature.trim()) {
-      alert("Please enter your digital signature.");
-      return;
-    }
+    if (!booking) return;
 
     setSaving(true);
 
     try {
-      const sourceBookingIds: string[] = booking.sourceBookingIds || [booking.id];
-      const bookingNumbers: string[] =
-        booking.bookingNumbers || [booking.bookingNumber];
-      const villas: string[] = booking.villas || [booking.villa];
-      const consentId: string = booking.consentId;
+      if (
+        !houseRules ||
+        !poolRules ||
+        !damageRules ||
+        !zeroTolerance ||
+        !liabilityWaiver ||
+        !guestDeclaration
+      ) {
+        alert("Please accept all sections before submitting.");
+        return;
+      }
 
-      // Create exactly ONE consent document for the complete stay.
+      if (!signature.trim()) {
+        alert("Please enter your digital signature.");
+        return;
+      }
+
+      const sourceBookingIds: string[] = booking.sourceBookingIds || [booking.id];
+      const bookingNumbers: string[] = booking.bookingNumbers || [booking.bookingNumber];
+      const villas: string[] = booking.villas || [booking.villa];
+      const consentId = booking.consentId || getConsentId(booking);
+      const phone = customer?.phone || booking.phone || "";
+      const email = customer?.email || "";
+
+      const existingConsent = await getDoc(doc(db, "consents", consentId));
+      if (existingConsent.exists()) {
+        router.replace("/guest/consent/consent-already-submitted");
+        return;
+      }
+
       await setDoc(doc(db, "consents", consentId), {
         consentId,
-        bookingNumber: booking.bookingNumber,
+        bookingGroupId: booking.bookingGroupId || "",
+        bookingNumber: bookingNumbers[0] || booking.bookingNumber,
         bookingNumbers,
         customerName: guestName.trim(),
         villa: villas.join(" + "),
@@ -256,8 +242,8 @@ const [guestDeclaration, setGuestDeclaration] = useState(false);
         checkIn: booking.checkIn,
         checkOut: booking.checkOut,
         sourceBookingIds,
-        phone: booking.phone || customer?.phone || "",
-        email: customer?.email || "",
+        phone,
+        email,
         adults,
         children,
         vehicleNumber: vehicleNumber.trim(),
@@ -272,13 +258,12 @@ const [guestDeclaration, setGuestDeclaration] = useState(false);
         createdAt: serverTimestamp(),
       });
 
-      // The ONE consent updates every booking belonging to this phone/stay.
       await Promise.all(
         sourceBookingIds.map((bookingId) =>
           updateDoc(doc(db, "bookings", bookingId), {
             consentStatus: "Completed",
             customerName: guestName.trim(),
-            phone: booking.phone || customer?.phone || "",
+            phone,
             adults,
             children,
             vehicleNumber: vehicleNumber.trim(),
@@ -290,9 +275,6 @@ const [guestDeclaration, setGuestDeclaration] = useState(false);
       );
 
       router.push("/guest/thank-you");
-    } catch (error) {
-      console.error("Consent submission failed:", error);
-      alert("Unable to submit consent. Please try again.");
     } finally {
       setSaving(false);
     }

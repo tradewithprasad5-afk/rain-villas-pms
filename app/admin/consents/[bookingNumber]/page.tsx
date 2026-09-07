@@ -17,6 +17,8 @@ import jsPDF from "jspdf";
 type Consent = {
   bookingNumber?: string;
   bookingNumbers?: string[];
+  bookingGroupId?: string;
+  consentId?: string;
   customerName?: string;
   villa?: string;
   villas?: string[];
@@ -59,26 +61,6 @@ function safeFileName(value: string) {
   return value.replace(/[^a-z0-9-_]/gi, "-");
 }
 
-function normalizePhone(value?: string) {
-  const digits = (value || "").replace(/\D/g, "");
-  return digits.length > 10 ? digits.slice(-10) : digits;
-}
-
-function normalizeDate(value?: string) {
-  if (!value) return "";
-  const d = new Date(value);
-  return Number.isNaN(d.getTime()) ? value : d.toISOString().slice(0, 10);
-}
-
-function getConsentId(bookingNumber: string, phone: string, checkIn?: string, checkOut?: string) {
-  const normalizedPhone = normalizePhone(phone);
-  const guestKey = normalizedPhone
-    ? `phone-${normalizedPhone}`
-    : `guest-${bookingNumber}`;
-
-  return `${guestKey}-${normalizeDate(checkIn)}-${normalizeDate(checkOut)}`;
-}
-
 export default function AdminConsentPage() {
   const params = useParams();
   const router = useRouter();
@@ -90,6 +72,34 @@ export default function AdminConsentPage() {
   const [printing, setPrinting] = useState(false);
   const [error, setError] = useState("");
 
+  function normalizePhone(value?: string) {
+    const digits = (value || "").replace(/\D/g, "");
+    return digits.length > 10 ? digits.slice(-10) : digits;
+  }
+
+  function normalizeDate(value?: string) {
+    if (!value) return "";
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return value;
+    return d.toISOString().slice(0, 10);
+  }
+
+  function getConsentId(booking: any) {
+    // One consent belongs to the complete guest stay.
+    // Do not split consent merely because source bookings have different
+    // bookingGroupId values.
+    const phone = normalizePhone(booking.phone || "");
+    if (phone) {
+      return `stay-${phone}-${normalizeDate(booking.checkIn)}-${normalizeDate(booking.checkOut)}`;
+    }
+
+    if (booking.customerId) {
+      return `stay-customer-${booking.customerId}-${normalizeDate(booking.checkIn)}-${normalizeDate(booking.checkOut)}`;
+    }
+
+    return `legacy-booking-${booking.bookingNumber}`;
+  }
+
   useEffect(() => {
     async function loadConsent() {
       if (!bookingNumber) return;
@@ -98,15 +108,14 @@ export default function AdminConsentPage() {
         setLoading(true);
         setError("");
 
-        // Find the booking represented by the URL.
-        const bookingsSnapshot = await getDocs(collection(db, "bookings"));
-        const allBookings = bookingsSnapshot.docs.map((docSnap) => ({
-          id: docSnap.id,
-          ...docSnap.data(),
+        const bookingSnapshot = await getDocs(collection(db, "bookings"));
+        const bookingDocs = bookingSnapshot.docs.map((bookingDoc) => ({
+          id: bookingDoc.id,
+          ...bookingDoc.data(),
         })) as any[];
 
-        const primaryBooking = allBookings.find(
-          (item) => item.bookingNumber === bookingNumber
+        const primaryBooking = bookingDocs.find(
+          (booking) => booking.bookingNumber === bookingNumber
         );
 
         if (!primaryBooking) {
@@ -114,120 +123,89 @@ export default function AdminConsentPage() {
           return;
         }
 
-        // Load all customers so phone identity works even for old booking
-        // documents that do not yet contain a phone field.
-        const customersSnapshot = await getDocs(collection(db, "customers"));
-        const customersById = new Map<string, any>();
-        customersSnapshot.docs.forEach((customerDoc) => {
-          customersById.set(customerDoc.id, customerDoc.data());
+        const primaryPhone = normalizePhone(primaryBooking.phone || "");
+
+        const sourceBookings = bookingDocs.filter((booking) => {
+          const sameDates =
+            normalizeDate(booking.checkIn) === normalizeDate(primaryBooking.checkIn) &&
+            normalizeDate(booking.checkOut) === normalizeDate(primaryBooking.checkOut);
+
+          const bookingPhone = normalizePhone(booking.phone || "");
+
+          if (primaryPhone) {
+            return sameDates && bookingPhone === primaryPhone;
+          }
+
+          return sameDates && booking.customerId === primaryBooking.customerId;
         });
 
-        // Resolve the phone from the booking first, then the customer record.
-        let primaryPhone = normalizePhone(
-          primaryBooking.phone ||
-            customersById.get(primaryBooking.customerId)?.phone ||
-            ""
-        );
-        let primaryEmail =
-          primaryBooking.email ||
-          customersById.get(primaryBooking.customerId)?.email ||
-          "";
+        const consentId = getConsentId(primaryBooking);
+        let consentSnapshot = await getDoc(doc(db, "consents", consentId));
 
-        // IMPORTANT: same normalized PHONE + same dates = one consent.
-        const sourceBookings = allBookings.filter((item) => {
-          if (
-            normalizeDate(item.checkIn) !==
-            normalizeDate(primaryBooking.checkIn)
-          ) {
-            return false;
-          }
-
-          if (
-            normalizeDate(item.checkOut) !==
-            normalizeDate(primaryBooking.checkOut)
-          ) {
-            return false;
-          }
-
-          const itemPhone = normalizePhone(
-            item.phone || customersById.get(item.customerId)?.phone || ""
+        // Compatibility with consents created by the previous grouped-booking version.
+        if (!consentSnapshot.exists() && primaryBooking.bookingGroupId) {
+          consentSnapshot = await getDoc(
+            doc(db, "consents", `group-${primaryBooking.bookingGroupId}`)
           );
+        }
 
-          return primaryPhone && itemPhone
-            ? primaryPhone === itemPhone
-            : item.customerId === primaryBooking.customerId;
-        });
-
-        const group = sourceBookings.length ? sourceBookings : [primaryBooking];
-
-        const resolvedPhone = normalizePhone(
-          primaryPhone ||
-            group
-              .map((item) =>
-                normalizePhone(
-                  item.phone || customersById.get(item.customerId)?.phone || ""
-                )
-              )
-              .find(Boolean) ||
-            ""
-        );
-
-        const consentId = getConsentId(
-          bookingNumber,
-          resolvedPhone,
-          primaryBooking.checkIn,
-          primaryBooking.checkOut
-        );
-
-        // New one-consent document.
-        let snapshot = await getDoc(doc(db, "consents", consentId));
-
-        // Backward compatibility for older records created under a booking
-        // number before the one-consent logic was introduced.
-        if (!snapshot.exists()) {
-          for (const item of group) {
-            if (!item.bookingNumber) continue;
-            const legacy = await getDoc(doc(db, "consents", item.bookingNumber));
-            if (legacy.exists()) {
-              snapshot = legacy;
+        // Legacy compatibility: old records used the booking number as the
+        // consent document ID.
+        if (!consentSnapshot.exists()) {
+          for (const sourceBooking of sourceBookings) {
+            if (!sourceBooking.bookingNumber) continue;
+            const legacySnapshot = await getDoc(
+              doc(db, "consents", sourceBooking.bookingNumber)
+            );
+            if (legacySnapshot.exists()) {
+              consentSnapshot = legacySnapshot;
               break;
             }
           }
         }
 
-        if (!snapshot.exists()) {
-          setError("Consent form not found for this stay.");
+        if (!consentSnapshot.exists()) {
+          setError("Consent form not found.");
           return;
         }
 
-        const consentData = snapshot.data() as Consent;
-
-        // If the old consent does not contain the combined booking list,
-        // rebuild it from the actual booking group for display/PDF.
+        const data = consentSnapshot.data() as Consent;
         setConsent({
-          ...consentData,
-          bookingNumber: consentData.bookingNumber || bookingNumber,
-          bookingNumbers:
-            consentData.bookingNumbers?.length
-              ? consentData.bookingNumbers
-              : Array.from(
-                  new Set(group.map((item) => item.bookingNumber).filter(Boolean))
-                ),
-          villa:
-            consentData.villa ||
-            Array.from(new Set(group.map((item) => item.villa).filter(Boolean))).join(" + "),
-          villas:
-            consentData.villas?.length
-              ? consentData.villas
-              : Array.from(new Set(group.map((item) => item.villa).filter(Boolean))),
-          phone: consentData.phone || resolvedPhone,
-          email: consentData.email || primaryEmail,
-          checkIn: consentData.checkIn || primaryBooking.checkIn,
-          checkOut: consentData.checkOut || primaryBooking.checkOut,
+          ...data,
+          consentId,
+          bookingGroupId: primaryBooking.bookingGroupId || data.bookingGroupId,
+          bookingNumber: data.bookingNumber || primaryBooking.bookingNumber,
+          bookingNumbers: Array.from(
+            new Set(
+              sourceBookings
+                .map((booking) => booking.bookingNumber)
+                .filter(Boolean)
+            )
+          ),
+          villas: Array.from(
+            new Set(
+              sourceBookings
+                .map((booking) => booking.villa)
+                .filter(Boolean)
+            )
+          ),
+          villa: Array.from(
+            new Set(
+              sourceBookings
+                .map((booking) => booking.villa)
+                .filter(Boolean)
+            )
+          ).join(" + ") || data.villa,
+          checkIn: primaryBooking.checkIn || data.checkIn,
+          checkOut: primaryBooking.checkOut || data.checkOut,
+          phone: data.phone || primaryBooking.phone,
+          customerName: data.customerName || primaryBooking.customerName,
         });
       } catch (err) {
         console.error("Failed to load consent:", err);
-        setError("Unable to load consent. Please try again.");
+        setError(
+          "Unable to load consent. Please make sure you are logged in as admin."
+        );
       } finally {
         setLoading(false);
       }

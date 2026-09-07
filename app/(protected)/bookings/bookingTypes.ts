@@ -3,6 +3,8 @@ export interface Booking {
   customerId: string;
   customerName: string;
   bookingNumber?: string;
+  bookingGroupId?: string;
+  phone?: string;
 
   villa: string;
   checkIn: string;

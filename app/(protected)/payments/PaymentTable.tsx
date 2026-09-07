@@ -57,12 +57,12 @@ function normalizePhone(value?: string) {
 }
 
 function getStayGroupKey(booking: Booking) {
+  // Always group by the actual guest + stay dates.
+  // bookingGroupId is only metadata and must not cause a separate row.
   const phone = normalizePhone(booking.phone);
-  const name = booking.customerName.trim().toLowerCase();
-
-  // Phone is the primary identity. Do not use customerId here because
-  // older data can contain duplicate customer documents for one guest.
-  const guestKey = phone ? `phone:${phone}` : `name:${name}`;
+  const guestKey = phone
+    ? `phone:${phone}`
+    : `customer:${booking.customerId || booking.customerName.trim().toLowerCase()}`;
 
   return `${guestKey}|${normalizeDate(booking.checkIn)}|${normalizeDate(
     booking.checkOut
@@ -70,10 +70,10 @@ function getStayGroupKey(booking: Booking) {
 }
 
 /*
- * Group only bookings belonging to the same guest/stay.
- * Same customer + same check-in + same check-out = one payment row.
- * Different stays remain separate rows.
- * Firestore booking documents are never merged.
+ * NEW BOOKINGS use bookingGroupId.
+ * Both Villas therefore becomes one payment row while its two source
+ * booking documents keep separate villa balances for receiving payment.
+ * Legacy bookings fall back to phone/customer + exact stay dates.
  */
 function groupBookings(bookings: Booking[]): CombinedBooking[] {
   const groups = new Map<string, Booking[]>();
@@ -149,7 +149,7 @@ export default function PaymentTable({
    * Send receipt for one actual booking.
    */
   const sendReceiptWhatsApp = (booking: Booking) => {
-    const mobile = (booking.phone || "").replace(/\D/g, "");
+    const mobile = normalizePhone(booking.phone);
 
     if (!mobile) {
       alert("Customer mobile number not found.");
@@ -186,7 +186,7 @@ www.rainvilla.in`;
    * original booking separately.
    */
   const sendCombinedReceiptWhatsApp = (booking: CombinedBooking) => {
-    const mobile = (booking.phone || "").replace(/\D/g, "");
+    const mobile = normalizePhone(booking.phone);
 
     if (!mobile) {
       alert("Customer mobile number not found.");

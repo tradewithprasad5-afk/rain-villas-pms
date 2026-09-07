@@ -9,7 +9,6 @@ import DeletePinDialog from "./DeletePinDialog";
 import { Capacitor } from "@capacitor/core";
 import { Filesystem, Directory } from "@capacitor/filesystem";
 import { Share } from "@capacitor/share";
-
 import {
   collection,
   addDoc,
@@ -44,7 +43,6 @@ interface Booking {
 
   customerId: string;
   customerName: string;
-  phone?: string;
 
   villa: string;
 
@@ -60,6 +58,28 @@ interface Booking {
   status: string;
 
   consentStatus?: "Pending" | "Completed";
+  phone?: string;
+  bookingGroupId?: string;
+}
+
+function normalizePhone(value?: string) {
+  const digits = (value || "").replace(/\D/g, "");
+
+  if (!digits) return "";
+
+  return digits.length > 10 ? digits.slice(-10) : digits;
+}
+
+function normalizeDate(value?: string) {
+  if (!value) return "";
+
+  const d = new Date(value);
+
+  if (Number.isNaN(d.getTime())) {
+    return value;
+  }
+
+  return d.toISOString().slice(0, 10);
 }
 
 /* ======================================================
@@ -80,7 +100,9 @@ export default function BookingsPage() {
 
   const [loading, setLoading] = useState(true);
 
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] =
+    useState(false);
+
   const [bookingToDelete, setBookingToDelete] =
     useState<Booking | null>(null);
 
@@ -100,18 +122,33 @@ export default function BookingsPage() {
   ========================================== */
 
   const [customerId, setCustomerId] = useState("");
-  const [customerName, setCustomerName] = useState("");
+
+  const [customerName, setCustomerName] =
+    useState("");
+
   const [phone, setPhone] = useState("");
+
   const [email, setEmail] = useState("");
+
   const [address, setAddress] = useState("");
 
   /* ==========================================
      Booking Information
   ========================================== */
 
-  const [villa, setVilla] = useState("Rain Paradise");
+  const [villa, setVilla] =
+    useState("Rain Paradise");
+
+  const [rainParadiseAmount, setRainParadiseAmount] =
+    useState("");
+
+  const [rainHeavenAmount, setRainHeavenAmount] =
+    useState("");
+
   const [checkIn, setCheckIn] = useState("");
+
   const [checkOut, setCheckOut] = useState("");
+
   const [guests, setGuests] = useState(1);
 
   /* ==========================================
@@ -119,32 +156,44 @@ export default function BookingsPage() {
   ========================================== */
 
   const [totalAmount, setTotalAmount] = useState("");
-  const [advancePaid, setAdvancePaid] = useState("");
-  const [balanceAmount, setBalanceAmount] = useState(0);
 
-  const [status, setStatus] = useState("Confirmed");
+  const [advancePaid, setAdvancePaid] =
+    useState("");
+
+  const [balanceAmount, setBalanceAmount] =
+    useState(0);
+
+  const [status, setStatus] =
+    useState("Confirmed");
 
   /* ==========================================
-     Normalize Phone
+     Both Villas Total
   ========================================== */
 
-  function normalizePhone(value: string = "") {
-    let normalized = value.replace(/\D/g, "");
+  useEffect(() => {
+    if (villa === "Both Villas") {
+      const combinedTotal =
+        (Number(rainParadiseAmount) || 0) +
+        (Number(rainHeavenAmount) || 0);
 
-    if (normalized.startsWith("91") && normalized.length > 10) {
-      normalized = normalized.slice(2);
+      setTotalAmount(String(combinedTotal));
     }
-
-    return normalized;
-  }
+  }, [
+    villa,
+    rainParadiseAmount,
+    rainHeavenAmount,
+  ]);
 
   /* ==========================================
      Auto Balance
   ========================================== */
 
   useEffect(() => {
-    const total = Number(totalAmount) || 0;
-    const advance = Number(advancePaid) || 0;
+    const total =
+      Number(totalAmount) || 0;
+
+    const advance =
+      Number(advancePaid) || 0;
 
     setBalanceAmount(total - advance);
   }, [totalAmount, advancePaid]);
@@ -157,20 +206,31 @@ export default function BookingsPage() {
     setEditingId(null);
 
     setCustomerId("");
+
     setCustomerName("");
+
     setPhone("");
+
     setEmail("");
+
     setAddress("");
 
     setVilla("Rain Paradise");
 
+    setRainParadiseAmount("");
+
+    setRainHeavenAmount("");
+
     setCheckIn("");
+
     setCheckOut("");
 
     setGuests(1);
 
     setTotalAmount("");
+
     setAdvancePaid("");
+
     setBalanceAmount(0);
 
     setStatus("Confirmed");
@@ -195,7 +255,10 @@ export default function BookingsPage() {
 
       setBookings(data);
     } catch (error) {
-      console.error("Error loading bookings:", error);
+      console.error(
+        "Error loading bookings:",
+        error
+      );
     } finally {
       setLoading(false);
     }
@@ -218,7 +281,10 @@ export default function BookingsPage() {
 
       setCustomers(data);
     } catch (error) {
-      console.error("Error loading customers:", error);
+      console.error(
+        "Error loading customers:",
+        error
+      );
     }
   }
 
@@ -226,16 +292,20 @@ export default function BookingsPage() {
      Find Customer By Phone
   ========================================== */
 
-  function findCustomerByPhone(phoneNumber: string) {
-    const normalizedPhone = normalizePhone(phoneNumber);
+  function findCustomerByPhone(
+    phoneNumber: string
+  ) {
+    const normalized =
+      normalizePhone(phoneNumber);
 
-    if (!normalizedPhone) {
+    if (!normalized) {
       return undefined;
     }
 
     return customers.find(
       (customer) =>
-        normalizePhone(customer.phone) === normalizedPhone
+        normalizePhone(customer.phone || "") ===
+        normalized
     );
   }
 
@@ -243,13 +313,14 @@ export default function BookingsPage() {
      Auto Fill Customer
   ========================================== */
 
-  function searchCustomerByPhone(phoneNumber: string) {
+  function searchCustomerByPhone(
+    phoneNumber: string
+  ) {
     if (phoneNumber.trim() === "") {
       setCustomerId("");
       setCustomerName("");
       setEmail("");
       setAddress("");
-
       return;
     }
 
@@ -273,12 +344,10 @@ export default function BookingsPage() {
     loadCustomers();
   }, []);
 
-  /* ==========================================
-     URL Booking Parameters
-  ========================================== */
-
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined") {
+      return;
+    }
 
     const params = new URLSearchParams(
       window.location.search
@@ -310,9 +379,9 @@ export default function BookingsPage() {
   ========================================== */
 
   async function saveBooking() {
-    /* -----------------------------------------
-       Validation
-    ----------------------------------------- */
+    // -----------------------------
+    // Basic Validation
+    // -----------------------------
 
     if (!customerName.trim()) {
       alert("Customer Name is required.");
@@ -321,13 +390,6 @@ export default function BookingsPage() {
 
     if (!phone.trim()) {
       alert("Phone Number is required.");
-      return;
-    }
-
-    const normalizedPhone = normalizePhone(phone);
-
-    if (normalizedPhone.length !== 10) {
-      alert("Please enter a valid 10-digit phone number.");
       return;
     }
 
@@ -341,25 +403,126 @@ export default function BookingsPage() {
       return;
     }
 
-    if (checkOut <= checkIn) {
-      alert("Check Out date must be after Check In date.");
+    if (
+      new Date(checkOut) <=
+      new Date(checkIn)
+    ) {
+      alert(
+        "Check Out Date must be after Check In Date."
+      );
       return;
     }
 
-    const wasEditing = Boolean(editingId);
+    // -----------------------------
+    // Normalize Payment Values
+    // Empty = 0
+    // -----------------------------
+
+    const finalTotalAmount =
+      totalAmount.trim() === ""
+        ? 0
+        : Number(totalAmount);
+
+    const finalAdvancePaid =
+      advancePaid.trim() === ""
+        ? 0
+        : Number(advancePaid);
+
+    const finalBalanceAmount =
+      finalTotalAmount -
+      finalAdvancePaid;
+
+    // -----------------------------
+    // Validate Payment Values
+    // -----------------------------
+
+    if (
+      !Number.isFinite(finalTotalAmount) ||
+      finalTotalAmount < 0
+    ) {
+      alert("Total Amount cannot be negative.");
+      return;
+    }
+
+    if (
+      !Number.isFinite(finalAdvancePaid) ||
+      finalAdvancePaid < 0
+    ) {
+      alert(
+        "Advance Paid cannot be negative."
+      );
+      return;
+    }
+
+    if (
+      finalAdvancePaid >
+      finalTotalAmount
+    ) {
+      alert(
+        "Advance Paid cannot exceed Total Amount."
+      );
+      return;
+    }
+
+    // -----------------------------
+    // Both Villas Validation
+    // -----------------------------
+
+    if (villa === "Both Villas") {
+      const paradise =
+        rainParadiseAmount.trim() === ""
+          ? 0
+          : Number(rainParadiseAmount);
+
+      const heaven =
+        rainHeavenAmount.trim() === ""
+          ? 0
+          : Number(rainHeavenAmount);
+
+      if (
+        !Number.isFinite(paradise) ||
+        paradise < 0
+      ) {
+        alert(
+          "Rain Paradise amount cannot be negative."
+        );
+        return;
+      }
+
+      if (
+        !Number.isFinite(heaven) ||
+        heaven < 0
+      ) {
+        alert(
+          "Rain Heaven amount cannot be negative."
+        );
+        return;
+      }
+
+      if (
+        finalAdvancePaid >
+        paradise + heaven
+      ) {
+        alert(
+          "Advance Paid cannot exceed the combined villa total."
+        );
+        return;
+      }
+    }
 
     try {
       let finalCustomerId = customerId;
 
-      /* -----------------------------------------
-         Find Existing Customer
-      ----------------------------------------- */
+      // -----------------------------
+      // Find Existing Customer
+      // -----------------------------
 
       const existingCustomer =
         findCustomerByPhone(phone);
 
       if (existingCustomer) {
-        finalCustomerId = existingCustomer.id;
+        finalCustomerId =
+          existingCustomer.id;
 
         await updateDoc(
           doc(
@@ -368,77 +531,100 @@ export default function BookingsPage() {
             existingCustomer.id
           ),
           {
-            name: customerName.trim(),
-            phone: normalizedPhone,
-            email: email.trim(),
-            address: address.trim(),
+            name: customerName,
+            phone,
+            email,
+            address,
 
             totalBookings:
-              (existingCustomer.totalBookings || 0) +
-              (wasEditing ? 0 : 1),
+              (existingCustomer.totalBookings ||
+                0) +
+              (editingId ? 0 : 1),
 
             totalSpent:
-              (existingCustomer.totalSpent || 0) +
-              (wasEditing
+              (existingCustomer.totalSpent ||
+                0) +
+              (editingId
                 ? 0
-                : Number(totalAmount) || 0),
+                : finalTotalAmount),
 
             lastStay: checkOut,
           }
         );
       }
 
-      /* -----------------------------------------
-         Create New Customer
-      ----------------------------------------- */
+      // -----------------------------
+      // Create New Customer
+      // -----------------------------
 
       else {
-        const customerRef = await addDoc(
-          collection(db, "customers"),
-          {
-            name: customerName.trim(),
-            phone: normalizedPhone,
-            email: email.trim(),
-            address: address.trim(),
+        const customerRef =
+          await addDoc(
+            collection(db, "customers"),
+            {
+              name: customerName,
+              phone,
+              email,
+              address,
 
-            totalBookings: 1,
+              totalBookings: 1,
 
-            totalSpent:
-              Number(totalAmount) || 0,
+              totalSpent:
+                finalTotalAmount,
 
-            lastStay: checkOut,
-          }
-        );
+              lastStay: checkOut,
+            }
+          );
 
-        finalCustomerId = customerRef.id;
+        finalCustomerId =
+          customerRef.id;
       }
 
-      /* =========================================
-         Update Existing Booking
-      ========================================= */
+      // ==========================================
+      // EDIT EXISTING BOOKING
+      // ==========================================
 
       if (editingId) {
+        const existingBooking =
+          bookings.find(
+            (item) =>
+              item.id === editingId
+          );
+
         const bookingData = {
-          customerId: finalCustomerId,
-          customerName: customerName.trim(),
-          phone: normalizedPhone,
+          customerId:
+            finalCustomerId,
+
+          customerName,
+
+          phone:
+            normalizePhone(phone),
 
           villa,
 
           checkIn,
+
           checkOut,
 
           guests,
 
           totalAmount:
-            Number(totalAmount) || 0,
+            finalTotalAmount,
 
           advancePaid:
-            Number(advancePaid) || 0,
+            finalAdvancePaid,
 
-          balanceAmount,
+          balanceAmount:
+            finalBalanceAmount,
 
           status,
+
+          ...(existingBooking?.bookingGroupId
+            ? {
+                bookingGroupId:
+                  existingBooking.bookingGroupId,
+              }
+            : {}),
         };
 
         await updateDoc(
@@ -447,69 +633,293 @@ export default function BookingsPage() {
         );
       }
 
-      /* =========================================
-         Create New Booking
-      ========================================= */
+      // ==========================================
+      // CREATE NEW BOOKING
+      // ==========================================
 
       else {
-        const bookingSnapshot = await getDocs(
-          collection(db, "bookings")
-        );
+        const bookingSnapshot =
+          await getDocs(
+            collection(db, "bookings")
+          );
 
-        const bookingNumber =
+        const normalizedPhone =
+          normalizePhone(phone);
+
+        const sameStayBookings =
+          bookingSnapshot.docs
+            .map((bookingDoc) => ({
+              id: bookingDoc.id,
+              ...bookingDoc.data(),
+            }))
+            .filter((item: any) => {
+              const sameDates =
+                normalizeDate(
+                  item.checkIn
+                ) ===
+                  normalizeDate(
+                    checkIn
+                  ) &&
+                normalizeDate(
+                  item.checkOut
+                ) ===
+                  normalizeDate(
+                    checkOut
+                  );
+
+              if (!sameDates) {
+                return false;
+              }
+
+              const itemPhone =
+                normalizePhone(
+                  item.phone || ""
+                );
+
+              if (normalizedPhone) {
+                return (
+                  itemPhone ===
+                  normalizedPhone
+                );
+              }
+
+              return (
+                item.customerId ===
+                finalCustomerId
+              );
+            });
+
+        const requestedVillas =
+          villa === "Both Villas"
+            ? [
+                "Rain Paradise",
+                "Rain Heaven",
+              ]
+            : [villa];
+
+        const duplicateVilla =
+          requestedVillas.find(
+            (requestedVilla) =>
+              sameStayBookings.some(
+                (item: any) =>
+                  item.villa ===
+                  requestedVilla
+              )
+          );
+
+        if (duplicateVilla) {
+          alert(
+            `${duplicateVilla} is already booked for this guest on the selected dates.`
+          );
+          return;
+        }
+
+        const firstBookingNumber =
           `RV-${String(
             bookingSnapshot.size + 1
           ).padStart(4, "0")}`;
 
-        const bookingData = {
-          bookingNumber,
+        const secondBookingNumber =
+          `RV-${String(
+            bookingSnapshot.size + 2
+          ).padStart(4, "0")}`;
 
-          customerId: finalCustomerId,
-          customerName: customerName.trim(),
-          phone: normalizedPhone,
+        const bookingGroupId =
+          `group-${Date.now()}-${Math.random()
+            .toString(36)
+            .slice(2, 10)}`;
 
-          villa,
+        const combinedTotal =
+          finalTotalAmount;
 
-          checkIn,
-          checkOut,
+        const combinedAdvance =
+          finalAdvancePaid;
 
-          guests,
+        // ==========================================
+        // BOTH VILLAS
+        // ==========================================
 
-          totalAmount:
-            Number(totalAmount) || 0,
+        if (villa === "Both Villas") {
+          const paradiseTotal =
+            rainParadiseAmount.trim() === ""
+              ? 0
+              : Number(
+                  rainParadiseAmount
+                );
 
-          advancePaid:
-            Number(advancePaid) || 0,
+          const heavenTotal =
+            rainHeavenAmount.trim() === ""
+              ? 0
+              : Number(
+                  rainHeavenAmount
+                );
 
-          balanceAmount,
+          const paradiseAdvance =
+            combinedTotal > 0
+              ? Math.round(
+                  (combinedAdvance *
+                    paradiseTotal) /
+                    combinedTotal
+                )
+              : 0;
 
-          status,
+          const heavenAdvance =
+            combinedAdvance -
+            paradiseAdvance;
 
-          consentStatus: "Pending",
-        };
+          await Promise.all([
+            addDoc(
+              collection(db, "bookings"),
+              {
+                bookingNumber:
+                  firstBookingNumber,
 
-        await addDoc(
-          collection(db, "bookings"),
-          bookingData
-        );
+                bookingGroupId,
+
+                customerId:
+                  finalCustomerId,
+
+                customerName,
+
+                phone:
+                  normalizePhone(phone),
+
+                villa:
+                  "Rain Paradise",
+
+                checkIn,
+
+                checkOut,
+
+                guests,
+
+                totalAmount:
+                  paradiseTotal,
+
+                advancePaid:
+                  paradiseAdvance,
+
+                balanceAmount:
+                  paradiseTotal -
+                  paradiseAdvance,
+
+                status,
+
+                consentStatus:
+                  "Pending",
+              }
+            ),
+
+            addDoc(
+              collection(db, "bookings"),
+              {
+                bookingNumber:
+                  secondBookingNumber,
+
+                bookingGroupId,
+
+                customerId:
+                  finalCustomerId,
+
+                customerName,
+
+                phone:
+                  normalizePhone(phone),
+
+                villa:
+                  "Rain Heaven",
+
+                checkIn,
+
+                checkOut,
+
+                guests,
+
+                totalAmount:
+                  heavenTotal,
+
+                advancePaid:
+                  heavenAdvance,
+
+                balanceAmount:
+                  heavenTotal -
+                  heavenAdvance,
+
+                status,
+
+                consentStatus:
+                  "Pending",
+              }
+            ),
+          ]);
+        }
+
+        // ==========================================
+        // SINGLE VILLA
+        // ==========================================
+
+        else {
+          await addDoc(
+            collection(db, "bookings"),
+            {
+              bookingNumber:
+                firstBookingNumber,
+
+              bookingGroupId,
+
+              customerId:
+                finalCustomerId,
+
+              customerName,
+
+              phone:
+                normalizePhone(phone),
+
+              villa,
+
+              checkIn,
+
+              checkOut,
+
+              guests,
+
+              totalAmount:
+                finalTotalAmount,
+
+              advancePaid:
+                finalAdvancePaid,
+
+              balanceAmount:
+                finalBalanceAmount,
+
+              status,
+
+              consentStatus:
+                "Pending",
+            }
+          );
+        }
       }
 
+      // -----------------------------
+      // Reload
+      // -----------------------------
+
       await loadBookings();
+
       await loadCustomers();
 
       resetForm();
+
       setShowForm(false);
 
       alert(
-        wasEditing
+        editingId
           ? "Booking updated successfully."
           : "Booking created successfully."
       );
     } catch (error) {
-      console.error(
-        "Error saving booking:",
-        error
-      );
+      console.error(error);
 
       alert("Unable to save booking.");
     }
@@ -519,150 +929,108 @@ export default function BookingsPage() {
      Edit Booking
   ========================================== */
 
-  async function editBooking(booking: Booking) {
+  async function editBooking(
+    booking: Booking
+  ) {
     setEditingId(booking.id);
 
-    setCustomerId(booking.customerId);
+    setCustomerId(
+      booking.customerId
+    );
 
     setCustomerName(
       booking.customerName
     );
 
-    setPhone(
-      booking.phone || ""
-    );
-
     setVilla(booking.villa);
 
-    setCheckIn(booking.checkIn);
-    setCheckOut(booking.checkOut);
+    if (
+      booking.villa ===
+      "Rain Paradise"
+    ) {
+      setRainParadiseAmount(
+        String(
+          booking.totalAmount || 0
+        )
+      );
 
-    setGuests(booking.guests);
+      setRainHeavenAmount("");
+    } else if (
+      booking.villa ===
+      "Rain Heaven"
+    ) {
+      setRainParadiseAmount("");
+
+      setRainHeavenAmount(
+        String(
+          booking.totalAmount || 0
+        )
+      );
+    } else {
+      setRainParadiseAmount("");
+      setRainHeavenAmount("");
+    }
+
+    setCheckIn(
+      booking.checkIn
+    );
+
+    setCheckOut(
+      booking.checkOut
+    );
+
+    setGuests(
+      booking.guests
+    );
 
     setTotalAmount(
-      String(booking.totalAmount)
+      String(
+        booking.totalAmount
+      )
     );
 
     setAdvancePaid(
-      String(booking.advancePaid)
+      String(
+        booking.advancePaid
+      )
     );
 
     setBalanceAmount(
       booking.balanceAmount
     );
 
-    setStatus(booking.status);
-
-    /* -----------------------------------------
-       Load Customer Details
-    ----------------------------------------- */
-
-    const customer = customers.find(
-      (customerItem) =>
-        customerItem.id ===
-        booking.customerId
+    setStatus(
+      booking.status
     );
 
+    // -----------------------------
+    // Load Customer Details
+    // -----------------------------
+
+    const customer =
+      customers.find(
+        (c) =>
+          c.id ===
+          booking.customerId
+      );
+
     if (customer) {
+      setPhone(customer.phone);
+      setEmail(customer.email);
+      setAddress(customer.address);
+    } else {
       setPhone(
-        booking.phone ||
-        customer.phone ||
-        ""
+        booking.phone || ""
       );
-
-      setEmail(
-        customer.email || ""
-      );
-
-      setAddress(
-        customer.address || ""
-      );
+      setEmail("");
+      setAddress("");
     }
 
     setShowForm(true);
   }
 
   /* ==========================================
-     Delete Booking
-  ========================================== */
-
-  async function deleteBooking(
-    booking: Booking
-  ) {
-    setBookingToDelete(booking);
-    setShowDeleteDialog(true);
-  }
-
-  async function confirmDeleteBooking() {
-    if (!bookingToDelete) return;
-
-    try {
-      /* -----------------------------------------
-         Delete Booking
-      ----------------------------------------- */
-
-      await deleteDoc(
-        doc(
-          db,
-          "bookings",
-          bookingToDelete.id
-        )
-      );
-
-      /* -----------------------------------------
-         Check Remaining Customer Bookings
-      ----------------------------------------- */
-
-      const snapshot = await getDocs(
-        collection(db, "bookings")
-      );
-
-      const remainingBookings =
-        snapshot.docs
-          .map((bookingDoc) => ({
-            id: bookingDoc.id,
-            ...bookingDoc.data(),
-          }))
-          .filter(
-            (bookingData: any) =>
-              bookingData.customerId ===
-              bookingToDelete.customerId
-          );
-
-      /* -----------------------------------------
-         Delete Customer If No Bookings Left
-      ----------------------------------------- */
-
-      if (
-        remainingBookings.length === 0 &&
-        bookingToDelete.customerId
-      ) {
-        await deleteDoc(
-          doc(
-            db,
-            "customers",
-            bookingToDelete.customerId
-          )
-        );
-      }
-
-      await loadBookings();
-      await loadCustomers();
-
-      setBookingToDelete(null);
-      setShowDeleteDialog(false);
-    } catch (error) {
-      console.error(
-        "Error deleting booking:",
-        error
-      );
-
-      alert("Unable to delete booking.");
-    }
-  }
-
-  /* ==========================================
-     Complete Consent
+     Consent Complete
   ========================================== */
 
   async function markConsentCompleted(
@@ -674,7 +1042,8 @@ export default function BookingsPage() {
         new Set([
           id,
           ...relatedBookings.map(
-            (booking) => booking.id
+            (booking) =>
+              booking.id
           ),
         ])
       );
@@ -695,9 +1064,11 @@ export default function BookingsPage() {
         )
       );
 
-      setBookings((previous) =>
-        previous.map((booking) =>
-          ids.includes(booking.id)
+      setBookings((prev) =>
+        prev.map((booking) =>
+          ids.includes(
+            booking.id
+          )
             ? {
                 ...booking,
                 consentStatus:
@@ -707,13 +1078,78 @@ export default function BookingsPage() {
         )
       );
     } catch (error) {
-      console.error(
-        "Error updating consent:",
-        error
-      );
+      console.error(error);
 
       alert(
         "Unable to update consent status."
+      );
+    }
+  }
+
+  /* ==========================================
+     Delete Booking
+  ========================================== */
+
+  async function deleteBooking(
+    booking: Booking
+  ) {
+    setBookingToDelete(booking);
+    setShowDeleteDialog(true);
+  }
+
+  async function confirmDeleteBooking() {
+    if (!bookingToDelete) {
+      return;
+    }
+
+    try {
+      await deleteDoc(
+        doc(
+          db,
+          "bookings",
+          bookingToDelete.id
+        )
+      );
+
+      const snapshot =
+        await getDocs(
+          collection(db, "bookings")
+        );
+
+      const remainingBookings =
+        snapshot.docs
+          .map((bookingDoc) => ({
+            id: bookingDoc.id,
+            ...bookingDoc.data(),
+          }))
+          .filter(
+            (booking: any) =>
+              booking.customerId ===
+              bookingToDelete.customerId
+          );
+
+      if (
+        remainingBookings.length === 0
+      ) {
+        await deleteDoc(
+          doc(
+            db,
+            "customers",
+            bookingToDelete.customerId
+          )
+        );
+      }
+
+      await loadBookings();
+      await loadCustomers();
+
+      setBookingToDelete(null);
+      setShowDeleteDialog(false);
+    } catch (error) {
+      console.error(error);
+
+      alert(
+        "Unable to delete booking."
       );
     }
   }
@@ -736,12 +1172,6 @@ export default function BookingsPage() {
           .includes(keyword) ||
         booking.status
           .toLowerCase()
-          .includes(keyword) ||
-        booking.phone
-          ?.toLowerCase()
-          .includes(keyword) ||
-        booking.bookingNumber
-          ?.toLowerCase()
           .includes(keyword);
 
       const today = new Date();
@@ -754,7 +1184,9 @@ export default function BookingsPage() {
       );
 
       const checkInDate =
-        new Date(booking.checkIn);
+        new Date(
+          booking.checkIn
+        );
 
       checkInDate.setHours(
         0,
@@ -799,10 +1231,6 @@ export default function BookingsPage() {
       ...relatedBookings,
     ];
 
-    /* -----------------------------------------
-       Remove Duplicate Booking IDs
-    ----------------------------------------- */
-
     const uniqueBookings =
       Array.from(
         new Map(
@@ -815,56 +1243,29 @@ export default function BookingsPage() {
         ).values()
       );
 
-    /* -----------------------------------------
-       Find Customer
-    ----------------------------------------- */
-
     const customer =
       customers.find(
-        (customerItem) =>
-          customerItem.id ===
+        (c) =>
+          c.id ===
           booking.customerId
-      ) ||
-      uniqueBookings
-        .map((item) =>
-          customers.find(
-            (customerItem) =>
-              customerItem.id ===
-              item.customerId
-          )
-        )
-        .find(Boolean);
-
-    /* -----------------------------------------
-       Find Phone
-    ----------------------------------------- */
+      );
 
     const mobile =
-      booking.phone
-        ?.replace(/\D/g, "")
-        .replace(/^91/, "") ||
-      customer?.phone
-        ?.replace(/\D/g, "")
-        .replace(/^91/, "") ||
-      "";
+      normalizePhone(
+        booking.phone ||
+          customer?.phone ||
+          ""
+      );
 
     if (!mobile) {
       alert(
-        "Customer mobile number not found."
+        "Customer phone number not found."
       );
       return;
     }
 
-    if (mobile.length !== 10) {
-      alert(
-        "Customer mobile number is invalid."
-      );
-      return;
-    }
-
-    /* -----------------------------------------
-       Booking Numbers
-    ----------------------------------------- */
+    const primaryBookingNumber =
+      booking.bookingNumber || "";
 
     const bookingNumbers =
       uniqueBookings
@@ -872,16 +1273,7 @@ export default function BookingsPage() {
           (item) =>
             item.bookingNumber
         )
-        .filter(
-          (
-            value
-          ): value is string =>
-            Boolean(value)
-        );
-
-    /* -----------------------------------------
-       Villas
-    ----------------------------------------- */
+        .filter(Boolean);
 
     const villas =
       Array.from(
@@ -895,26 +1287,8 @@ export default function BookingsPage() {
         )
       );
 
-    /* -----------------------------------------
-       Primary Consent Link
-    ----------------------------------------- */
-
-    const primaryBookingNumber =
-      booking.bookingNumber;
-
-    if (!primaryBookingNumber) {
-      alert(
-        "Booking number not found."
-      );
-      return;
-    }
-
     const consentLink =
       `${window.location.origin}/guest/consent/${primaryBookingNumber}`;
-
-    /* -----------------------------------------
-       WhatsApp Message
-    ----------------------------------------- */
 
     const message =
       `Hello ${booking.customerName},
@@ -923,19 +1297,13 @@ Welcome to The Rain Villa 🌿
 
 Please complete your Guest Consent before your arrival.
 
-Booking No: ${
-        bookingNumbers.join(" + ")
-      }
-
-Villa: ${
-        villas.join(" + ")
-      }
-
-Stay: ${
-        booking.checkIn
-      } → ${
-        booking.checkOut
-      }
+Booking No: ${bookingNumbers.join(
+        " + "
+      )}
+Villa: ${villas.join(
+        " + "
+      )}
+Stay: ${booking.checkIn} → ${booking.checkOut}
 
 Please click the link below to complete ONE consent form for your complete stay:
 
@@ -943,10 +1311,6 @@ ${consentLink}
 
 Thank you,
 The Rain Villa Team`;
-
-    /* -----------------------------------------
-       Open WhatsApp
-    ----------------------------------------- */
 
     window.location.href =
       `https://wa.me/91${mobile}?text=${encodeURIComponent(
@@ -964,7 +1328,7 @@ The Rain Villa Team`;
   }
 
   /* ==========================================
-     Export Bookings CSV
+     Export CSV
   ========================================== */
 
   async function exportBookingsCSV() {
@@ -989,16 +1353,18 @@ The Rain Villa Team`;
       (booking) => {
         const customer =
           customers.find(
-            (customerItem) =>
-              customerItem.id ===
+            (c) =>
+              c.id ===
               booking.customerId
           );
 
         return [
-          booking.bookingNumber || "",
-          booking.customerName || "",
-          booking.phone ||
-            customer?.phone ||
+          booking.bookingNumber ||
+            "",
+          booking.customerName ||
+            "",
+          customer?.phone ||
+            booking.phone ||
             "",
           customer?.email || "",
           customer?.address || "",
@@ -1010,7 +1376,8 @@ The Rain Villa Team`;
           booking.advancePaid,
           booking.balanceAmount,
           booking.status,
-          booking.consentStatus || "",
+          booking.consentStatus ||
+            "",
         ];
       }
     );
@@ -1037,22 +1404,17 @@ The Rain Villa Team`;
         .toISOString()
         .slice(0, 10)}.csv`;
 
-    /* -----------------------------------------
-       Web Export
-    ----------------------------------------- */
-
     if (
       Capacitor.getPlatform() ===
       "web"
     ) {
-      const blob =
-        new Blob(
-          [csv],
-          {
-            type:
-              "text/csv;charset=utf-8;",
-          }
-        );
+      const blob = new Blob(
+        [csv],
+        {
+          type:
+            "text/csv;charset=utf-8;",
+        }
+      );
 
       const url =
         window.URL.createObjectURL(
@@ -1081,18 +1443,11 @@ The Rain Villa Team`;
       window.URL.revokeObjectURL(
         url
       );
-    }
-
-    /* -----------------------------------------
-       Android Export
-    ----------------------------------------- */
-
-    else {
+    } else {
       const result =
         await Filesystem.writeFile(
           {
             path: filename,
-
             data: btoa(
               unescape(
                 encodeURIComponent(
@@ -1100,7 +1455,6 @@ The Rain Villa Team`;
                 )
               )
             ),
-
             directory:
               Directory.Documents,
           }
@@ -1109,13 +1463,9 @@ The Rain Villa Team`;
       await Share.share({
         title:
           "Bookings Export",
-
         text:
           "Rain Villa PMS Bookings CSV",
-
-        url:
-          result.uri,
-
+        url: result.uri,
         dialogTitle:
           "Save or Share CSV",
       });
@@ -1169,6 +1519,22 @@ The Rain Villa Team`;
 
         villa={villa}
 
+        rainParadiseAmount={
+          rainParadiseAmount
+        }
+
+        rainHeavenAmount={
+          rainHeavenAmount
+        }
+
+        setRainParadiseAmount={
+          setRainParadiseAmount
+        }
+
+        setRainHeavenAmount={
+          setRainHeavenAmount
+        }
+
         guests={guests}
 
         checkIn={checkIn}
@@ -1210,9 +1576,7 @@ The Rain Villa Team`;
 
         setVilla={setVilla}
 
-        setGuests={
-          setGuests
-        }
+        setGuests={setGuests}
 
         setCheckIn={
           setCheckIn
@@ -1230,13 +1594,9 @@ The Rain Villa Team`;
           setAdvancePaid
         }
 
-        setStatus={
-          setStatus
-        }
+        setStatus={setStatus}
 
-        onSave={
-          saveBooking
-        }
+        onSave={saveBooking}
 
         onCancel={() => {
           resetForm();
@@ -1250,49 +1610,36 @@ The Rain Villa Team`;
         bookings={
           filteredBookings
         }
-
         customers={
           customers
         }
-
-        loading={
-          loading
-        }
-
-        onEdit={
-          editBooking
-        }
-
+        loading={loading}
+        onEdit={editBooking}
         onDelete={
           deleteBooking
         }
-
         onSendConsent={
           sendConsent
         }
-
         onCompleteConsent={
           markConsentCompleted
         }
       />
 
-      {/* Delete PIN Dialog */}
+      {/* Delete Dialog */}
 
       <DeletePinDialog
         open={
           showDeleteDialog
         }
-
         onClose={() => {
           setShowDeleteDialog(
             false
           );
-
           setBookingToDelete(
             null
           );
         }}
-
         onVerified={
           confirmDeleteBooking
         }
