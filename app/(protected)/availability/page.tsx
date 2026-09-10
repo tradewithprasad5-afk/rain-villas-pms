@@ -123,20 +123,75 @@ export default function AvailabilityPage() {
     return `${year}-${month}-${day}`;
   }
 
+  function isBookingForVilla(
+    booking: Booking,
+    villa: string
+  ) {
+    /* A Both Villas source record occupies BOTH real villas.
+     * This is also a safety net for older records that were
+     * accidentally saved with villa = "Both Villas". */
+    return (
+      booking.villa === villa ||
+      booking.villa === "Both Villas"
+    );
+  }
+
   function getBooking(
     villa: string,
     date: Date
   ) {
     const current = formatDate(date);
 
-    return bookings.find(
-      (booking) =>
-        booking.villa === villa &&
-        booking.status !== "Cancelled" &&
-        current >= booking.checkIn &&
-        current < booking.checkOut
+    const booking = bookings.find(
+      (item) =>
+        isBookingForVilla(item, villa) &&
+        item.status !== "Cancelled" &&
+        current >= item.checkIn &&
+        current < item.checkOut
     );
+
+    if (!booking) {
+      return undefined;
+    }
+
+    /* If the stored record says Both Villas, return a display
+     * copy for the requested real villa so the drawer remains
+     * correct without changing Firestore data here. */
+    if (booking.villa === "Both Villas") {
+      return {
+        ...booking,
+        villa,
+      };
+    }
+
+    return booking;
   }
+
+  /* CalendarGrid expects real villa names. Expand any legacy
+   * "Both Villas" record into two display-only records so BOTH
+   * Rain Paradise and Rain Heaven are marked occupied. */
+  const availabilityBookings = useMemo(
+    () =>
+      bookings.flatMap((booking) => {
+        if (booking.villa !== "Both Villas") {
+          return [booking];
+        }
+
+        return [
+          {
+            ...booking,
+            id: `${booking.id}-paradise`,
+            villa: "Rain Paradise",
+          },
+          {
+            ...booking,
+            id: `${booking.id}-heaven`,
+            villa: "Rain Heaven",
+          },
+        ];
+      }),
+    [bookings]
+  );
 
   const paradiseBooking = selectedDate
     ? getBooking(
@@ -158,7 +213,7 @@ export default function AvailabilityPage() {
     return villas.filter((villa) =>
       bookings.some(
         (booking) =>
-          booking.villa === villa &&
+          isBookingForVilla(booking, villa) &&
           booking.status !== "Cancelled" &&
           todayString >= booking.checkIn &&
           todayString < booking.checkOut
@@ -321,7 +376,7 @@ export default function AvailabilityPage() {
             <CalendarGrid
               month={selectedMonth}
               year={selectedYear}
-              bookings={bookings}
+              bookings={availabilityBookings}
               onSelectDay={handleDayClick}
             />
           )}

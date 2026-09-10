@@ -74,6 +74,60 @@ function createBookingGroupId() {
     .slice(2, 10)}`;
 }
 
+function normalizeName(value?: string) {
+  return (value || "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .toLowerCase();
+}
+
+/*
+ * Find every Firestore booking belonging to the same stay.
+ * This does NOT merge or delete Firestore documents. It is only
+ * used so editing a grouped card always updates both villa records.
+ */
+function getRelatedStayBookings(
+  target: Booking,
+  allBookings: Booking[]
+) {
+  const targetPhone = normalizePhone(target.phone);
+  const targetName = normalizeName(target.customerName);
+  const targetCheckIn = normalizeDate(target.checkIn);
+  const targetCheckOut = normalizeDate(target.checkOut);
+
+  return allBookings.filter((item) => {
+    if (item.id === target.id) return true;
+
+    if (
+      target.bookingGroupId &&
+      item.bookingGroupId &&
+      target.bookingGroupId === item.bookingGroupId
+    ) {
+      return true;
+    }
+
+    if (
+      normalizeDate(item.checkIn) !== targetCheckIn ||
+      normalizeDate(item.checkOut) !== targetCheckOut
+    ) {
+      return false;
+    }
+
+    const itemPhone = normalizePhone(item.phone);
+    const itemName = normalizeName(item.customerName);
+
+    if (targetPhone && itemPhone) {
+      return targetPhone === itemPhone;
+    }
+
+    if (target.customerId && item.customerId) {
+      return target.customerId === item.customerId;
+    }
+
+    return Boolean(targetName && itemName && targetName === itemName);
+  });
+}
+
 /* ======================================================
    Component
 ====================================================== */
@@ -111,6 +165,9 @@ export default function BookingsPage() {
 
   const [editingId, setEditingId] =
     useState<string | null>(null);
+
+  const [editingCombined, setEditingCombined] =
+    useState(false);
 
   const [search, setSearch] =
     useState("");
@@ -259,6 +316,7 @@ export default function BookingsPage() {
 
   function resetForm() {
     setEditingId(null);
+    setEditingCombined(false);
 
     setCustomerId("");
 
@@ -689,15 +747,39 @@ export default function BookingsPage() {
           return;
         }
 
-        const sourceBookings =
+        const relatedStayBookings =
+          getRelatedStayBookings(
+            existingBooking,
+            bookings
+          );
+
+        const passedSourceBookings =
           existingBooking.sourceBookings ||
           [];
 
+        const sourceBookings =
+          passedSourceBookings.length > 0
+            ? passedSourceBookings
+            : relatedStayBookings;
+
+        const uniqueSourceBookings =
+          Array.from(
+            new Map(
+              sourceBookings.map((item) => [
+                item.id,
+                item,
+              ])
+            ).values()
+          );
+
         const isCombinedBooking =
-          sourceBookings.length >=
-            2 ||
+          uniqueSourceBookings.length >= 2 ||
           existingBooking.villa.includes(
             " + "
+          ) ||
+          uniqueSourceBookings.some(
+            (item) =>
+              item.villa === "Both Villas"
           );
 
         /* ==========================================
@@ -718,14 +800,24 @@ export default function BookingsPage() {
           }
 
           const paradiseBooking =
-            sourceBookings.find(
+            uniqueSourceBookings.find(
               (item) =>
                 item.villa ===
                 "Rain Paradise"
+            ) ||
+            /* Repair an older accidental
+             * `Both Villas` source record.
+             * It represents the Paradise source
+             * when the other source is Rain Heaven.
+             */
+            uniqueSourceBookings.find(
+              (item) =>
+                item.villa ===
+                "Both Villas"
             );
 
           const heavenBooking =
-            sourceBookings.find(
+            uniqueSourceBookings.find(
               (item) =>
                 item.villa ===
                 "Rain Heaven"
@@ -754,6 +846,11 @@ export default function BookingsPage() {
             finalAdvancePaid -
             paradiseAdvance;
 
+          const repairGroupId =
+            paradiseBooking.bookingGroupId ||
+            heavenBooking.bookingGroupId ||
+            createBookingGroupId();
+
           const commonData = {
             customerId:
               finalCustomerId,
@@ -773,6 +870,8 @@ export default function BookingsPage() {
             guests,
 
             status,
+
+            bookingGroupId: repairGroupId,
           };
 
           await Promise.all([
@@ -1439,23 +1538,34 @@ export default function BookingsPage() {
        SOURCE BOOKINGS
     ========================================== */
 
-    const sourceBookings =
+    const passedSourceBookings =
       editableBooking.sourceBookings ||
       [];
 
-    /*
-     * If BookingTable grouped this booking,
-     * sourceBookings contains both Firestore
-     * documents.
-     *
-     * Otherwise it falls back to the clicked
-     * booking itself.
-     */
+    const relatedStayBookings =
+      getRelatedStayBookings(
+        editableBooking,
+        bookings
+      );
+
+    /* Prefer the grouped source records when
+     * BookingTable supplies them. Otherwise derive
+     * the complete stay directly from Firestore data
+     * already loaded in this page. */
+    const sourceBookings =
+      passedSourceBookings.length > 0
+        ? passedSourceBookings
+        : relatedStayBookings;
 
     const effectiveSourceBookings =
-      sourceBookings.length > 0
-        ? sourceBookings
-        : [editableBooking];
+      Array.from(
+        new Map(
+          (sourceBookings.length > 0
+            ? sourceBookings
+            : [editableBooking]
+          ).map((item) => [item.id, item])
+        ).values()
+      );
 
     /* ==========================================
        DETECT BOTH VILLAS
@@ -1475,11 +1585,18 @@ export default function BookingsPage() {
           "Rain Heaven"
       );
 
+    const hasBothLabel =
+      effectiveSourceBookings.some(
+        (item) =>
+          item.villa === "Both Villas"
+      );
+
     const isCombinedBooking =
-      effectiveSourceBookings.length >=
-        2 &&
-      hasParadise &&
-      hasHeaven;
+      effectiveSourceBookings.length >= 2 &&
+      ((hasParadise && hasHeaven) ||
+        (hasBothLabel && hasHeaven));
+
+    setEditingCombined(isCombinedBooking);
 
     /* ==========================================
        BOTH VILLAS EDIT
@@ -1493,6 +1610,11 @@ export default function BookingsPage() {
           (item) =>
             item.villa ===
             "Rain Paradise"
+        ) ||
+        effectiveSourceBookings.find(
+          (item) =>
+            item.villa ===
+            "Both Villas"
         );
 
       const heavenBooking =
@@ -2215,6 +2337,9 @@ The Rain Villa Team`;
       <BookingModal
         show={showForm}
         editingId={editingId}
+        allowBothVillas={
+          !editingId || editingCombined
+        }
 
         customerName={
           customerName

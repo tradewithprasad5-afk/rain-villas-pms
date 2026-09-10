@@ -3,6 +3,7 @@
 interface BookingModalProps {
   show: boolean;
   editingId: string | null;
+  allowBothVillas?: boolean;
 
   customerName: string;
   phone: string;
@@ -44,6 +45,7 @@ interface BookingModalProps {
 export default function BookingModal({
   show,
   editingId,
+  allowBothVillas = false,
 
   customerName,
   phone,
@@ -215,9 +217,11 @@ export default function BookingModal({
                  * Both Villas is available for
                  * NEW and EDIT bookings.
                  */}
-                <option>
-                  Both Villas
-                </option>
+                {(!editingId || allowBothVillas) && (
+                  <option>
+                    Both Villas
+                  </option>
+                )}
               </select>
             </div>
 

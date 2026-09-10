@@ -101,9 +101,42 @@ function groupBookings(bookings: Booking[]): CombinedBooking[] {
       0
     );
 
-    const villas = Array.from(
-      new Set(sourceBookings.map((booking) => booking.villa).filter(Boolean))
+    /*
+     * Display-only villa name.
+     *
+     * "Both Villas" is a form/edit value, not a physical villa.
+     * For the payment row, always show the real villa names.
+     *
+     * Examples:
+     *   Rain Paradise + Rain Heaven
+     *   Both Villas -> Rain Paradise + Rain Heaven
+     *   Rain Heaven + Both Villas -> Rain Paradise + Rain Heaven
+     *
+     * The original Firestore/source bookings are NOT changed here.
+     */
+    const displayVillas = new Set<string>();
+
+    sourceBookings.forEach((booking) => {
+      if (booking.villa === "Both Villas") {
+        displayVillas.add("Rain Paradise");
+        displayVillas.add("Rain Heaven");
+      } else if (booking.villa) {
+        displayVillas.add(booking.villa);
+      }
+    });
+
+    const villas = [
+      "Rain Paradise",
+      "Rain Heaven",
+    ].filter((villa) =>
+      displayVillas.has(villa)
     );
+
+    const displayVillaName =
+      villas.length === 2
+        ? "Rain Paradise + Rain Heaven"
+        : villas.join(" + ") ||
+          first.villa;
 
     const bookingNumbers = Array.from(
       new Set(
@@ -116,7 +149,7 @@ function groupBookings(bookings: Booking[]): CombinedBooking[] {
     return {
       ...first,
       bookingNumber: bookingNumbers.join(" + "),
-      villa: villas.join(" + "),
+      villa: displayVillaName,
       totalAmount,
       advancePaid,
       balanceAmount,
