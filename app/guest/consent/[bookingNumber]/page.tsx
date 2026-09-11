@@ -57,20 +57,49 @@ const [guestDeclaration, setGuestDeclaration] = useState(false);
     return d.toISOString().slice(0, 10);
   }
 
-  function getConsentId(primaryBooking: any) {
-    // One consent belongs to one guest stay, not to one Firestore booking.
-    // This also handles older records where Paradise and Heaven were booked
-    // separately and therefore have different bookingGroupId values.
-    const phone = normalizePhone(primaryBooking.phone || "");
-    if (phone) {
-      return `stay-${phone}-${normalizeDate(primaryBooking.checkIn)}-${normalizeDate(primaryBooking.checkOut)}`;
+  function getConsentId(
+    primaryBooking: any,
+    sourceBookings: any[] = []
+  ) {
+    // IMPORTANT: consentId must never depend on a mutable guest field such as
+    // phone number. The guest can edit the phone number during consent, so a
+    // phone-based ID would change when the same link is opened again.
+    //
+    // First reuse a consentId already stored on any source booking. This makes
+    // old successful submissions immediately detectable.
+    const existingConsentId =
+      sourceBookings.find((item) => item?.consentId)?.consentId ||
+      primaryBooking?.consentId ||
+      "";
+
+    if (existingConsentId) {
+      return existingConsentId;
     }
 
-    if (primaryBooking.customerId) {
+    // For new stays use stable booking number(s). These never change when the
+    // guest edits their phone/name. Both Villas therefore gets one stable ID
+    // for the complete stay.
+    const bookingNumbers = Array.from(
+      new Set(
+        sourceBookings
+          .map((item) => item?.bookingNumber)
+          .filter(Boolean)
+      )
+    ).sort();
+
+    if (bookingNumbers.length) {
+      return `stay-${bookingNumbers.join("-")}`;
+    }
+
+    if (primaryBooking?.bookingGroupId) {
+      return `stay-group-${primaryBooking.bookingGroupId}`;
+    }
+
+    if (primaryBooking?.customerId) {
       return `stay-customer-${primaryBooking.customerId}-${normalizeDate(primaryBooking.checkIn)}-${normalizeDate(primaryBooking.checkOut)}`;
     }
 
-    return `legacy-booking-${primaryBooking.bookingNumber}`;
+    return `legacy-booking-${primaryBooking?.bookingNumber || "unknown"}`;
   }
 
   useEffect(() => {
@@ -136,6 +165,15 @@ const [guestDeclaration, setGuestDeclaration] = useState(false);
           ? relatedBookings
           : [primaryBooking];
 
+        const existingConsentId =
+          sourceBookings.find((item) => item?.consentId)?.consentId ||
+          primaryBooking.consentId ||
+          "";
+
+        const consentId =
+          existingConsentId ||
+          getConsentId(primaryBooking, sourceBookings);
+
         const bookingData: any = {
           ...primaryBooking,
           bookingNumbers: Array.from(
@@ -145,8 +183,9 @@ const [guestDeclaration, setGuestDeclaration] = useState(false);
             new Set(sourceBookings.map((item) => item.villa).filter(Boolean))
           ),
           sourceBookingIds: sourceBookings.map((item) => item.id),
+          sourceBookings,
           bookingGroupId: primaryBooking.bookingGroupId || "",
-          consentId: getConsentId(primaryBooking),
+          consentId,
           phone: primaryBooking.phone || "",
         };
 
@@ -166,36 +205,19 @@ const [guestDeclaration, setGuestDeclaration] = useState(false);
           }
         }
 
-        const consentId = getConsentId(primaryBooking);
-        const consentDoc = await getDoc(doc(db, "consents", consentId));
+        // Do NOT read the consents collection from the guest page. Guest users
+        // are intentionally not granted public read access to consent records.
+        // The booking documents already contain the authoritative consent state
+        // and consentId after a successful submission.
+        const alreadySubmitted = sourceBookings.some(
+          (sourceBooking) =>
+            sourceBooking.consentStatus === "Completed" ||
+            Boolean(sourceBooking.consentId)
+        );
 
-        if (consentDoc.exists()) {
+        if (alreadySubmitted) {
           router.replace("/guest/consent/consent-already-submitted");
           return;
-        }
-
-        // Compatibility with consents created by the previous grouped-booking version.
-        if (primaryBooking.bookingGroupId) {
-          const legacyGroupConsent = await getDoc(
-            doc(db, "consents", `group-${primaryBooking.bookingGroupId}`)
-          );
-          if (legacyGroupConsent.exists()) {
-            router.replace("/guest/consent/consent-already-submitted");
-            return;
-          }
-        }
-
-        // Compatibility check for old consent documents created before
-        // bookingGroupId existed.
-        for (const sourceBooking of sourceBookings) {
-          if (!sourceBooking.bookingNumber) continue;
-          const legacyConsent = await getDoc(
-            doc(db, "consents", sourceBooking.bookingNumber)
-          );
-          if (legacyConsent.exists()) {
-            router.replace("/guest/consent/consent-already-submitted");
-            return;
-          }
         }
       } catch (error) {
         console.error("Failed to load booking for consent:", error);
@@ -239,7 +261,9 @@ const [guestDeclaration, setGuestDeclaration] = useState(false);
       const sourceBookingIds: string[] = booking.sourceBookingIds || [booking.id];
       const bookingNumbers: string[] = booking.bookingNumbers || [booking.bookingNumber];
       const villas: string[] = booking.villas || [booking.villa];
-      const consentId = booking.consentId || getConsentId(booking);
+      const consentId =
+        booking.consentId ||
+        getConsentId(booking, booking.sourceBookings || []);
       const phone = customer?.phone || booking.phone || "";
       const email = customer?.email || booking.email || "";
 
@@ -248,8 +272,15 @@ const [guestDeclaration, setGuestDeclaration] = useState(false);
         return;
       }
 
-      const existingConsent = await getDoc(doc(db, "consents", consentId));
-      if (existingConsent.exists()) {
+      // Re-check the booking state before writing. This works for guests
+      // without requiring public read access to the consents collection.
+      const alreadySubmitted = (booking.sourceBookings || []).some(
+        (sourceBooking: any) =>
+          sourceBooking.consentStatus === "Completed" ||
+          Boolean(sourceBooking.consentId)
+      );
+
+      if (alreadySubmitted) {
         router.replace("/guest/consent/consent-already-submitted");
         return;
       }
