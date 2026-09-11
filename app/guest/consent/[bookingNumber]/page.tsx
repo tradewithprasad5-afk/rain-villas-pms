@@ -10,8 +10,7 @@ import {
   getDocs,
   query,
   serverTimestamp,
-  setDoc,
-  updateDoc,
+  writeBatch,
   where,
 } from "firebase/firestore";
 
@@ -104,19 +103,33 @@ const [guestDeclaration, setGuestDeclaration] = useState(false);
         })) as any[];
 
         const primaryPhone = normalizePhone(primaryBooking.phone || "");
+        const primaryName = (primaryBooking.customerName || "").trim().toLowerCase().replace(/\s+/g, " ");
 
         const relatedBookings = allBookings.filter((item) => {
           const sameDates =
             normalizeDate(item.checkIn) === normalizeDate(primaryBooking.checkIn) &&
             normalizeDate(item.checkOut) === normalizeDate(primaryBooking.checkOut);
 
+          if (!sameDates) return false;
+          if (item.id === primaryBooking.id) return true;
+
           const itemPhone = normalizePhone(item.phone || "");
+          const itemName = (item.customerName || "").trim().toLowerCase().replace(/\s+/g, " ");
 
-          if (primaryPhone) {
-            return sameDates && itemPhone === primaryPhone;
-          }
+          const samePhone = Boolean(primaryPhone && itemPhone && primaryPhone === itemPhone);
+          const sameCustomer = Boolean(
+            primaryBooking.customerId &&
+              item.customerId &&
+              primaryBooking.customerId === item.customerId
+          );
+          const sameName = Boolean(primaryName && itemName && primaryName === itemName);
+          const sameGroup = Boolean(
+            primaryBooking.bookingGroupId &&
+              item.bookingGroupId &&
+              primaryBooking.bookingGroupId === item.bookingGroupId
+          );
 
-          return sameDates && item.customerId === primaryBooking.customerId;
+          return samePhone || sameCustomer || sameName || sameGroup;
         });
 
         const sourceBookings = relatedBookings.length
@@ -218,12 +231,22 @@ const [guestDeclaration, setGuestDeclaration] = useState(false);
         return;
       }
 
+      if (!guestName.trim()) {
+        alert("Please enter the guest full name.");
+        return;
+      }
+
       const sourceBookingIds: string[] = booking.sourceBookingIds || [booking.id];
       const bookingNumbers: string[] = booking.bookingNumbers || [booking.bookingNumber];
       const villas: string[] = booking.villas || [booking.villa];
       const consentId = booking.consentId || getConsentId(booking);
       const phone = customer?.phone || booking.phone || "";
-      const email = customer?.email || "";
+      const email = customer?.email || booking.email || "";
+
+      if (!sourceBookingIds.length) {
+        alert("Unable to identify the booking records. Please contact the villa.");
+        return;
+      }
 
       const existingConsent = await getDoc(doc(db, "consents", consentId));
       if (existingConsent.exists()) {
@@ -231,14 +254,35 @@ const [guestDeclaration, setGuestDeclaration] = useState(false);
         return;
       }
 
-      await setDoc(doc(db, "consents", consentId), {
+      // One atomic batch is important here. It prevents the consent document
+      // from being created successfully while one of the source booking
+      // updates fails, which could leave a partial/incorrect consent state.
+      const batch = writeBatch(db);
+
+      const consentRef = doc(db, "consents", consentId);
+      batch.set(consentRef, {
         consentId,
         bookingGroupId: booking.bookingGroupId || "",
         bookingNumber: bookingNumbers[0] || booking.bookingNumber,
         bookingNumbers,
         customerName: guestName.trim(),
-        villa: villas.join(" + "),
-        villas,
+        villa: villas
+          .flatMap((villa) =>
+            villa === "Both Villas"
+              ? ["Rain Paradise", "Rain Heaven"]
+              : [villa]
+          )
+          .filter(Boolean)
+          .filter((villa, index, list) => list.indexOf(villa) === index)
+          .join(" + "),
+        villas: villas
+          .flatMap((villa) =>
+            villa === "Both Villas"
+              ? ["Rain Paradise", "Rain Heaven"]
+              : [villa]
+          )
+          .filter(Boolean)
+          .filter((villa, index, list) => list.indexOf(villa) === index),
         checkIn: booking.checkIn,
         checkOut: booking.checkOut,
         sourceBookingIds,
@@ -258,23 +302,40 @@ const [guestDeclaration, setGuestDeclaration] = useState(false);
         createdAt: serverTimestamp(),
       });
 
-      await Promise.all(
-        sourceBookingIds.map((bookingId) =>
-          updateDoc(doc(db, "bookings", bookingId), {
-            consentStatus: "Completed",
-            customerName: guestName.trim(),
-            phone,
-            adults,
-            children,
-            vehicleNumber: vehicleNumber.trim(),
-            emergencyContact: emergencyContact.trim(),
-            consentId,
-            consentSubmittedAt: serverTimestamp(),
-          })
-        )
-      );
+      sourceBookingIds.forEach((bookingId) => {
+        batch.update(doc(db, "bookings", bookingId), {
+          consentStatus: "Completed",
+          customerName: guestName.trim(),
+          phone,
+          adults,
+          children,
+          vehicleNumber: vehicleNumber.trim(),
+          emergencyContact: emergencyContact.trim(),
+          consentId,
+          consentSubmittedAt: serverTimestamp(),
+        });
+      });
+
+      await batch.commit();
 
       router.push("/guest/thank-you");
+    } catch (error: any) {
+      console.error("Failed to submit guest consent:", error);
+
+      const code = error?.code || "";
+      if (code === "permission-denied") {
+        alert(
+          "Consent submission was not permitted. Please contact The Rain Villa management."
+        );
+      } else if (code === "failed-precondition") {
+        alert(
+          "Consent could not be submitted because the booking data is not ready. Please contact The Rain Villa management."
+        );
+      } else {
+        alert(
+          "Unable to submit consent. Please check your internet connection and try again."
+        );
+      }
     } finally {
       setSaving(false);
     }
