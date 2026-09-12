@@ -260,12 +260,14 @@ export default function AdminConsentPage() {
 
     setPrinting(true);
 
-    try {
-      if (!Capacitor.isNativePlatform()) {
-        window.print();
-        return;
-      }
+    // On web, open a blank tab immediately from the button click.
+    // This avoids mobile-browser popup blockers when the PDF is ready
+    // after asynchronous PDF generation.
+    const webPrintWindow = Capacitor.isNativePlatform()
+      ? null
+      : window.open("", "_blank");
 
+    try {
       const pdf = new jsPDF({
         orientation: "portrait",
         unit: "mm",
@@ -607,15 +609,38 @@ export default function AdminConsentPage() {
         );
       }
 
-      // Convert to base64 and save to Android cache.
-      const pdfBase64 = pdf
-        .output("datauristring")
-        .split(",")[1];
-
       const fileName =
         `Rain-Villa-Consent-${safeFileName(
           consent.bookingNumber || bookingNumber
         )}.pdf`;
+
+      // ===============================
+      // WEB BROWSER
+      // ===============================
+      // Generate a real PDF in the browser instead of relying on
+      // window.print(), which is unreliable on mobile web browsers.
+      if (!Capacitor.isNativePlatform()) {
+        const pdfBlob = pdf.output("blob");
+        const pdfUrl = URL.createObjectURL(pdfBlob);
+
+        if (webPrintWindow && !webPrintWindow.closed) {
+          webPrintWindow.location.href = pdfUrl;
+        } else {
+          // Fallback if the browser blocked the new tab.
+          window.location.href = pdfUrl;
+        }
+
+        return;
+      }
+
+      // ===============================
+      // ANDROID APP
+      // ===============================
+      // Keep the existing native flow: save the PDF to the Android cache
+      // and open the system Share / Print chooser.
+      const pdfBase64 = pdf
+        .output("datauristring")
+        .split(",")[1];
 
       const file = await Filesystem.writeFile({
         path: fileName,
@@ -624,7 +649,6 @@ export default function AdminConsentPage() {
         recursive: true,
       });
 
-      // Open Android share / print chooser.
       await Share.share({
         title: `Rain Villa Consent - ${
           consent.bookingNumber || bookingNumber
