@@ -84,20 +84,47 @@ export default function AdminConsentPage() {
     return d.toISOString().slice(0, 10);
   }
 
-  function getConsentId(booking: any) {
-    // One consent belongs to the complete guest stay.
-    // Do not split consent merely because source bookings have different
-    // bookingGroupId values.
-    const phone = normalizePhone(booking.phone || "");
-    if (phone) {
-      return `stay-${phone}-${normalizeDate(booking.checkIn)}-${normalizeDate(booking.checkOut)}`;
+  function getConsentId(
+    primaryBooking: any,
+    sourceBookings: any[] = []
+  ) {
+    // IMPORTANT:
+    // Always reuse the consentId already stored on a booking first.
+    // The guest consent page saves this stable ID after submission.
+    // Never rebuild the ID from phone number because the guest can edit
+    // their phone number during consent submission.
+    const existingConsentId =
+      sourceBookings.find((item) => item?.consentId)?.consentId ||
+      primaryBooking?.consentId ||
+      "";
+
+    if (existingConsentId) {
+      return existingConsentId;
     }
 
-    if (booking.customerId) {
-      return `stay-customer-${booking.customerId}-${normalizeDate(booking.checkIn)}-${normalizeDate(booking.checkOut)}`;
+    // For new stays, use the booking number(s) so the ID remains stable.
+    // Both Villas can therefore share one consent document.
+    const bookingNumbers = Array.from(
+      new Set(
+        sourceBookings
+          .map((item) => item?.bookingNumber)
+          .filter(Boolean)
+      )
+    ).sort();
+
+    if (bookingNumbers.length) {
+      return `stay-${bookingNumbers.join("-")}`;
     }
 
-    return `legacy-booking-${booking.bookingNumber}`;
+    if (primaryBooking?.bookingGroupId) {
+      return `stay-group-${primaryBooking.bookingGroupId}`;
+    }
+
+    if (primaryBooking?.customerId) {
+      return `stay-customer-${primaryBooking.customerId}-${normalizeDate(primaryBooking.checkIn)}-${normalizeDate(primaryBooking.checkOut)}`;
+    }
+
+    return `legacy-booking-${primaryBooking?.bookingNumber || "unknown"}`;
   }
 
   useEffect(() => {
@@ -139,8 +166,20 @@ export default function AdminConsentPage() {
           return sameDates && booking.customerId === primaryBooking.customerId;
         });
 
-        const consentId = getConsentId(primaryBooking);
-        let consentSnapshot = await getDoc(doc(db, "consents", consentId));
+        // First use the consentId already stored on any source booking.
+        // This is the ID written by the current guest consent submission flow.
+        const storedConsentId =
+          sourceBookings.find((booking) => booking?.consentId)?.consentId ||
+          primaryBooking.consentId ||
+          "";
+
+        const consentId =
+          storedConsentId ||
+          getConsentId(primaryBooking, sourceBookings);
+
+        let consentSnapshot = await getDoc(
+          doc(db, "consents", consentId)
+        );
 
         // Compatibility with consents created by the previous grouped-booking version.
         if (!consentSnapshot.exists() && primaryBooking.bookingGroupId) {
@@ -154,9 +193,11 @@ export default function AdminConsentPage() {
         if (!consentSnapshot.exists()) {
           for (const sourceBooking of sourceBookings) {
             if (!sourceBooking.bookingNumber) continue;
+
             const legacySnapshot = await getDoc(
               doc(db, "consents", sourceBooking.bookingNumber)
             );
+
             if (legacySnapshot.exists()) {
               consentSnapshot = legacySnapshot;
               break;
@@ -172,7 +213,7 @@ export default function AdminConsentPage() {
         const data = consentSnapshot.data() as Consent;
         setConsent({
           ...data,
-          consentId,
+          consentId: data.consentId || consentId,
           bookingGroupId: primaryBooking.bookingGroupId || data.bookingGroupId,
           bookingNumber: data.bookingNumber || primaryBooking.bookingNumber,
           bookingNumbers: Array.from(
