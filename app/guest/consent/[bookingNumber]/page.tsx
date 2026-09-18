@@ -131,38 +131,19 @@ const [guestDeclaration, setGuestDeclaration] = useState(false);
           ...docSnap.data(),
         })) as any[];
 
-        const primaryPhone = normalizePhone(primaryBooking.phone || "");
-        const primaryName = (primaryBooking.customerName || "").trim().toLowerCase().replace(/\s+/g, " ");
-
-        const relatedBookings = allBookings.filter((item) => {
-          const sameDates =
-            normalizeDate(item.checkIn) === normalizeDate(primaryBooking.checkIn) &&
-            normalizeDate(item.checkOut) === normalizeDate(primaryBooking.checkOut);
-
-          if (!sameDates) return false;
-          if (item.id === primaryBooking.id) return true;
-
-          const itemPhone = normalizePhone(item.phone || "");
-          const itemName = (item.customerName || "").trim().toLowerCase().replace(/\s+/g, " ");
-
-          const samePhone = Boolean(primaryPhone && itemPhone && primaryPhone === itemPhone);
-          const sameCustomer = Boolean(
-            primaryBooking.customerId &&
-              item.customerId &&
-              primaryBooking.customerId === item.customerId
-          );
-          const sameName = Boolean(primaryName && itemName && primaryName === itemName);
-          const sameGroup = Boolean(
-            primaryBooking.bookingGroupId &&
-              item.bookingGroupId &&
-              primaryBooking.bookingGroupId === item.bookingGroupId
-          );
-
-          return samePhone || sameCustomer || sameName || sameGroup;
-        });
-
-        const sourceBookings = relatedBookings.length
-          ? relatedBookings
+        /*
+         * A consent URL identifies one booking number.
+         *
+         * Only a shared bookingGroupId can expand that booking into
+         * a genuine Both Villas reservation. Phone number, customerId,
+         * guest name, and dates must NEVER combine separate bookings.
+         */
+        const sourceBookings = primaryBooking.bookingGroupId
+          ? allBookings.filter(
+              (item) =>
+                item.bookingGroupId ===
+                primaryBooking.bookingGroupId
+            )
           : [primaryBooking];
 
         const existingConsentId =

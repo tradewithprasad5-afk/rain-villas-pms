@@ -90,41 +90,85 @@ function getRelatedStayBookings(
   target: Booking,
   allBookings: Booking[]
 ) {
-  const targetPhone = normalizePhone(target.phone);
-  const targetName = normalizeName(target.customerName);
-  const targetCheckIn = normalizeDate(target.checkIn);
-  const targetCheckOut = normalizeDate(target.checkOut);
+  const targetName =
+    normalizeName(target.customerName);
+
+  const targetCheckIn =
+    normalizeDate(target.checkIn);
+
+  const targetCheckOut =
+    normalizeDate(target.checkOut);
 
   return allBookings.filter((item) => {
-    if (item.id === target.id) return true;
-
-    if (
-      target.bookingGroupId &&
-      item.bookingGroupId &&
-      target.bookingGroupId === item.bookingGroupId
-    ) {
+    if (item.id === target.id) {
       return true;
     }
 
+    /*
+     * NEW bookings:
+     * bookingGroupId is the authoritative identity for a
+     * combined Both Villas reservation.
+     */
     if (
-      normalizeDate(item.checkIn) !== targetCheckIn ||
-      normalizeDate(item.checkOut) !== targetCheckOut
+      target.bookingGroupId &&
+      item.bookingGroupId
+    ) {
+      return (
+        target.bookingGroupId ===
+        item.bookingGroupId
+      );
+    }
+
+    /*
+     * Never use phone number alone to decide that two bookings
+     * are the same stay.
+     *
+     * Different guests can share one mobile number:
+     * test1 / test2 / test3 -> same phone.
+     */
+    if (
+      normalizeDate(item.checkIn) !==
+        targetCheckIn ||
+      normalizeDate(item.checkOut) !==
+        targetCheckOut
     ) {
       return false;
     }
 
-    const itemPhone = normalizePhone(item.phone);
-    const itemName = normalizeName(item.customerName);
+    /*
+     * Legacy fallback:
+     * customerId by itself is NOT enough because older records may
+     * have reused one customer record for multiple guests sharing
+     * the same mobile number.
+     *
+     * Require customerId + exact guest name when both exist.
+     */
+    const itemName =
+      normalizeName(item.customerName);
 
-    if (targetPhone && itemPhone) {
-      return targetPhone === itemPhone;
+    if (
+      target.customerId &&
+      item.customerId
+    ) {
+      return (
+        target.customerId ===
+          item.customerId &&
+        Boolean(
+          targetName &&
+          itemName &&
+          targetName === itemName
+        )
+      );
     }
 
-    if (target.customerId && item.customerId) {
-      return target.customerId === item.customerId;
-    }
-
-    return Boolean(targetName && itemName && targetName === itemName);
+    /*
+     * Older records without customerId use exact guest name.
+     */
+    return Boolean(
+      targetName &&
+      itemName &&
+      targetName === itemName
+    );
   });
 }
 
@@ -414,7 +458,8 @@ export default function BookingsPage() {
   ========================================== */
 
   function findCustomerByPhone(
-    phoneNumber: string
+    phoneNumber: string,
+    excludeCustomerId?: string
   ) {
     const normalized =
       normalizePhone(phoneNumber);
@@ -423,11 +468,35 @@ export default function BookingsPage() {
       return undefined;
     }
 
+    /*
+     * A phone number is not a unique guest identity.
+     *
+     * Example:
+     * test1, test2 and test3 may all use 9527249988.
+     *
+     * For new bookings we therefore use phone matching only
+     * to find an existing customer when there is no active
+     * customer identity to preserve.
+     *
+     * During editing, exclude the booking's current customer
+     * so we never replace the name being edited with another
+     * guest who happens to share the same phone number.
+     */
     return customers.find(
-      (customer) =>
-        normalizePhone(
-          customer.phone || ""
-        ) === normalized
+      (customer) => {
+        if (
+          excludeCustomerId &&
+          customer.id === excludeCustomerId
+        ) {
+          return false;
+        }
+
+        return (
+          normalizePhone(
+            customer.phone || ""
+          ) === normalized
+        );
+      }
     );
   }
 
@@ -441,13 +510,26 @@ export default function BookingsPage() {
     if (
       phoneNumber.trim() === ""
     ) {
+      /*
+       * Do not erase the guest name while the user is
+       * temporarily editing the phone field.
+       */
       setCustomerId("");
-      setCustomerName("");
       setEmail("");
       setAddress("");
       return;
     }
 
+    /*
+     * IMPORTANT:
+     * Do not auto-change the guest name based only on phone.
+     *
+     * Multiple guests are allowed to share one mobile number.
+     * The name entered by the staff remains authoritative.
+     *
+     * We still use the phone lookup for customer details,
+     * but never overwrite customerName automatically.
+     */
     const customer =
       findCustomerByPhone(
         phoneNumber
@@ -458,10 +540,6 @@ export default function BookingsPage() {
         customer.id
       );
 
-      setCustomerName(
-        customer.name
-      );
-
       setEmail(
         customer.email
       );
@@ -469,6 +547,8 @@ export default function BookingsPage() {
       setAddress(
         customer.address
       );
+    } else {
+      setCustomerId("");
     }
   }
 
@@ -720,7 +800,9 @@ export default function BookingsPage() {
         customerId;
 
       const existingCustomer =
-        findCustomerByPhone(phone);
+        editingId
+          ? undefined
+          : findCustomerByPhone(phone);
 
       if (
         existingCustomer
@@ -1281,16 +1363,66 @@ export default function BookingsPage() {
            BOOKING NUMBERS
         ========================================== */
 
+        /*
+         * Reuse the first available RV-#### serial number.
+         * Existing booking numbers are never renumbered.
+         */
+        const usedBookingNumbers = new Set<number>();
+
+        bookingSnapshot.docs.forEach((bookingDoc) => {
+          const value =
+            bookingDoc.data()?.bookingNumber;
+
+          if (typeof value !== "string") {
+            return;
+          }
+
+          const match =
+            value.trim().match(/^RV-(\d+)$/i);
+
+          if (!match) {
+            return;
+          }
+
+          const number = Number(match[1]);
+
+          if (
+            Number.isInteger(number) &&
+            number > 0
+          ) {
+            usedBookingNumbers.add(number);
+          }
+        });
+
+        let nextBookingSerial = 1;
+
+        while (
+          usedBookingNumbers.has(
+            nextBookingSerial
+          )
+        ) {
+          nextBookingSerial += 1;
+        }
+
         const firstBookingNumber =
           `RV-${String(
-            bookingSnapshot.size +
-              1
+            nextBookingSerial
           ).padStart(4, "0")}`;
+
+        let secondBookingSerial =
+          nextBookingSerial + 1;
+
+        while (
+          usedBookingNumbers.has(
+            secondBookingSerial
+          )
+        ) {
+          secondBookingSerial += 1;
+        }
 
         const secondBookingNumber =
           `RV-${String(
-            bookingSnapshot.size +
-              2
+            secondBookingSerial
           ).padStart(4, "0")}`;
 
         const bookingGroupId =
@@ -1874,11 +2006,39 @@ export default function BookingsPage() {
     }
 
     try {
-      await deleteDoc(
-        doc(
-          db,
-          "bookings",
-          bookingToDelete.id
+      /*
+       * Both Villas bookings are stored as two Firestore
+       * documents with the same bookingGroupId.
+       *
+       * Delete the complete grouped stay in one confirmation.
+       * For older records without bookingGroupId, use the
+       * existing stay-matching fallback.
+       */
+      const relatedBookings =
+        getRelatedStayBookings(
+          bookingToDelete,
+          bookings
+        );
+
+      const bookingsToDelete =
+        Array.from(
+          new Map(
+            [bookingToDelete, ...relatedBookings].map(
+              (booking) => [booking.id, booking]
+            )
+          ).values()
+        );
+
+      await Promise.all(
+        bookingsToDelete.map(
+          (booking) =>
+            deleteDoc(
+              doc(
+                db,
+                "bookings",
+                booking.id
+              )
+            )
         )
       );
 
@@ -2048,9 +2208,27 @@ export default function BookingsPage() {
     }
 
 
+    /*
+     * Consent must use the exact stay represented by this booking.
+     *
+     * A genuine Both Villas reservation has one shared
+     * bookingGroupId, so only those two source records are included.
+     * A normal single-villa booking is never expanded just because
+     * another guest shares the same phone/customer record.
+     */
     const sourceBookings =
-      editableBooking.sourceBookings ||
-      [editableBooking];
+      editableBooking.bookingGroupId
+        ? bookings.filter(
+            (item) =>
+              item.bookingGroupId ===
+              editableBooking.bookingGroupId
+          )
+        : (
+            editableBooking.sourceBookings &&
+            editableBooking.sourceBookings.length > 0
+          )
+          ? editableBooking.sourceBookings
+          : [editableBooking];
 
     const uniqueBookings =
       Array.from(

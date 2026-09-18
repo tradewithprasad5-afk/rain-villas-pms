@@ -150,21 +150,20 @@ export default function AdminConsentPage() {
           return;
         }
 
-        const primaryPhone = normalizePhone(primaryBooking.phone || "");
-
-        const sourceBookings = bookingDocs.filter((booking) => {
-          const sameDates =
-            normalizeDate(booking.checkIn) === normalizeDate(primaryBooking.checkIn) &&
-            normalizeDate(booking.checkOut) === normalizeDate(primaryBooking.checkOut);
-
-          const bookingPhone = normalizePhone(booking.phone || "");
-
-          if (primaryPhone) {
-            return sameDates && bookingPhone === primaryPhone;
-          }
-
-          return sameDates && booking.customerId === primaryBooking.customerId;
-        });
+        /*
+         * The admin consent view must use the exact booking represented
+         * by the URL. Only a shared bookingGroupId can combine records
+         * into a genuine Both Villas reservation.
+         *
+         * Never group by phone, customerId, guest name, or dates.
+         */
+        const sourceBookings = primaryBooking.bookingGroupId
+          ? bookingDocs.filter(
+              (booking) =>
+                booking.bookingGroupId ===
+                primaryBooking.bookingGroupId
+            )
+          : [primaryBooking];
 
         // First use the consentId already stored on any source booking.
         // This is the ID written by the current guest consent submission flow.
