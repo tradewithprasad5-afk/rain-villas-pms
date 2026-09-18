@@ -2047,9 +2047,6 @@ export default function BookingsPage() {
       return;
     }
 
-    const primaryBookingNumber =
-      editableBooking.bookingNumber ||
-      "";
 
     const sourceBookings =
       editableBooking.sourceBookings ||
@@ -2066,6 +2063,12 @@ export default function BookingsPage() {
           )
         ).values()
       );
+
+      const primaryBookingNumber =
+  uniqueBookings[0]?.bookingNumber ||
+  editableBooking.bookingNumber ||
+  "";
+
 
     const bookingNumbers =
       uniqueBookings
@@ -2107,22 +2110,44 @@ export default function BookingsPage() {
     const consentLink =
       `${window.location.origin}/guest/consent/${primaryBookingNumber}`;
 
-    const message =
-      `Hello ${editableBooking.customerName},
+    const villaLines = villas
+  .flatMap((villa) =>
+    villa === "Both Villas"
+      ? ["Rain Paradise Villa", "Rain Heaven Villa"]
+      : [`${villa} Villa`]
+  )
+  .filter(
+    (villa, index, array) =>
+      array.indexOf(villa) === index
+  );
+
+const message =
+  `Hello ${editableBooking.customerName},
 
 Welcome to The Rain Villa 🌿
 
-Please complete your Guest Consent before your arrival.
+Please complete your Guest Consent Form before your arrival.
 
-Booking No: ${bookingNumbers.join(
-        " + "
-      )}
-Villa: ${villas.join(
-        " + "
-      )}
-Stay: ${editableBooking.checkIn} → ${editableBooking.checkOut}
+Booking No: ${bookingNumbers.join(" + ")}
 
-Please click the link below to complete ONE consent form for your complete stay:
+Villas Booked:
+${villaLines.map((villa) => `• ${villa}`).join("\n")}
+
+Stay: ${new Date(editableBooking.checkIn).toLocaleDateString("en-GB", {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+})} → ${new Date(editableBooking.checkOut).toLocaleDateString("en-GB", {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+})}
+
+Please click the link below to complete ONE consent form for your complete stay at The Rain Villa${
+  villaLines.length > 1
+    ? ", covering both villas booked under this reservation"
+    : ""
+}:
 
 ${consentLink}
 

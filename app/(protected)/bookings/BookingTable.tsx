@@ -136,122 +136,131 @@ function getGuestIdentity(
   };
 }
 
-function sameGuest(
-  a: Booking,
-  b: Booking,
+/*
+ * Return a stable identity key for fallback grouping.
+ *
+ * IMPORTANT:
+ * A phone number alone must NEVER group bookings together.
+ * The same mobile number can legitimately be used by different
+ * guests / family members / test bookings.
+ *
+ * New bookings have bookingGroupId, which is the authoritative
+ * way to group the two Firestore records created for "Both Villas".
+ */
+function getGuestFallbackKey(
+  booking: Booking,
   customers: Customer[]
 ) {
-  const left = getGuestIdentity(
-    a,
+  const identity = getGuestIdentity(
+    booking,
     customers
   );
 
-  const right = getGuestIdentity(
-    b,
-    customers
-  );
-
-  if (
-    left.phone &&
-    right.phone &&
-    left.phone === right.phone
-  ) {
-    return true;
+  /*
+   * Prefer customerId + guest name.
+   * Including the name prevents test1, test2 and test3 from
+   * collapsing into one row when they share the same phone.
+   */
+  if (identity.customerId && identity.name) {
+    return `customer:${identity.customerId}|name:${identity.name}`;
   }
 
-  if (
-    left.customerId &&
-    right.customerId &&
-    left.customerId === right.customerId
-  ) {
-    return true;
+  /*
+   * For older records without customerId, use name + phone.
+   * Phone is only a fallback identity component, never the
+   * sole grouping key.
+   */
+  if (identity.name && identity.phone) {
+    return `name:${identity.name}|phone:${identity.phone}`;
   }
 
-  if (
-    left.name &&
-    right.name &&
-    left.name === right.name
-  ) {
-    return true;
+  if (identity.name) {
+    return `name:${identity.name}`;
   }
 
-  return false;
+  if (identity.phone) {
+    return `phone:${identity.phone}`;
+  }
+
+  return `booking:${booking.id}`;
 }
 
+/*
+ * Group bookings for display.
+ *
+ * NEW bookings:
+ *   bookingGroupId is the authoritative stay/group identifier.
+ *   This correctly combines the two source records for Both Villas.
+ *
+ * LEGACY bookings:
+ *   Fall back to guest identity + exact check-in/check-out dates.
+ *
+ * IMPORTANT:
+ *   We do NOT group by phone number alone.
+ *   Different guests can share the same mobile number.
+ */
 function groupBookings(
   bookings: Booking[],
   customers: Customer[]
 ): CombinedBooking[] {
-  const dateBuckets =
-    new Map<string, Booking[]>();
+  const groups = new Map<string, Booking[]>();
 
   for (const booking of bookings) {
-    const dateKey =
-      `${normalizeDate(
-        booking.checkIn
-      )}|${normalizeDate(
-        booking.checkOut
-      )}`;
+    const checkIn = normalizeDate(
+      booking.checkIn
+    );
 
-    const bucket =
-      dateBuckets.get(dateKey);
+    const checkOut = normalizeDate(
+      booking.checkOut
+    );
 
-    if (bucket) {
-      bucket.push(booking);
+    let groupKey = "";
+
+    /*
+     * New booking records created by the PMS have a
+     * bookingGroupId. Both villa records for one stay share
+     * the same value, so they must appear as one row.
+     */
+    const bookingGroupId =
+      (booking as Booking & {
+        bookingGroupId?: string;
+      }).bookingGroupId?.trim();
+
+    if (bookingGroupId) {
+      groupKey = `group:${bookingGroupId}`;
     } else {
-      dateBuckets.set(
-        dateKey,
+      /*
+       * Legacy fallback.
+       *
+       * Exact dates are part of the key so that repeated bookings
+       * by the same guest are still shown as separate stays.
+       *
+       * Guest name is part of the identity, so test1/test2/test3
+       * remain separate even when they use the same mobile number.
+       */
+      const guestKey = getGuestFallbackKey(
+        booking,
+        customers
+      );
+
+      groupKey =
+        `${guestKey}|stay:${checkIn}|${checkOut}`;
+    }
+
+    const existing =
+      groups.get(groupKey);
+
+    if (existing) {
+      existing.push(booking);
+    } else {
+      groups.set(
+        groupKey,
         [booking]
       );
     }
   }
 
-  const result: Booking[][] = [];
-
-  for (const bucket of dateBuckets.values()) {
-    const groups: Booking[][] = [];
-
-    for (const booking of bucket) {
-      const matchingGroups =
-        groups.filter((group) =>
-          group.some((existing) =>
-            sameGuest(
-              booking,
-              existing,
-              customers
-            )
-          )
-        );
-
-      if (
-        matchingGroups.length === 0
-      ) {
-        groups.push([booking]);
-        continue;
-      }
-
-      const merged = [booking];
-
-      for (const group of matchingGroups) {
-        merged.push(...group);
-      }
-
-      for (const group of matchingGroups) {
-        const index =
-          groups.indexOf(group);
-
-        if (index !== -1) {
-          groups.splice(index, 1);
-        }
-      }
-
-      groups.push(merged);
-    }
-
-    result.push(...groups);
-  }
-
-  return result.map(
+  return Array.from(groups.values()).map(
     (sourceBookings) => {
       const first =
         sourceBookings[0];
@@ -277,20 +286,31 @@ function groupBookings(
        * Examples:
        *   Rain Paradise + Rain Heaven
        *   Both Villas -> Rain Paradise + Rain Heaven
-       *   Rain Heaven + Both Villas -> Rain Paradise + Rain Heaven
        *
        * The original Firestore/source bookings are NOT changed here.
        */
-      const displayVillas = new Set<string>();
+      const displayVillas =
+        new Set<string>();
 
-      sourceBookings.forEach((booking) => {
-        if (booking.villa === "Both Villas") {
-          displayVillas.add("Rain Paradise");
-          displayVillas.add("Rain Heaven");
-        } else if (booking.villa) {
-          displayVillas.add(booking.villa);
+      sourceBookings.forEach(
+        (booking) => {
+          if (
+            booking.villa ===
+            "Both Villas"
+          ) {
+            displayVillas.add(
+              "Rain Paradise"
+            );
+            displayVillas.add(
+              "Rain Heaven"
+            );
+          } else if (booking.villa) {
+            displayVillas.add(
+              booking.villa
+            );
+          }
         }
-      });
+      );
 
       const villas = [
         "Rain Paradise",
@@ -573,10 +593,10 @@ export default function BookingTable({
         <DropdownMenuItem
           key="send-consent"
           onClick={() =>
-            onSendConsent(
-              primaryBooking
-            )
-          }
+  onSendConsent(
+    booking
+  )
+}
         >
           📲 Send Consent
         </DropdownMenuItem>
