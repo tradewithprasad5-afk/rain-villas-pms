@@ -88,10 +88,9 @@ export default function BookingModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-3 sm:p-4">
       <div className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-xl bg-white p-4 shadow-xl sm:p-8">
+
         <h2 className="mb-4 text-lg font-bold sm:mb-6 sm:text-2xl">
-          {editingId
-            ? "Edit Booking"
-            : "New Booking"}
+          {editingId ? "Edit Booking" : "New Booking"}
         </h2>
 
         {/* ===============================
@@ -104,6 +103,7 @@ export default function BookingModal({
           </h3>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+
             <div>
               <label className="mb-1 block text-sm font-medium sm:text-base">
                 Customer Name
@@ -112,11 +112,7 @@ export default function BookingModal({
               <input
                 type="text"
                 value={customerName}
-                onChange={(e) =>
-                  setCustomerName(
-                    e.target.value
-                  )
-                }
+                onChange={(e) => setCustomerName(e.target.value)}
                 className="w-full rounded-lg border p-2.5 text-sm sm:p-3 sm:text-base"
                 placeholder="Customer Name"
               />
@@ -130,11 +126,7 @@ export default function BookingModal({
               <input
                 type="text"
                 value={phone}
-                onChange={(e) =>
-                  onPhoneChange(
-                    e.target.value
-                  )
-                }
+                onChange={(e) => onPhoneChange(e.target.value)}
                 className="w-full rounded-lg border p-2.5 text-sm sm:p-3 sm:text-base"
                 placeholder="9876543210"
               />
@@ -148,11 +140,7 @@ export default function BookingModal({
               <input
                 type="email"
                 value={email}
-                onChange={(e) =>
-                  setEmail(
-                    e.target.value
-                  )
-                }
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full rounded-lg border p-2.5 text-sm sm:p-3 sm:text-base"
                 placeholder="example@email.com"
               />
@@ -166,15 +154,12 @@ export default function BookingModal({
               <textarea
                 rows={3}
                 value={address}
-                onChange={(e) =>
-                  setAddress(
-                    e.target.value
-                  )
-                }
+                onChange={(e) => setAddress(e.target.value)}
                 className="w-full rounded-lg border p-2.5 text-sm sm:p-3 sm:text-base"
                 placeholder="Customer Address"
               />
             </div>
+
           </div>
         </div>
 
@@ -188,6 +173,7 @@ export default function BookingModal({
           </h3>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+
             {/* Villa */}
 
             <div>
@@ -197,30 +183,16 @@ export default function BookingModal({
 
               <select
                 value={villa}
-                onChange={(e) =>
-                  setVilla(
-                    e.target.value
-                  )
-                }
+                onChange={(e) => setVilla(e.target.value)}
                 className="w-full rounded-lg border p-2.5 text-sm sm:p-3 sm:text-base"
               >
-                <option>
-                  Rain Paradise
-                </option>
+                <option>Rain Paradise</option>
+                <option>Rain Heaven</option>
 
-                <option>
-                  Rain Heaven
-                </option>
+                {/* Both Villas is available for NEW and EDIT bookings. */}
 
-                {/* 
-                 * IMPORTANT:
-                 * Both Villas is available for
-                 * NEW and EDIT bookings.
-                 */}
                 {(!editingId || allowBothVillas) && (
-                  <option>
-                    Both Villas
-                  </option>
+                  <option>Both Villas</option>
                 )}
               </select>
             </div>
@@ -239,18 +211,20 @@ export default function BookingModal({
                     min={0}
                     step="1"
                     value={
-                      rainParadiseAmount ===
-                      ""
-                        ? "0"
+                      rainParadiseAmount === "0" && !editingId
+                        ? ""
                         : rainParadiseAmount
                     }
+                    onFocus={(e) => {
+                      if (e.currentTarget.value === "0") {
+                        setRainParadiseAmount("");
+                      }
+                    }}
                     onChange={(e) =>
-                      setRainParadiseAmount(
-                        e.target.value
-                      )
+                      setRainParadiseAmount(e.target.value)
                     }
                     className="w-full rounded-lg border p-2.5 text-sm sm:p-3 sm:text-base"
-                    placeholder="0"
+                    placeholder="Enter amount"
                   />
                 </div>
 
@@ -264,18 +238,20 @@ export default function BookingModal({
                     min={0}
                     step="1"
                     value={
-                      rainHeavenAmount ===
-                      ""
-                        ? "0"
+                      rainHeavenAmount === "0" && !editingId
+                        ? ""
                         : rainHeavenAmount
                     }
+                    onFocus={(e) => {
+                      if (e.currentTarget.value === "0") {
+                        setRainHeavenAmount("");
+                      }
+                    }}
                     onChange={(e) =>
-                      setRainHeavenAmount(
-                        e.target.value
-                      )
+                      setRainHeavenAmount(e.target.value)
                     }
                     className="w-full rounded-lg border p-2.5 text-sm sm:p-3 sm:text-base"
-                    placeholder="0"
+                    placeholder="Enter amount"
                   />
                 </div>
               </>
@@ -283,25 +259,28 @@ export default function BookingModal({
 
             {/* Guests */}
 
-            <div>
-              <label className="mb-1 block text-sm font-medium sm:text-base">
-                Guests
-              </label>
+<div>
+  <label className="mb-1 block text-sm font-medium sm:text-base">
+    Total Guests
+  </label>
 
-              <input
-                type="number"
-                min={1}
-                value={guests}
-                onChange={(e) =>
-                  setGuests(
-                    Number(
-                      e.target.value
-                    )
-                  )
-                }
-                className="w-full rounded-lg border p-2.5 text-sm sm:p-3 sm:text-base"
-              />
-            </div>
+  <input
+    type="number"
+    min={1}
+    step="1"
+    value={guests === 0 && !editingId ? "" : guests}
+    onChange={(e) => {
+      const value = e.target.value;
+      setGuests(value === "" ? 0 : Number(value));
+    }}
+    className="w-full rounded-lg border p-2.5 text-sm sm:p-3 sm:text-base"
+    placeholder="Enter total guests"
+  />
+
+  <p className="mt-1 text-xs text-gray-500">
+    Enter total guests including kids
+  </p>
+</div>
 
             {/* Check In */}
 
@@ -313,11 +292,7 @@ export default function BookingModal({
               <input
                 type="date"
                 value={checkIn}
-                onChange={(e) =>
-                  setCheckIn(
-                    e.target.value
-                  )
-                }
+                onChange={(e) => setCheckIn(e.target.value)}
                 className="w-full rounded-lg border p-2.5 text-sm sm:p-3 sm:text-base"
               />
             </div>
@@ -332,14 +307,11 @@ export default function BookingModal({
               <input
                 type="date"
                 value={checkOut}
-                onChange={(e) =>
-                  setCheckOut(
-                    e.target.value
-                  )
-                }
+                onChange={(e) => setCheckOut(e.target.value)}
                 className="w-full rounded-lg border p-2.5 text-sm sm:p-3 sm:text-base"
               />
             </div>
+
           </div>
         </div>
 
@@ -353,6 +325,7 @@ export default function BookingModal({
           </h3>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+
             {/* Total Amount */}
 
             <div>
@@ -365,24 +338,23 @@ export default function BookingModal({
                 min={0}
                 step="1"
                 value={
-                  totalAmount === ""
-                    ? "0"
+                  totalAmount === "0" && !editingId
+                    ? ""
                     : totalAmount
                 }
-                onChange={(e) =>
-                  setTotalAmount(
-                    e.target.value
-                  )
-                }
-                readOnly={
-                  villa === "Both Villas"
-                }
+                onFocus={(e) => {
+                  if (e.currentTarget.value === "0") {
+                    setTotalAmount("");
+                  }
+                }}
+                onChange={(e) => setTotalAmount(e.target.value)}
+                readOnly={villa === "Both Villas"}
                 className={`w-full rounded-lg border p-2.5 text-sm sm:p-3 sm:text-base ${
                   villa === "Both Villas"
                     ? "bg-gray-100"
                     : ""
                 }`}
-                placeholder="0"
+                placeholder="Enter total amount"
               />
             </div>
 
@@ -398,17 +370,18 @@ export default function BookingModal({
                 min={0}
                 step="1"
                 value={
-                  advancePaid === ""
-                    ? "0"
+                  advancePaid === "0" && !editingId
+                    ? ""
                     : advancePaid
                 }
-                onChange={(e) =>
-                  setAdvancePaid(
-                    e.target.value
-                  )
-                }
+                onFocus={(e) => {
+                  if (e.currentTarget.value === "0") {
+                    setAdvancePaid("");
+                  }
+                }}
+                onChange={(e) => setAdvancePaid(e.target.value)}
                 className="w-full rounded-lg border p-2.5 text-sm sm:p-3 sm:text-base"
-                placeholder="0"
+                placeholder="Enter advance amount"
               />
             </div>
 
@@ -436,26 +409,15 @@ export default function BookingModal({
 
               <select
                 value={status}
-                onChange={(e) =>
-                  setStatus(
-                    e.target.value
-                  )
-                }
+                onChange={(e) => setStatus(e.target.value)}
                 className="w-full rounded-lg border p-2.5 text-sm sm:p-3 sm:text-base"
               >
-                <option>
-                  Confirmed
-                </option>
-
-                <option>
-                  Pending
-                </option>
-
-                <option>
-                  Cancelled
-                </option>
+                <option>Confirmed</option>
+                <option>Pending</option>
+                <option>Cancelled</option>
               </select>
             </div>
+
           </div>
         </div>
 
@@ -464,6 +426,7 @@ export default function BookingModal({
         =============================== */}
 
         <div className="flex flex-col-reverse justify-end gap-3 sm:flex-row sm:gap-4">
+
           <button
             onClick={onCancel}
             className="rounded-lg bg-gray-300 px-5 py-2.5 text-sm hover:bg-gray-400 sm:px-6 sm:py-3 sm:text-base"
@@ -475,11 +438,11 @@ export default function BookingModal({
             onClick={onSave}
             className="rounded-lg bg-green-600 px-5 py-2.5 text-sm text-white hover:bg-green-700 sm:px-6 sm:py-3 sm:text-base"
           >
-            {editingId
-              ? "Update Booking"
-              : "Save Booking"}
+            {editingId ? "Update Booking" : "Save Booking"}
           </button>
+
         </div>
+
       </div>
     </div>
   );
